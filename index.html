@@ -442,6 +442,19 @@
   })();
   function colorFor(provider){ return providerColor[provider] || "#5EEAD4"; }
   function statusSlug(status){ return (status||"").toLowerCase().replace(/[^a-z]+/g,"-").replace(/(^-|-$)/g,""); }
+
+  // Table row order: grouped by provider (first-appearance order, same as
+  // the color assignment above), then within each provider by status —
+  // Operational, then Under construction, then Planned.
+  var providerOrder = Object.keys(providerColor);
+  var STATUS_ORDER = { "Operational": 0, "Under construction": 1, "Planned": 2 };
+  function tableSortCompare(a, b){
+    var pd = providerOrder.indexOf(a.provider) - providerOrder.indexOf(b.provider);
+    if (pd !== 0) return pd;
+    var sa = STATUS_ORDER[a.status] != null ? STATUS_ORDER[a.status] : 99;
+    var sb = STATUS_ORDER[b.status] != null ? STATUS_ORDER[b.status] : 99;
+    return sa - sb;
+  }
   var svgNS = "http://www.w3.org/2000/svg";
   var W = 1000, H = 560;
 
@@ -600,7 +613,8 @@
     tbody.innerHTML = "";
     rowEls = {};
     var shown = 0;
-    SITES.forEach(function(site){
+    var sorted = SITES.slice().sort(tableSortCompare);
+    sorted.forEach(function(site){
       if (!activeProviders[site.provider]) return;
       shown++;
       var tr = document.createElement("tr");
