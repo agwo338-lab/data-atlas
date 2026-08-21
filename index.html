@@ -114,6 +114,12 @@
   }
   .chip[aria-pressed="false"]{ opacity:0.4; }
   .chip:hover{ border-color:var(--dot); }
+  .chip-capacity{
+    color:var(--ink-soft);
+    font-weight:400;
+    font-size:0.76rem;
+  }
+  .chip-capacity::before{ content:"· "; }
 
   .count{
     font-family:var(--font-mono);
@@ -189,6 +195,24 @@
   .pin:hover .halo, .pin.active .halo{ opacity:0.35; }
   .pin.active .core{ r:7; }
   .pin.dim{ opacity:0.16; }
+
+  /* Operational sites pulse to read as "live"; planned/under-construction sites
+     stay static and muted, with a dashed ring standing in for "not built yet" */
+  .pin .pulse{ fill:none; opacity:0; }
+  .pin.status-operational .core{ opacity:1; }
+  .pin.status-operational .pulse{ animation:pin-pulse 2.4s cubic-bezier(0.2,0.6,0.4,1) infinite; }
+  @keyframes pin-pulse{
+    0%   { r:5; stroke-width:3; opacity:0.6; }
+    100% { r:15; stroke-width:0.5; opacity:0; }
+  }
+  .pin.status-under-construction .core{ opacity:0.6; }
+  .pin.status-under-construction .ring{ fill:none; stroke-width:1.2; stroke-dasharray:3,2.5; opacity:0.7; }
+  .pin.status-planned .core{ opacity:0.4; r:4; }
+  .pin.status-planned .ring{ fill:none; stroke-width:1; stroke-dasharray:1,3; opacity:0.55; }
+
+  @media (prefers-reduced-motion: reduce){
+    .pin.status-operational .pulse{ animation:none; display:none; }
+  }
 
   .detail-panel{
     background:var(--surface);
@@ -463,17 +487,25 @@
       var pos = projection([site.lon, site.lat]);
       if (!pos) return;
       pinPos[site.id] = pos;
-      var g = svgEl("g", { class:"pin", tabindex:"0", "data-id":site.id, transform:"translate(" + pos[0] + "," + pos[1] + ")" });
+      var slug = statusSlug(site.status);
+      var g = svgEl("g", { class:"pin status-" + slug, tabindex:"0", "data-id":site.id, transform:"translate(" + pos[0] + "," + pos[1] + ")" });
       var scaleG = svgEl("g", { class:"pin-scale" });
       var color = colorFor(site.provider);
 
       var hit = svgEl("circle", { class:"hit", cx:0, cy:0, r:16, fill:"rgba(0,0,0,0.001)" });
+      if (slug !== "operational") {
+        scaleG.appendChild(svgEl("circle", { class:"ring", cx:0, cy:0, r:9, stroke:color }));
+      }
       var halo = svgEl("circle", { class:"halo", cx:0, cy:0, r:14, fill:color });
       var core = svgEl("circle", { class:"core", cx:0, cy:0, r:5, fill:color, stroke:"#060B12", "stroke-width":"1.4" });
       var title = svgEl("title", {});
-      title.textContent = site.provider + (site.site ? " · " + site.site : "") + " (" + site.city + ")";
+      title.textContent = site.provider + (site.site ? " · " + site.site : "") + " (" + site.city + ") — " + site.status;
 
-      scaleG.appendChild(hit); scaleG.appendChild(halo); scaleG.appendChild(core);
+      scaleG.appendChild(hit);
+      if (slug === "operational") {
+        scaleG.appendChild(svgEl("circle", { class:"pulse", cx:0, cy:0, r:5, stroke:color }));
+      }
+      scaleG.appendChild(halo); scaleG.appendChild(core);
       g.appendChild(scaleG); g.appendChild(title);
       g.addEventListener("click", function(e){ e.stopPropagation(); selectSite(site.id); });
       g.addEventListener("keydown", function(e){ if (e.key === "Enter" || e.key === " ") { e.preventDefault(); selectSite(site.id); } });
@@ -534,13 +566,24 @@
   var providers = Object.keys(providerColor);
   var activeProviders = {};
   providers.forEach(function(p){ activeProviders[p] = true; });
+  function operationalCapacityLabel(p){
+    var opSites = SITES.filter(function(s){ return s.provider === p && s.status === "Operational"; });
+    var disclosed = opSites.filter(function(s){ return s.capacityMW != null; });
+    if (opSites.length === 0) return "no operational sites yet";
+    if (disclosed.length === 0) return "operational capacity undisclosed";
+    var totalGW = disclosed.reduce(function(sum, s){ return sum + s.capacityMW; }, 0) / 1000;
+    var label = totalGW.toFixed(2) + " GW operational";
+    if (disclosed.length < opSites.length) label += " (partial — not all sites disclose capacity)";
+    return label;
+  }
+
   var filtersEl = document.getElementById("filters");
   providers.forEach(function(p){
     var btn = document.createElement("button");
     btn.className = "chip";
     btn.setAttribute("aria-pressed", "true");
     btn.style.setProperty("--dot", colorFor(p));
-    btn.innerHTML = '<span class="dot"></span>' + p;
+    btn.innerHTML = '<span class="dot"></span>' + p + '<span class="chip-capacity">' + operationalCapacityLabel(p) + '</span>';
     btn.addEventListener("click", function(){
       activeProviders[p] = !activeProviders[p];
       btn.setAttribute("aria-pressed", String(activeProviders[p]));
