@@ -1,0 +1,586 @@
+<title>Site Atlas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+
+<style>
+  :root{
+    --bg:#F3F5F4;
+    --surface:#FFFFFF;
+    --surface-2:#E7EBEA;
+    --border:#CBD3D1;
+    --ink:#14201D;
+    --ink-soft:#4B5D58;
+    --accent:#0E8574;
+    --accent-soft:#CFEAE4;
+    --provider-aws:#C97A32;
+    --provider-azure:#3A7CC4;
+    --provider-gcp:#7A63C9;
+
+    /* fixed instrument-panel palette (deliberate single look regardless of page theme) */
+    --map-bg:#0B1420;
+    --map-bg-2:#0E1B2A;
+    --map-grid:rgba(94,234,212,0.14);
+    --map-grid-strong:rgba(94,234,212,0.28);
+    --map-zone:rgba(94,234,212,0.07);
+    --map-zone-stroke:rgba(94,234,212,0.30);
+    --map-label:rgba(197,225,219,0.55);
+    --map-ink:#E7F1EC;
+
+    --radius:10px;
+    --font-sans:"IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+    --font-mono:"IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+  }
+
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0B1210;
+      --surface:#101A17;
+      --surface-2:#16211D;
+      --border:#263630;
+      --ink:#E7F1EC;
+      --ink-soft:#93A8A0;
+      --accent:#35D6B8;
+      --accent-soft:rgba(53,214,184,0.16);
+      --provider-aws:#E39149;
+      --provider-azure:#5B9BE0;
+      --provider-gcp:#9A85E0;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0B1210;
+    --surface:#101A17;
+    --surface-2:#16211D;
+    --border:#263630;
+    --ink:#E7F1EC;
+    --ink-soft:#93A8A0;
+    --accent:#35D6B8;
+    --accent-soft:rgba(53,214,184,0.16);
+    --provider-aws:#E39149;
+    --provider-azure:#5B9BE0;
+    --provider-gcp:#9A85E0;
+  }
+
+  *{ box-sizing:border-box; }
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--font-sans);
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{ background:var(--accent-soft); color:var(--ink); }
+
+  .page{
+    max-width:1180px;
+    margin:0 auto;
+    padding:2.25rem 1.5rem 4rem;
+    display:flex;
+    flex-direction:column;
+    gap:1.5rem;
+  }
+
+  header.top{
+    display:flex;
+    flex-direction:column;
+    gap:0.5rem;
+    border-bottom:1px solid var(--border);
+    padding-bottom:1.25rem;
+  }
+  .eyebrow{
+    font-family:var(--font-mono);
+    font-size:0.72rem;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:var(--accent);
+  }
+  h1{
+    margin:0;
+    font-size:clamp(1.6rem, 2.4vw, 2.1rem);
+    font-weight:650;
+    letter-spacing:-0.01em;
+    text-wrap:balance;
+  }
+  .subtitle{
+    margin:0;
+    max-width:62ch;
+    color:var(--ink-soft);
+    font-size:0.95rem;
+    line-height:1.5;
+  }
+  .template-note{
+    font-size:0.82rem;
+    color:var(--ink-soft);
+    background:var(--surface-2);
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:0.55rem 0.8rem;
+    max-width:fit-content;
+  }
+  .template-note code{
+    font-family:var(--font-mono);
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:4px;
+    padding:0.05rem 0.35rem;
+    font-size:0.8rem;
+  }
+
+  .toolbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:1rem;
+    flex-wrap:wrap;
+  }
+  .filters{
+    display:flex;
+    gap:0.5rem;
+    flex-wrap:wrap;
+  }
+  .chip{
+    display:inline-flex;
+    align-items:center;
+    gap:0.45rem;
+    font-family:var(--font-mono);
+    font-size:0.78rem;
+    letter-spacing:0.02em;
+    padding:0.4rem 0.7rem;
+    border-radius:999px;
+    border:1px solid var(--border);
+    background:var(--surface);
+    color:var(--ink-soft);
+    cursor:pointer;
+    transition:opacity 0.15s ease, border-color 0.15s ease;
+  }
+  .chip .dot{
+    width:8px; height:8px; border-radius:50%;
+    background:var(--dot);
+    box-shadow:0 0 0 3px color-mix(in srgb, var(--dot) 25%, transparent);
+  }
+  .chip[aria-pressed="false"]{ opacity:0.4; }
+  .chip:hover{ border-color:var(--dot); }
+
+  .count{
+    font-family:var(--font-mono);
+    font-size:0.78rem;
+    color:var(--ink-soft);
+  }
+  .count b{ color:var(--ink); font-weight:600; }
+
+  main.grid{
+    display:grid;
+    grid-template-columns:minmax(0,1.62fr) minmax(280px,1fr);
+    gap:1.25rem;
+    align-items:stretch;
+  }
+  @media (max-width:820px){
+    main.grid{ grid-template-columns:1fr; }
+  }
+
+  .map-panel{
+    background:var(--map-bg);
+    border-radius:var(--radius);
+    border:1px solid var(--border);
+    overflow:hidden;
+    position:relative;
+    min-height:420px;
+  }
+  .map-panel svg{ display:block; width:100%; height:100%; }
+  .map-caption{
+    position:absolute;
+    left:14px; bottom:12px;
+    font-family:var(--font-mono);
+    font-size:0.68rem;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    color:var(--map-label);
+  }
+  .map-caption span{ color:#5EEAD4; }
+
+  .zone{ fill:var(--map-zone); stroke:var(--map-zone-stroke); stroke-width:1; stroke-linejoin:round; }
+  .grid-line{ stroke:var(--map-grid); stroke-width:1; }
+  .grid-line.strong{ stroke:var(--map-grid-strong); }
+  .grid-label{ font-family:var(--font-mono); font-size:9px; fill:var(--map-label); }
+
+  .pin{ cursor:pointer; }
+  .pin .halo{ fill:none; opacity:0; transition:opacity 0.15s ease, r 0.15s ease; }
+  .pin .core{ transition:r 0.15s ease; }
+  .pin:hover .halo, .pin.active .halo{ opacity:0.35; }
+  .pin.active .core{ r:6; }
+  .pin.dim{ opacity:0.18; }
+
+  .detail-panel{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:1.1rem 1.2rem;
+    display:flex;
+    flex-direction:column;
+    gap:0.9rem;
+    min-height:420px;
+  }
+  .detail-empty{
+    margin:auto;
+    text-align:center;
+    color:var(--ink-soft);
+    font-size:0.88rem;
+    max-width:26ch;
+    line-height:1.5;
+  }
+  .detail-head{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:0.5rem;
+  }
+  .detail-head h2{
+    margin:0;
+    font-size:1.15rem;
+    font-weight:650;
+    letter-spacing:-0.005em;
+  }
+  .provider-tag{
+    font-family:var(--font-mono);
+    font-size:0.68rem;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    padding:0.22rem 0.5rem;
+    border-radius:5px;
+    color:#fff;
+    white-space:nowrap;
+  }
+  .region-code{
+    font-family:var(--font-mono);
+    font-size:0.8rem;
+    color:var(--accent);
+  }
+  .kv{
+    display:grid;
+    grid-template-columns:auto 1fr;
+    gap:0.4rem 0.9rem;
+    font-size:0.86rem;
+  }
+  .kv dt{ color:var(--ink-soft); }
+  .kv dd{ margin:0; font-family:var(--font-mono); font-variant-numeric:tabular-nums; }
+
+  .gauge-label{
+    display:flex;
+    justify-content:space-between;
+    font-size:0.78rem;
+    color:var(--ink-soft);
+    margin-bottom:0.3rem;
+  }
+  .gauge-label b{ color:var(--ink); font-family:var(--font-mono); }
+  .gauge{
+    height:6px;
+    border-radius:999px;
+    background:var(--surface-2);
+    overflow:hidden;
+  }
+  .gauge > i{
+    display:block; height:100%;
+    background:var(--accent);
+    border-radius:999px;
+  }
+  .gauge-note{ font-size:0.72rem; color:var(--ink-soft); font-style:italic; }
+
+  .notes-box{
+    border:1px dashed var(--border);
+    border-radius:8px;
+    padding:0.7rem 0.8rem;
+    font-size:0.85rem;
+    color:var(--ink-soft);
+    font-style:italic;
+    line-height:1.45;
+  }
+
+  section.table-section{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    overflow:hidden;
+  }
+  .table-scroll{ overflow-x:auto; }
+  table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:0.85rem;
+    min-width:640px;
+  }
+  thead th{
+    text-align:left;
+    font-family:var(--font-mono);
+    font-weight:500;
+    font-size:0.7rem;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    padding:0.7rem 0.9rem;
+    border-bottom:1px solid var(--border);
+    background:var(--surface-2);
+  }
+  tbody td{
+    padding:0.6rem 0.9rem;
+    border-bottom:1px solid var(--border);
+    vertical-align:middle;
+  }
+  tbody tr{ cursor:pointer; transition:background 0.12s ease; }
+  tbody tr:hover{ background:var(--surface-2); }
+  tbody tr.active{ background:var(--accent-soft); }
+  tbody tr:last-child td{ border-bottom:none; }
+  td.mono, th.mono{ font-family:var(--font-mono); font-variant-numeric:tabular-nums; }
+  .provider-dot{
+    display:inline-block; width:8px; height:8px; border-radius:50%;
+    margin-right:0.5rem; vertical-align:middle;
+  }
+
+  footer.foot{
+    color:var(--ink-soft);
+    font-size:0.78rem;
+    text-align:center;
+    padding-top:0.5rem;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ transition:none !important; }
+  }
+</style>
+
+<div class="page">
+
+  <header class="top">
+    <p class="eyebrow">Personal reference · geographic</p>
+    <h1>Site Atlas</h1>
+    <p class="subtitle">A working map of data center sites — provider, region, and capacity at a glance. Click a node on the grid or a row in the table for details.</p>
+    <p class="template-note">Showing 14 example hyperscale regions as a starting template. Replace them with your own facilities by editing the <code>SITES</code> array near the top of this page's script.</p>
+  </header>
+
+  <div class="toolbar">
+    <div class="filters" id="filters"></div>
+    <p class="count" id="count"></p>
+  </div>
+
+  <main class="grid">
+    <div class="map-panel">
+      <svg id="map" viewBox="0 15 1000 400" preserveAspectRatio="xMidYMid meet" role="img" aria-label="World map with data center site markers"></svg>
+      <p class="map-caption">grid · 30° graticule &nbsp; <span id="mapCount"></span></p>
+    </div>
+
+    <div class="detail-panel" id="detailPanel">
+      <p class="detail-empty">Select a site on the map or in the table below to see its details here.</p>
+    </div>
+  </main>
+
+  <section class="table-section">
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Provider</th>
+            <th>Region</th>
+            <th>Location</th>
+            <th class="mono">Coordinates</th>
+            <th class="mono">Capacity idx</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer class="foot">Capacity index is an illustrative 1–100 scale for template purposes, not a disclosed operating figure.</footer>
+
+</div>
+
+<script>
+(function(){
+
+  // ---- Edit this array to track your own sites --------------------------
+  var SITES = [
+    { id:"aws-use1", provider:"AWS",   region:"us-east-1",       city:"Ashburn",        country:"United States", lat:39.0438,  lon:-77.4874,  capacity:96, notes:"Densest hub in the region — add your own notes here." },
+    { id:"aws-usw2", provider:"AWS",   region:"us-west-2",       city:"Boardman",       country:"United States", lat:45.8399,  lon:-119.7006, capacity:74, notes:"" },
+    { id:"aws-euw1", provider:"AWS",   region:"eu-west-1",       city:"Dublin",         country:"Ireland",       lat:53.3498,  lon:-6.2603,   capacity:82, notes:"" },
+    { id:"aws-euc1", provider:"AWS",   region:"eu-central-1",    city:"Frankfurt",      country:"Germany",       lat:50.1109,  lon:8.6821,    capacity:79, notes:"" },
+    { id:"aws-apse1",provider:"AWS",   region:"ap-southeast-1",  city:"Singapore",      country:"Singapore",     lat:1.3521,   lon:103.8198,  capacity:71, notes:"" },
+    { id:"aws-apne1",provider:"AWS",   region:"ap-northeast-1",  city:"Tokyo",          country:"Japan",         lat:35.6762,  lon:139.6503,  capacity:68, notes:"" },
+    { id:"aws-sae1", provider:"AWS",   region:"sa-east-1",       city:"São Paulo",      country:"Brazil",        lat:-23.5505, lon:-46.6333,  capacity:52, notes:"" },
+    { id:"az-eus",   provider:"Azure", region:"East US",         city:"Boydton",        country:"United States", lat:36.6681,  lon:-78.3889,  capacity:88, notes:"" },
+    { id:"az-weu",   provider:"Azure", region:"West Europe",     city:"Amsterdam",      country:"Netherlands",   lat:52.3676,  lon:4.9041,    capacity:77, notes:"" },
+    { id:"az-aue",   provider:"Azure", region:"Australia East",  city:"Sydney",         country:"Australia",     lat:-33.8688, lon:151.2093,  capacity:58, notes:"" },
+    { id:"gcp-usc1", provider:"GCP",   region:"us-central1",     city:"Council Bluffs", country:"United States", lat:41.2619,  lon:-95.8608,  capacity:70, notes:"" },
+    { id:"gcp-euw4", provider:"GCP",   region:"europe-west4",    city:"Eemshaven",      country:"Netherlands",   lat:53.4386,  lon:6.8355,    capacity:65, notes:"" },
+    { id:"gcp-ae1",  provider:"GCP",   region:"asia-east1",      city:"Changhua",       country:"Taiwan",        lat:24.0518,  lon:120.5161,  capacity:60, notes:"" },
+    { id:"gcp-sae1", provider:"GCP",   region:"southamerica-east1", city:"Osasco",      country:"Brazil",        lat:-23.5329, lon:-46.7916,  capacity:47, notes:"" }
+  ];
+  // -------------------------------------------------------------------------
+
+  var PROVIDER_VAR = { AWS:"--provider-aws", Azure:"--provider-azure", GCP:"--provider-gcp" };
+  var svgNS = "http://www.w3.org/2000/svg";
+  var W = 1000, H = 500;
+
+  function project(lon, lat){
+    return { x: (lon + 180) * (W / 360), y: (90 - lat) * (H / 180) };
+  }
+
+  var ZONES = [
+    // rough continental silhouettes for orientation — stylized, not cartographic
+    "27.8,50.0 236.1,41.7 347.2,83.3 355.6,125.0 319.4,180.6 250.0,208.3 172.2,194.4 152.8,152.8 111.1,97.2 27.8,83.3",
+    "277.8,222.2 402.8,263.9 402.8,305.6 347.2,361.1 305.6,402.8 291.7,333.3 272.2,263.9",
+    "472.2,150.0 583.3,133.3 611.1,111.1 583.3,55.6 527.8,52.8 472.2,88.9",
+    "452.8,152.8 597.2,161.1 644.4,222.2 616.7,305.6 555.6,347.2 533.3,300.0 525.0,236.1 452.8,208.3",
+    "611.1,111.1 666.7,97.2 750.0,50.0 861.1,47.2 916.7,83.3 888.9,152.8 833.3,194.4 777.8,227.8 708.3,222.2 666.7,180.6 625.0,166.7",
+    "813.9,283.3 875.0,280.6 925.0,319.4 916.7,355.6 861.1,338.9 816.7,311.1"
+  ];
+
+  function buildGraticule(svg){
+    for (var lon = -180; lon <= 180; lon += 30){
+      var x = project(lon, 0).x;
+      var line = document.createElementNS(svgNS, "line");
+      line.setAttribute("x1", x); line.setAttribute("x2", x);
+      line.setAttribute("y1", 0); line.setAttribute("y2", H);
+      line.setAttribute("class", "grid-line" + (lon === 0 ? " strong" : ""));
+      svg.appendChild(line);
+    }
+    for (var lat = -60; lat <= 60; lat += 30){
+      var y = project(0, lat).y;
+      var hl = document.createElementNS(svgNS, "line");
+      hl.setAttribute("x1", 0); hl.setAttribute("x2", W);
+      hl.setAttribute("y1", y); hl.setAttribute("y2", y);
+      hl.setAttribute("class", "grid-line" + (lat === 0 ? " strong" : ""));
+      svg.appendChild(hl);
+    }
+    [-60,-30,0,30,60].forEach(function(lat){
+      var y = project(0, lat).y;
+      var t = document.createElementNS(svgNS, "text");
+      t.setAttribute("x", 6); t.setAttribute("y", y - 4);
+      t.setAttribute("class", "grid-label");
+      t.textContent = (lat > 0 ? lat+"°N" : lat < 0 ? Math.abs(lat)+"°S" : "0°");
+      svg.appendChild(t);
+    });
+  }
+
+  function buildZones(svg){
+    ZONES.forEach(function(pts){
+      var p = document.createElementNS(svgNS, "polygon");
+      p.setAttribute("points", pts);
+      p.setAttribute("class", "zone");
+      svg.appendChild(p);
+    });
+  }
+
+  var svg = document.getElementById("map");
+  buildZones(svg);
+  buildGraticule(svg);
+
+  var pinEls = {};
+  SITES.forEach(function(site){
+    var pos = project(site.lon, site.lat);
+    var g = document.createElementNS(svgNS, "g");
+    g.setAttribute("class", "pin");
+    g.setAttribute("tabindex", "0");
+    g.setAttribute("data-id", site.id);
+
+    var colorVar = PROVIDER_VAR[site.provider] || "--accent";
+    var halo = document.createElementNS(svgNS, "circle");
+    halo.setAttribute("class", "halo");
+    halo.setAttribute("cx", pos.x); halo.setAttribute("cy", pos.y); halo.setAttribute("r", 12);
+    halo.setAttribute("fill", "var(" + colorVar + ")");
+
+    var core = document.createElementNS(svgNS, "circle");
+    core.setAttribute("class", "core");
+    core.setAttribute("cx", pos.x); core.setAttribute("cy", pos.y); core.setAttribute("r", 4);
+    core.setAttribute("fill", "var(" + colorVar + ")");
+    core.setAttribute("stroke", "#0B1420");
+    core.setAttribute("stroke-width", "1.2");
+
+    var title = document.createElementNS(svgNS, "title");
+    title.textContent = site.provider + " · " + site.region + " (" + site.city + ")";
+
+    g.appendChild(halo); g.appendChild(core); g.appendChild(title);
+    g.addEventListener("click", function(){ selectSite(site.id); });
+    g.addEventListener("keydown", function(e){ if (e.key === "Enter" || e.key === " ") { e.preventDefault(); selectSite(site.id); } });
+    svg.appendChild(g);
+    pinEls[site.id] = g;
+  });
+
+  document.getElementById("mapCount").textContent = SITES.length + " sites plotted";
+
+  // ---- Filters --------------------------------------------------------
+  var providers = ["AWS", "Azure", "GCP"];
+  var activeProviders = { AWS:true, Azure:true, GCP:true };
+  var filtersEl = document.getElementById("filters");
+  providers.forEach(function(p){
+    var btn = document.createElement("button");
+    btn.className = "chip";
+    btn.setAttribute("aria-pressed", "true");
+    btn.style.setProperty("--dot", "var(" + PROVIDER_VAR[p] + ")");
+    btn.innerHTML = '<span class="dot"></span>' + p;
+    btn.addEventListener("click", function(){
+      activeProviders[p] = !activeProviders[p];
+      btn.setAttribute("aria-pressed", String(activeProviders[p]));
+      renderTable();
+      SITES.forEach(function(s){
+        pinEls[s.id].classList.toggle("dim", !activeProviders[s.provider]);
+      });
+    });
+    filtersEl.appendChild(btn);
+  });
+
+  // ---- Table ------------------------------------------------------------
+  var tbody = document.getElementById("tableBody");
+  var rowEls = {};
+  function renderTable(){
+    tbody.innerHTML = "";
+    rowEls = {};
+    var shown = 0;
+    SITES.forEach(function(site){
+      if (!activeProviders[site.provider]) return;
+      shown++;
+      var tr = document.createElement("tr");
+      tr.setAttribute("data-id", site.id);
+      tr.innerHTML =
+        '<td><span class="provider-dot" style="background:var(' + PROVIDER_VAR[site.provider] + ')"></span>' + site.provider + '</td>' +
+        '<td class="mono">' + site.region + '</td>' +
+        '<td>' + site.city + ', ' + site.country + '</td>' +
+        '<td class="mono">' + site.lat.toFixed(2) + ', ' + site.lon.toFixed(2) + '</td>' +
+        '<td class="mono">' + site.capacity + '</td>';
+      tr.addEventListener("click", function(){ selectSite(site.id); });
+      tbody.appendChild(tr);
+      rowEls[site.id] = tr;
+    });
+    document.getElementById("count").innerHTML = "<b>" + shown + "</b> / " + SITES.length + " sites shown";
+  }
+  renderTable();
+
+  // ---- Selection ----------------------------------------------------------
+  var currentId = null;
+  var detailPanel = document.getElementById("detailPanel");
+
+  function selectSite(id){
+    currentId = id;
+    var site = SITES.filter(function(s){ return s.id === id; })[0];
+    if (!site) return;
+
+    Object.keys(pinEls).forEach(function(k){ pinEls[k].classList.toggle("active", k === id); });
+    Object.keys(rowEls).forEach(function(k){ rowEls[k].classList.toggle("active", k === id); });
+
+    var colorVar = PROVIDER_VAR[site.provider] || "--accent";
+    detailPanel.innerHTML =
+      '<div class="detail-head">' +
+        '<div><h2>' + site.city + '</h2><p class="region-code">' + site.region + '</p></div>' +
+        '<span class="provider-tag" style="background:var(' + colorVar + ')">' + site.provider + '</span>' +
+      '</div>' +
+      '<dl class="kv">' +
+        '<dt>Country</dt><dd>' + site.country + '</dd>' +
+        '<dt>Coordinates</dt><dd>' + site.lat.toFixed(4) + ', ' + site.lon.toFixed(4) + '</dd>' +
+      '</dl>' +
+      '<div>' +
+        '<div class="gauge-label"><span>Capacity index</span><b>' + site.capacity + ' / 100</b></div>' +
+        '<div class="gauge"><i style="width:' + site.capacity + '%; background:var(' + colorVar + ')"></i></div>' +
+        '<p class="gauge-note">Illustrative scale for this template — swap in a real metric (power, racks, sq ft) if you have one.</p>' +
+      '</div>' +
+      '<div class="notes-box">' + (site.notes && site.notes.length ? site.notes : "No notes yet — add a notes field to the SITES entry to keep facts here.") + '</div>';
+  }
+
+})();
+</script>
