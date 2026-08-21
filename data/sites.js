@@ -95,18 +95,19 @@ var SITES = [
   {
     id: "nebius-london",
     provider: "Nebius",
-    site: "Ark DC",
-    city: "London",
+    site: "Ark DC — Longcross Park",
+    city: "Longcross",
     country: "United Kingdom",
-    lat: 51.5074,
-    lon: -0.1278,
+    lat: 51.3818,
+    lon: -0.5928,
     status: "Operational",
-    capacityMW: null,
+    capacityMW: 16,
     lastUpdated: "2026-08-20",
     sources: [
-      { label: "datacenters.com provider profile", url: "https://www.datacenters.com/providers/nebius" }
+      { label: "Ark Data Centres newsroom", url: "https://www.ark-d-c.com/insights/ark-data-centres-collaborates-with-nebius" },
+      { label: "Data Center Dynamics", url: "https://www.datacenterdynamics.com/en/news/nebius-launches-nvidia-gpu-cluster-in-london-uk/" }
     ],
-    notes: "Colocated capacity."
+    notes: "Colocated at Ark's Longcross Park campus in Surrey (commonly described as \"London\" in press, but the campus itself is ~25km outside the city). 16MW live initially, with expansion toward 65MW targeted by 2027."
   },
   {
     id: "nebius-harlow",
@@ -149,13 +150,14 @@ var SITES = [
     country: "United States",
     lat: 39.4864,
     lon: -75.0257,
-    status: "Operational",
-    capacityMW: null,
+    status: "Under construction",
+    capacityMW: 100,
     lastUpdated: "2026-08-20",
     sources: [
-      { label: "Baxtel — Nebius data centers", url: "https://baxtel.com/data-centers/nebius" }
+      { label: "Nebius blog, Mar 2025", url: "https://nebius.com/blog/posts/300-mw-new-jersey-and-iceland-regions" },
+      { label: "Data Centre Magazine", url: "https://datacentremagazine.com/articles/dataone-and-nebius-partner-for-new-300mw-ai-data-centre" }
     ],
-    notes: "Leased capacity — Nebius's US entry point."
+    notes: "Nebius's own Mar 2025 post commits to 100MW installed by end of 2025, going live phase by phase, scaling toward a 300MW full build-out. Using the firmer 100MW commitment rather than the aspirational 300MW total; recheck for a status/capacity update."
   },
   {
     id: "coreweave-kristiansand",

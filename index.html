@@ -572,9 +572,7 @@
     if (opSites.length === 0) return "no operational sites yet";
     if (disclosed.length === 0) return "operational capacity undisclosed";
     var totalGW = disclosed.reduce(function(sum, s){ return sum + s.capacityMW; }, 0) / 1000;
-    var label = totalGW.toFixed(2) + " GW operational";
-    if (disclosed.length < opSites.length) label += " (partial — not all sites disclose capacity)";
-    return label;
+    return totalGW.toFixed(2) + " GW operational";
   }
 
   var filtersEl = document.getElementById("filters");
