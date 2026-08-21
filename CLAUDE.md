@@ -14,8 +14,10 @@ capacity. Built as a single static site with no backend and no build step.
   documents the field schema and the sourcing standard (how sources are
   tiered, what needs verification, when to recheck). Follow that standard
   whenever adding or updating an entry.
-- No package manager, no build step, no framework. Anyone editing this
-  should keep it that way unless there's a real reason to add tooling.
+- The site itself (`index.html`, `data/sites.js`) has no package manager, no
+  build step, no framework — keep it that way. The one exception is
+  `.claude/mcp/openrouter/`, a small local tool with its own `package.json`;
+  that's internal tooling, not part of the deployed site.
 
 ## Workflow
 
@@ -41,3 +43,13 @@ provider, or auditing the whole dataset — against a rigorous sourcing
 methodology (source grading, corroboration rules, conflict handling). It's
 research-only and can't edit files, so findings still need to be reviewed
 and applied deliberately.
+
+## Research cost
+
+`.mcp.json` registers a small local MCP server (`.claude/mcp/openrouter/`)
+that exposes an `openrouter_ask` tool, letting research delegate its
+token-heavy legwork to a cheap model via OpenRouter instead of running
+everything on the main model. Needs an `OPENROUTER_API_KEY` in a local
+`.env` (see `.env.example`) — never commit that key. Adding or changing
+this MCP server requires restarting the Claude Code session before it
+takes effect.

@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "openrouter-research": {
+      "command": "node",
+      "args": ["--env-file=.env", ".claude/mcp/openrouter/server.js"]
+    }
+  }
+}
