@@ -18,13 +18,23 @@ server.tool(
   {
     prompt: z.string().describe("The full prompt/question to send to the model."),
     model: z.string().optional().describe("OpenRouter model id to use, e.g. 'deepseek/deepseek-chat'. Defaults to OPENROUTER_DEFAULT_MODEL."),
+    search: z.boolean().optional().describe("If true, gives the model live web search (via OpenRouter's web plugin) before it answers."),
   },
-  async ({ prompt, model }) => {
+  async ({ prompt, model, search }) => {
     if (!API_KEY) {
       return {
         isError: true,
         content: [{ type: "text", text: "OPENROUTER_API_KEY is not set. Create a .env file in the project root (see .env.example) and restart Claude Code." }],
       };
+    }
+
+    const body = {
+      model: model || DEFAULT_MODEL,
+      messages: [{ role: "user", content: prompt }],
+    };
+
+    if (search) {
+      body.plugins = [{ id: "web", max_results: 5 }];
     }
 
     const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -33,10 +43,7 @@ server.tool(
         Authorization: `Bearer ${API_KEY}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        model: model || DEFAULT_MODEL,
-        messages: [{ role: "user", content: prompt }],
-      }),
+      body: JSON.stringify(body),
     });
 
     const data = await res.json();
@@ -50,9 +57,15 @@ server.tool(
 
     const text = data.choices?.[0]?.message?.content;
     const usedModel = data.model || model || DEFAULT_MODEL;
+    const annotations = data.choices?.[0]?.message?.annotations;
+    const citations = annotations
+      ?.filter(a => a.type === "url_citation")
+      .map(a => `- ${a.url_citation.title}: ${a.url_citation.url}`)
+      .join("\n");
+    const fullText = citations ? `${text}\n\nSources:\n${citations}` : text;
 
     return {
-      content: [{ type: "text", text: text || "(model returned no content)" }],
+      content: [{ type: "text", text: fullText || "(model returned no content)" }],
       _meta: { model: usedModel, usage: data.usage },
     };
   }
