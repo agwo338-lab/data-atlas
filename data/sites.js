@@ -43,21 +43,37 @@
 
 var SITES = [
   {
-    id: "nebius-mantsala",
+    id: "nebius-mantsala-i",
     provider: "Nebius",
-    site: "Mäntsälä I & II",
+    site: "Mäntsälä I",
     city: "Mäntsälä",
     country: "Finland",
     lat: 60.6317,
     lon: 25.3200,
     status: "Operational",
     capacityMW: 75,
-    lastUpdated: "2026-08-20",
+    lastUpdated: "2026-08-21",
     sources: [
       { label: "Nebius newsroom, Oct 2024", url: "https://nebius.com/newsroom/nebius-to-triple-capacity-at-finland-data-center-to-75-mw" },
       { label: "Data Center Dynamics, Aug 2026", url: "https://www.datacenterdynamics.com/en/news/nebius-expands-european-presence-announces-deployment-in-estonia-and-second-data-center-in-m%C3%A4nts%C3%A4l%C3%A4-finland/" }
     ],
-    notes: "Nebius's original flagship European site (inherited from Yandex); a second facility on the same site was announced in 2026. Capacity figure is the tripling target announced Oct 2024 (25MW → 75MW) — not independently reconfirmed as fully complete."
+    notes: "Nebius's original flagship European site (inherited from Yandex). Capacity figure is the tripling target announced Oct 2024 (25MW → 75MW) — not independently reconfirmed as fully complete. See nebius-mantsala-ii for the separate, newly-announced second facility on the same campus."
+  },
+  {
+    id: "nebius-mantsala-ii",
+    provider: "Nebius",
+    site: "Mäntsälä II",
+    city: "Mäntsälä",
+    country: "Finland",
+    lat: 60.6317,
+    lon: 25.3200,
+    status: "Planned",
+    capacityMW: 70,
+    lastUpdated: "2026-08-21",
+    sources: [
+      { label: "Data Center Dynamics, Aug 2026", url: "https://www.datacenterdynamics.com/en/news/nebius-expands-european-presence-announces-deployment-in-estonia-and-second-data-center-in-m%C3%A4nts%C3%A4l%C3%A4-finland/" }
+    ],
+    notes: "Newly announced second facility on the Mäntsälä campus, distinct from Mäntsälä I; up to 70MW, first capacity targeted 2027. Together with Mäntsälä I (75MW) and Lappeenranta (310MW), brings Nebius's disclosed Finland total to 455MW."
   },
   {
     id: "nebius-lappeenranta",
@@ -67,14 +83,15 @@ var SITES = [
     country: "Finland",
     lat: 61.0587,
     lon: 28.1887,
-    status: "Planned",
+    status: "Under construction",
     capacityMW: 310,
-    lastUpdated: "2026-08-20",
+    lastUpdated: "2026-08-21",
     sources: [
       { label: "Nebius newsroom, Mar 2026", url: "https://nebius.com/newsroom/nebius-to-construct-310-mw-ai-factory-in-finland" },
-      { label: "Finnish AI Region, Apr 2026", url: "https://www.fairedih.fi/en/2026/04/14/nebius-plans-e8-5-billion-data-centre-in-lappeenranta-cementing-finland-as-its-european-base/" }
+      { label: "Finnish AI Region, Apr 2026", url: "https://www.fairedih.fi/en/2026/04/14/nebius-plans-e8-5-billion-data-centre-in-lappeenranta-cementing-finland-as-its-european-base/" },
+      { label: "Polarnode newsroom, May 2026", url: "https://www.polarnode.fi/polarnode-begins-pre-construction-works-for-the-lappeenranta-data-center-project/" }
     ],
-    notes: "€8.5B project; first capacity expected 2027."
+    notes: "€8.5B project; first capacity expected 2027. Polarnode (developer) began pre-construction works in the Pajarila district in May 2026, confirmed by the City of Lappeenranta's own site — status updated from \"Planned\" accordingly."
   },
   {
     id: "nebius-bethune",
@@ -86,11 +103,11 @@ var SITES = [
     lon: 2.6400,
     status: "Under construction",
     capacityMW: 240,
-    lastUpdated: "2026-08-20",
+    lastUpdated: "2026-08-21",
     sources: [
-      { label: "Data Center Dynamics, 2026", url: "https://www.datacenterdynamics.com/en/news/nebius-expands-european-presence-announces-deployment-in-estonia-and-second-data-center-in-m%C3%A4nts%C3%A4l%C3%A4-finland/" }
+      { label: "Data Center Dynamics — \"Nebius plans 240MW data center in Béthune, France\"", url: "https://www.datacenterdynamics.com/en/news/nebius-plans-240mw-data-center-in-b%C3%A9thune-france/" }
     ],
-    notes: ""
+    notes: "Former Bridgestone tire-plant site; ~€1.5B investment. 240MW is the disclosed full-buildout target (2027/28), phased from an initial ~27MW ramping to ~120MW in 2026. Previous source citation (a Mäntsälä/Estonia roundup article that never mentions Béthune) was a copy-paste error — corrected."
   },
   {
     id: "nebius-london",
@@ -102,12 +119,13 @@ var SITES = [
     lon: -0.5928,
     status: "Operational",
     capacityMW: 16,
-    lastUpdated: "2026-08-20",
+    lastUpdated: "2026-08-21",
     sources: [
       { label: "Ark Data Centres newsroom", url: "https://www.ark-d-c.com/insights/ark-data-centres-collaborates-with-nebius" },
-      { label: "Data Center Dynamics", url: "https://www.datacenterdynamics.com/en/news/nebius-launches-nvidia-gpu-cluster-in-london-uk/" }
+      { label: "Data Center Dynamics", url: "https://www.datacenterdynamics.com/en/news/nebius-launches-nvidia-gpu-cluster-in-london-uk/" },
+      { label: "Data Center Dynamics, Jun 2026 — Ark expansion", url: "https://www.datacenterdynamics.com/en/news/ark-dc-to-add-new-building-to-longcross-data-center-campus-outside-london-uk/" }
     ],
-    notes: "Colocated at Ark's Longcross Park campus in Surrey (commonly described as \"London\" in press, but the campus itself is ~25km outside the city). 16MW live initially, with expansion toward 65MW targeted by 2027."
+    notes: "Colocated at Ark's Longcross Park campus in Surrey (commonly described as \"London\" in press, but the campus itself is ~25km outside the city). 16MW live initially, with expansion toward 65MW targeted by 2027 — confirmed by Ark's Jun 2026 announcement of a new building on the campus to support that growth."
   },
   {
     id: "nebius-harlow",
@@ -119,11 +137,12 @@ var SITES = [
     lon: 0.0917,
     status: "Under construction",
     capacityMW: 22,
-    lastUpdated: "2026-08-20",
+    lastUpdated: "2026-08-21",
     sources: [
-      { label: "Data Center Dynamics, Jun 2026", url: "https://www.datacenterdynamics.com/en/news/nebius-expands-european-presence-announces-deployment-in-estonia-and-second-data-center-in-m%C3%A4nts%C3%A4l%C3%A4-finland/" }
+      { label: "Data Center Dynamics — \"Nebius signs 22MW capacity agreement with Kao Data in the UK\"", url: "https://www.datacenterdynamics.com/en/news/nebius-signs-22mw-capacity-agreement-with-kao-data-in-the-uk/" },
+      { label: "Kao Data newsroom", url: "https://kaodata.com/discover/news/nebius-chooses-kao-datas-harlow-campus-for-major-ai-infrastructure-deployment/" }
     ],
-    notes: "Part of a wider £1.7B UK investment pledge, alongside new Nvidia infrastructure deployments."
+    notes: "22MW, 10-year deal, part of a wider £1.7B UK investment pledge, alongside new Nvidia infrastructure deployments. Previous source citation (a Mäntsälä/Estonia roundup article that never mentions Harlow or Kao Data) was a copy-paste error — corrected."
   },
   {
     id: "nebius-huuru",
@@ -135,12 +154,12 @@ var SITES = [
     lon: 24.5397,
     status: "Under construction",
     capacityMW: 22,
-    lastUpdated: "2026-08-20",
+    lastUpdated: "2026-08-21",
     sources: [
       { label: "Data Center Dynamics, Aug 2026", url: "https://www.datacenterdynamics.com/en/news/nebius-expands-european-presence-announces-deployment-in-estonia-and-second-data-center-in-m%C3%A4nts%C3%A4l%C3%A4-finland/" },
       { label: "Wikipedia — Hüüru (location reference)", url: "https://en.wikipedia.org/wiki/H%C3%BC%C3%BCru" }
     ],
-    notes: "Near Tallinn."
+    notes: "Near Tallinn. Agreement with Greenergy Data Centers; first phase expected operational later in 2026 — once fully live, expected to be Nebius's largest deployment in the Baltics."
   },
   {
     id: "nebius-vineland",
@@ -151,13 +170,14 @@ var SITES = [
     lat: 39.4864,
     lon: -75.0257,
     status: "Under construction",
-    capacityMW: 100,
-    lastUpdated: "2026-08-20",
+    capacityMW: 300,
+    lastUpdated: "2026-08-21",
     sources: [
-      { label: "Nebius blog, Mar 2025", url: "https://nebius.com/blog/posts/300-mw-new-jersey-and-iceland-regions" },
-      { label: "Data Centre Magazine", url: "https://datacentremagazine.com/articles/dataone-and-nebius-partner-for-new-300mw-ai-data-centre" }
+      { label: "Nebius/Businesswire, Mar 2025 — \"adding up to 300 MW capacity\"", url: "https://www.businesswire.com/news/home/20250305405030/en/Nebius-accelerates-US-expansion-adding-up-to-300-MW-capacity-at-new-data-center-in-New-Jersey" },
+      { label: "Data Centre Magazine", url: "https://datacentremagazine.com/articles/dataone-and-nebius-partner-for-new-300mw-ai-data-centre" },
+      { label: "WHYY, Aug 2026 — Vineland planning board approves Phase 2", url: "https://whyy.org/articles/vineland-planning-board-approves-data-center-plan/" }
     ],
-    notes: "Nebius's own Mar 2025 post commits to 100MW installed by end of 2025, going live phase by phase, scaling toward a 300MW full build-out. Using the firmer 100MW commitment rather than the aspirational 300MW total; recheck for a status/capacity update."
+    notes: "300MW was the primary-source figure from the original Mar 2025 Nebius/Businesswire release; the dataset previously used a more conservative 100MW \"installed by end-2025\" milestone, but that undersold the disclosed total. Phase 1 is under construction targeting full operation in 2026; Phase 2 (~600,000 sq ft addition) was approved by the Vineland Planning Board on Aug 18, 2026. Some secondary press floats a further expansion toward 350MW — not yet confirmed by a primary Nebius source, so not used here. Site is reportedly part of fulfilling Nebius's ~$17.4B Microsoft compute deal."
   },
   {
     id: "coreweave-kristiansand",
