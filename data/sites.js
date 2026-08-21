@@ -13,6 +13,33 @@
 //   lastUpdated  "YYYY-MM-DD" — the last time you checked this entry was still accurate
 //   sources      array of { label, url } — every claim above should trace to one of these
 //   notes        your own free-text notes — anything you want to remember
+//
+// ---------------------------------------------------------------------------
+// SOURCING STANDARDS — the checklist to follow every time a site is added
+// or re-verified. Keeping this next to the data (not in a separate doc)
+// means it's the first thing either of us sees when editing an entry.
+//
+// 1. Prefer sources in this order, and note which tier you used:
+//      Tier 1 — primary: the operator's own newsroom, press release,
+//               regulatory filing, or investor disclosure.
+//      Tier 2 — named trade press with a byline and date (e.g. Data Center
+//               Dynamics, Data Center Frontier) — the industry-standard beat.
+//      Tier 3 — directories/aggregators (e.g. Baxtel, datacenters.com) —
+//               fine for basic facts (a site exists, its city) but should
+//               not be the *only* source for a specific hard number.
+//      Avoid  — unattributed blogs, forums, social posts, anything without
+//               a clear author, publication, and date.
+// 2. Every entry needs at least one source. Any disclosed hard number
+//    (MW, $ investment, a date) should trace to Tier 1 or Tier 2 — use two
+//    independent sources if the number is large or newsworthy.
+// 3. Set lastUpdated to the day you actually verified the fact, not just
+//    when you typed the entry.
+// 4. "Planned" and "Under construction" entries change fastest — re-check
+//    those roughly every 6 months, or sooner if you see it referenced
+//    elsewhere with different numbers.
+// 5. If a claim can't be sourced, leave the field null/empty rather than
+//    guessing — "Not disclosed" is honest, a fabricated number isn't.
+// ---------------------------------------------------------------------------
 
 var SITES = [
   {

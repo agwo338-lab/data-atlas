@@ -39,6 +39,8 @@
     -webkit-font-smoothing:antialiased;
   }
   ::selection{ background:var(--accent-soft); color:var(--ink); }
+  a{ color:var(--accent); text-decoration-color:rgba(53,214,184,0.4); }
+  a:hover{ text-decoration-color:currentColor; }
 
   .page{
     max-width:1560px;
@@ -49,27 +51,6 @@
     gap:1.75rem;
   }
 
-  header.top{
-    display:flex;
-    flex-direction:column;
-    gap:0.55rem;
-    border-bottom:1px solid var(--border);
-    padding-bottom:1.4rem;
-  }
-  .eyebrow{
-    font-family:var(--font-mono);
-    font-size:0.76rem;
-    letter-spacing:0.12em;
-    text-transform:uppercase;
-    color:var(--accent);
-  }
-  h1{
-    margin:0;
-    font-size:clamp(2rem, 3vw, 2.7rem);
-    font-weight:650;
-    letter-spacing:-0.01em;
-    text-wrap:balance;
-  }
   .subtitle{
     margin:0;
     max-width:68ch;
@@ -77,25 +58,9 @@
     font-size:1.05rem;
     line-height:1.55;
   }
-  .template-note{
-    font-size:0.85rem;
-    color:var(--ink-soft);
-    background:var(--surface-2);
-    border:1px solid var(--border);
-    border-radius:8px;
-    padding:0.6rem 0.9rem;
-    max-width:fit-content;
-  }
-  .template-note code{
-    font-family:var(--font-mono);
-    background:var(--surface);
-    border:1px solid var(--border);
-    border-radius:4px;
-    padding:0.05rem 0.35rem;
-    font-size:0.82rem;
-  }
 
   .tabs{
+    margin-top:0.5rem;
     display:flex;
     gap:0.25rem;
     border-bottom:1px solid var(--border);
@@ -366,13 +331,6 @@
 
 <div class="page">
 
-  <header class="top">
-    <p class="eyebrow">Personal reference · geographic</p>
-    <h1>Site Atlas</h1>
-    <p class="subtitle">A working map of data center sites — operator, status, and capacity at a glance. Click a node on the map or a row in the table for details.</p>
-    <p class="template-note">Data lives in <code>data/sites.js</code> — add, edit, or remove facilities there and the map, filters, and table all update automatically. Nothing in this file needs to change.</p>
-  </header>
-
   <div class="tabs" role="tablist">
     <button class="tab-btn active" id="tabBtnMap" role="tab" aria-selected="true">Map</button>
     <button class="tab-btn" id="tabBtnSources" role="tab" aria-selected="false">Sources</button>
@@ -444,13 +402,19 @@
 
   // SITES comes from data/sites.js, loaded before this script.
 
-  // ---- Provider colors, assigned automatically as new operators appear --
-  var PALETTE = ["#E39149", "#5B9BE0", "#9A85E0", "#6FD08C", "#E0708A", "#D9C24E", "#4FC2C9", "#C97AD1"];
+  // ---- Provider colors ---------------------------------------------------
+  // Known operators can be pinned to a specific color here; anything new
+  // gets the next unused color from PALETTE automatically, no edit needed.
+  var COLOR_OVERRIDES = { "Nebius": "#4CAF6D" };
+  var PALETTE = ["#E39149", "#5B9BE0", "#9A85E0", "#E0708A", "#D9C24E", "#4FC2C9", "#C97AD1"];
   var providerColor = {};
   (function assignColors(){
     var seen = [];
     SITES.forEach(function(s){ if (seen.indexOf(s.provider) === -1) seen.push(s.provider); });
-    seen.forEach(function(p, i){ providerColor[p] = PALETTE[i % PALETTE.length]; });
+    var next = 0;
+    seen.forEach(function(p){
+      providerColor[p] = COLOR_OVERRIDES[p] || PALETTE[next++ % PALETTE.length];
+    });
   })();
   function colorFor(provider){ return providerColor[provider] || "#5EEAD4"; }
   function statusSlug(status){ return (status||"").toLowerCase().replace(/[^a-z]+/g,"-").replace(/(^-|-$)/g,""); }
