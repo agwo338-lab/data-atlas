@@ -34,3 +34,8 @@ permanently accurate — check individual entries' `notes` in `data/sites.js`
 for anything flagged that way before relying on a number. When adding a new
 operator or site, follow the sourcing standard already documented at the
 top of that file rather than re-deriving one.
+
+A `source-vetter` subagent (`.claude/agents/source-vetter.md`) handles
+research on request — vetting a new candidate, re-checking one entry or
+provider, or auditing the whole dataset. It's research-only and can't edit
+files, so findings still need to be reviewed and applied deliberately.
