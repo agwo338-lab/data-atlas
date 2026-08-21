@@ -4,6 +4,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
+<script src="data/sites.js"></script>
 
 <style>
   /* Committed dark theme — this page always renders dark, regardless of OS/browser setting */
@@ -16,9 +17,6 @@
     --ink-soft:#8FA39C;
     --accent:#35D6B8;
     --accent-soft:rgba(53,214,184,0.16);
-    --provider-aws:#E39149;
-    --provider-azure:#5B9BE0;
-    --provider-gcp:#9A85E0;
 
     --map-bg:#060B12;
     --map-land:rgba(94,234,212,0.10);
@@ -246,26 +244,27 @@
   .kv dt{ color:var(--ink-soft); }
   .kv dd{ margin:0; font-family:var(--font-mono); font-variant-numeric:tabular-nums; }
 
-  .gauge-label{
-    display:flex;
-    justify-content:space-between;
-    font-size:0.82rem;
+  .status-pill{
+    display:inline-flex;
+    align-items:center;
+    gap:0.4rem;
+    font-family:var(--font-mono);
+    font-size:0.78rem;
+    letter-spacing:0.02em;
+    padding:0.15rem 0.6rem 0.15rem 0.5rem;
+    border-radius:999px;
+  }
+  .status-pill::before{ content:""; width:6px; height:6px; border-radius:50%; background:currentColor; flex-shrink:0; }
+  .status-operational{ background:rgba(74,222,128,0.14); color:#4ADE80; }
+  .status-under-construction{ background:rgba(251,191,36,0.14); color:#FBBF24; }
+  .status-planned{ background:rgba(148,163,184,0.14); color:#94A3B8; }
+
+  .source-line{
+    font-size:0.78rem;
     color:var(--ink-soft);
-    margin-bottom:0.3rem;
+    margin:0;
   }
-  .gauge-label b{ color:var(--ink); font-family:var(--font-mono); }
-  .gauge{
-    height:6px;
-    border-radius:999px;
-    background:var(--surface-2);
-    overflow:hidden;
-  }
-  .gauge > i{
-    display:block; height:100%;
-    background:var(--accent);
-    border-radius:999px;
-  }
-  .gauge-note{ font-size:0.75rem; color:var(--ink-soft); font-style:italic; }
+  .source-line a{ color:var(--accent); }
 
   .notes-box{
     border:1px dashed var(--border);
@@ -334,8 +333,8 @@
   <header class="top">
     <p class="eyebrow">Personal reference · geographic</p>
     <h1>Site Atlas</h1>
-    <p class="subtitle">A working map of data center sites — provider, region, and capacity at a glance. Click a node on the map or a row in the table for details.</p>
-    <p class="template-note">Showing 14 example hyperscale regions as a starting template. Replace them with your own facilities by editing the <code>SITES</code> array near the top of this page's script.</p>
+    <p class="subtitle">A working map of data center sites — operator, status, and capacity at a glance. Click a node on the map or a row in the table for details.</p>
+    <p class="template-note">Data lives in <code>data/sites.js</code> — add, edit, or remove facilities there and the map, filters, and table all update automatically. Nothing in this file needs to change.</p>
   </header>
 
   <div class="toolbar">
@@ -360,11 +359,11 @@
       <table>
         <thead>
           <tr>
-            <th>Provider</th>
-            <th>Region</th>
+            <th>Operator</th>
+            <th>Site</th>
             <th>Location</th>
-            <th class="mono">Coordinates</th>
-            <th class="mono">Capacity idx</th>
+            <th>Status</th>
+            <th class="mono">Capacity</th>
           </tr>
         </thead>
         <tbody id="tableBody"></tbody>
@@ -372,33 +371,25 @@
     </div>
   </section>
 
-  <footer class="foot">Capacity index is an illustrative 1–100 scale for template purposes, not a disclosed operating figure. Coastline data from Natural Earth via world-atlas.</footer>
+  <footer class="foot">Status and capacity figures reflect public reporting as of when each entry was added — verify before relying on them. Coastline data from Natural Earth via world-atlas.</footer>
 
 </div>
 
 <script>
 (function(){
 
-  // ---- Edit this array to track your own sites --------------------------
-  var SITES = [
-    { id:"aws-use1", provider:"AWS",   region:"us-east-1",       city:"Ashburn",        country:"United States", lat:39.0438,  lon:-77.4874,  capacity:96, notes:"Densest hub in the region — add your own notes here." },
-    { id:"aws-usw2", provider:"AWS",   region:"us-west-2",       city:"Boardman",       country:"United States", lat:45.8399,  lon:-119.7006, capacity:74, notes:"" },
-    { id:"aws-euw1", provider:"AWS",   region:"eu-west-1",       city:"Dublin",         country:"Ireland",       lat:53.3498,  lon:-6.2603,   capacity:82, notes:"" },
-    { id:"aws-euc1", provider:"AWS",   region:"eu-central-1",    city:"Frankfurt",      country:"Germany",       lat:50.1109,  lon:8.6821,    capacity:79, notes:"" },
-    { id:"aws-apse1",provider:"AWS",   region:"ap-southeast-1",  city:"Singapore",      country:"Singapore",     lat:1.3521,   lon:103.8198,  capacity:71, notes:"" },
-    { id:"aws-apne1",provider:"AWS",   region:"ap-northeast-1",  city:"Tokyo",          country:"Japan",         lat:35.6762,  lon:139.6503,  capacity:68, notes:"" },
-    { id:"aws-sae1", provider:"AWS",   region:"sa-east-1",       city:"São Paulo",      country:"Brazil",        lat:-23.5505, lon:-46.6333,  capacity:52, notes:"" },
-    { id:"az-eus",   provider:"Azure", region:"East US",         city:"Boydton",        country:"United States", lat:36.6681,  lon:-78.3889,  capacity:88, notes:"" },
-    { id:"az-weu",   provider:"Azure", region:"West Europe",     city:"Amsterdam",      country:"Netherlands",   lat:52.3676,  lon:4.9041,    capacity:77, notes:"" },
-    { id:"az-aue",   provider:"Azure", region:"Australia East",  city:"Sydney",         country:"Australia",     lat:-33.8688, lon:151.2093,  capacity:58, notes:"" },
-    { id:"gcp-usc1", provider:"GCP",   region:"us-central1",     city:"Council Bluffs", country:"United States", lat:41.2619,  lon:-95.8608,  capacity:70, notes:"" },
-    { id:"gcp-euw4", provider:"GCP",   region:"europe-west4",    city:"Eemshaven",      country:"Netherlands",   lat:53.4386,  lon:6.8355,    capacity:65, notes:"" },
-    { id:"gcp-ae1",  provider:"GCP",   region:"asia-east1",      city:"Changhua",       country:"Taiwan",        lat:24.0518,  lon:120.5161,  capacity:60, notes:"" },
-    { id:"gcp-sae1", provider:"GCP",   region:"southamerica-east1", city:"Osasco",      country:"Brazil",        lat:-23.5329, lon:-46.7916,  capacity:47, notes:"" }
-  ];
-  // -------------------------------------------------------------------------
+  // SITES comes from data/sites.js, loaded before this script.
 
-  var PROVIDER_VAR = { AWS:"--provider-aws", Azure:"--provider-azure", GCP:"--provider-gcp" };
+  // ---- Provider colors, assigned automatically as new operators appear --
+  var PALETTE = ["#E39149", "#5B9BE0", "#9A85E0", "#6FD08C", "#E0708A", "#D9C24E", "#4FC2C9", "#C97AD1"];
+  var providerColor = {};
+  (function assignColors(){
+    var seen = [];
+    SITES.forEach(function(s){ if (seen.indexOf(s.provider) === -1) seen.push(s.provider); });
+    seen.forEach(function(p, i){ providerColor[p] = PALETTE[i % PALETTE.length]; });
+  })();
+  function colorFor(provider){ return providerColor[provider] || "#5EEAD4"; }
+  function statusSlug(status){ return (status||"").toLowerCase().replace(/[^a-z]+/g,"-").replace(/(^-|-$)/g,""); }
   var svgNS = "http://www.w3.org/2000/svg";
   var W = 1000, H = 560;
 
@@ -438,12 +429,12 @@
       var pos = projection([site.lon, site.lat]);
       if (!pos) return;
       var g = svgEl("g", { class:"pin", tabindex:"0", "data-id":site.id });
-      var colorVar = PROVIDER_VAR[site.provider] || "--accent";
+      var color = colorFor(site.provider);
 
-      var halo = svgEl("circle", { class:"halo", cx:pos[0], cy:pos[1], r:14, fill:"var(" + colorVar + ")" });
-      var core = svgEl("circle", { class:"core", cx:pos[0], cy:pos[1], r:5, fill:"var(" + colorVar + ")", stroke:"#060B12", "stroke-width":"1.4" });
+      var halo = svgEl("circle", { class:"halo", cx:pos[0], cy:pos[1], r:14, fill:color });
+      var core = svgEl("circle", { class:"core", cx:pos[0], cy:pos[1], r:5, fill:color, stroke:"#060B12", "stroke-width":"1.4" });
       var title = svgEl("title", {});
-      title.textContent = site.provider + " · " + site.region + " (" + site.city + ")";
+      title.textContent = site.provider + (site.site ? " · " + site.site : "") + " (" + site.city + ")";
 
       g.appendChild(halo); g.appendChild(core); g.appendChild(title);
       g.addEventListener("click", function(){ selectSite(site.id); });
@@ -467,15 +458,16 @@
       document.getElementById("mapLoading").textContent = "Couldn't load coastline data — check your connection and reload.";
     });
 
-  // ---- Filters --------------------------------------------------------
-  var providers = ["AWS", "Azure", "GCP"];
-  var activeProviders = { AWS:true, Azure:true, GCP:true };
+  // ---- Filters (one chip per provider found in the data) ----------------
+  var providers = Object.keys(providerColor);
+  var activeProviders = {};
+  providers.forEach(function(p){ activeProviders[p] = true; });
   var filtersEl = document.getElementById("filters");
   providers.forEach(function(p){
     var btn = document.createElement("button");
     btn.className = "chip";
     btn.setAttribute("aria-pressed", "true");
-    btn.style.setProperty("--dot", "var(" + PROVIDER_VAR[p] + ")");
+    btn.style.setProperty("--dot", colorFor(p));
     btn.innerHTML = '<span class="dot"></span>' + p;
     btn.addEventListener("click", function(){
       activeProviders[p] = !activeProviders[p];
@@ -501,11 +493,11 @@
       var tr = document.createElement("tr");
       tr.setAttribute("data-id", site.id);
       tr.innerHTML =
-        '<td><span class="provider-dot" style="background:var(' + PROVIDER_VAR[site.provider] + ')"></span>' + site.provider + '</td>' +
-        '<td class="mono">' + site.region + '</td>' +
+        '<td><span class="provider-dot" style="background:' + colorFor(site.provider) + '"></span>' + site.provider + '</td>' +
+        '<td>' + (site.site || '—') + '</td>' +
         '<td>' + site.city + ', ' + site.country + '</td>' +
-        '<td class="mono">' + site.lat.toFixed(2) + ', ' + site.lon.toFixed(2) + '</td>' +
-        '<td class="mono">' + site.capacity + '</td>';
+        '<td><span class="status-pill status-' + statusSlug(site.status) + '">' + site.status + '</span></td>' +
+        '<td class="mono">' + (site.capacityMW != null ? site.capacityMW + ' MW' : 'Not disclosed') + '</td>';
       tr.addEventListener("click", function(){ selectSite(site.id); });
       tbody.appendChild(tr);
       rowEls[site.id] = tr;
@@ -526,22 +518,20 @@
     Object.keys(pinEls).forEach(function(k){ pinEls[k].classList.toggle("active", k === id); });
     Object.keys(rowEls).forEach(function(k){ rowEls[k].classList.toggle("active", k === id); });
 
-    var colorVar = PROVIDER_VAR[site.provider] || "--accent";
+    var color = colorFor(site.provider);
     detailPanel.innerHTML =
       '<div class="detail-head">' +
-        '<div><h2>' + site.city + '</h2><p class="region-code">' + site.region + '</p></div>' +
-        '<span class="provider-tag" style="background:var(' + colorVar + ')">' + site.provider + '</span>' +
+        '<div><h2>' + site.city + '</h2><p class="region-code">' + (site.site || site.country) + '</p></div>' +
+        '<span class="provider-tag" style="background:' + color + '">' + site.provider + '</span>' +
       '</div>' +
       '<dl class="kv">' +
         '<dt>Country</dt><dd>' + site.country + '</dd>' +
         '<dt>Coordinates</dt><dd>' + site.lat.toFixed(4) + ', ' + site.lon.toFixed(4) + '</dd>' +
+        '<dt>Status</dt><dd><span class="status-pill status-' + statusSlug(site.status) + '">' + site.status + '</span></dd>' +
+        '<dt>Capacity</dt><dd>' + (site.capacityMW != null ? site.capacityMW + ' MW' : 'Not disclosed') + '</dd>' +
       '</dl>' +
-      '<div>' +
-        '<div class="gauge-label"><span>Capacity index</span><b>' + site.capacity + ' / 100</b></div>' +
-        '<div class="gauge"><i style="width:' + site.capacity + '%; background:var(' + colorVar + ')"></i></div>' +
-        '<p class="gauge-note">Illustrative scale for this template — swap in a real metric (power, racks, sq ft) if you have one.</p>' +
-      '</div>' +
-      '<div class="notes-box">' + (site.notes && site.notes.length ? site.notes : "No notes yet — add a notes field to the SITES entry to keep facts here.") + '</div>';
+      '<div class="notes-box">' + (site.notes && site.notes.length ? site.notes : "No notes yet — add one in data/sites.js.") + '</div>' +
+      (site.source ? '<p class="source-line">Source: <a href="' + site.sourceUrl + '" target="_blank" rel="noopener">' + site.source + '</a></p>' : '');
   }
 
 })();
