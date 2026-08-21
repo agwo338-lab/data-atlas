@@ -52,4 +52,20 @@ token-heavy legwork to a cheap model via OpenRouter instead of running
 everything on the main model. Needs an `OPENROUTER_API_KEY` in a local
 `.env` (see `.env.example`) — never commit that key. Adding or changing
 this MCP server requires restarting the Claude Code session before it
-takes effect.
+takes effect. `openrouter_ask` supports a `search` param (OpenRouter's web
+plugin) for live lookups, not just reasoning over text handed to it.
+
+## Open concerns
+
+- **`openrouter_ask` reliability**: in its first real research run (the
+  CoreWeave site audit, Aug 2026), the cheap delegate model fabricated or
+  overstated specifics with confident-sounding phrasing on its first pass
+  for a couple of leads (a DataBank Chicago MW figure with no real basis,
+  and a T5 Atlanta lease that a follow-up search couldn't substantiate at
+  all). A second, more skeptical/adversarial `openrouter_ask` call
+  correctly walked both claims back once asked to re-verify. Net: it's
+  useful for casting a wide net and drafting cited claims fast, but every
+  hard number or "is this real" claim still needs a second, skeptical pass
+  before being trusted — treat its output as a draft, never as a finding,
+  same as `research-agent.md` already instructs. Don't loosen that
+  discipline just because delegation is now wired up.

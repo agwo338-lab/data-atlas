@@ -212,5 +212,89 @@ var SITES = [
       { label: "Yahoo Finance, Jul 2026", url: "https://finance.yahoo.com/news/coreweave-crwv-plans-6-billion-143703771.html" }
     ],
     notes: "$6B project; phase one is 100MW with potential to expand to 300MW."
+  },
+  {
+    id: "coreweave-denton",
+    provider: "CoreWeave",
+    site: "Core Scientific Denton",
+    city: "Denton",
+    country: "United States",
+    lat: 33.2148,
+    lon: -97.1331,
+    status: "Operational",
+    capacityMW: 260,
+    lastUpdated: "2026-08-21",
+    sources: [
+      { label: "Core Scientific investor newsroom, Feb 2025", url: "https://investors.corescientific.com/news-events/press-releases/detail/110/core-scientific-and-coreweave-announce-1-2-billion-expansion-at-denton-tx-site" },
+      { label: "Data Center Dynamics, Apr 2026", url: "https://www.datacenterdynamics.com/en/news/coreweave-deploys-16000-gpus-at-delayed-data-center-in-denton-texas/" }
+    ],
+    notes: "Former Core Scientific bitcoin-mining site, converted for CoreWeave (reportedly hosting OpenAI workloads) under a $6.1B conversion. 260MW is the disclosed critical IT load. Coordinates are city-center approximation (site address reported as 8171 Jim Christal Rd, Denton — not independently geocoded)."
+  },
+  {
+    id: "coreweave-muskogee",
+    provider: "CoreWeave",
+    site: "Port of Muskogee HPC Data Center (Core Scientific)",
+    city: "Muskogee",
+    country: "United States",
+    lat: 35.7479,
+    lon: -95.3697,
+    status: "Operational",
+    capacityMW: 100,
+    lastUpdated: "2026-08-21",
+    sources: [
+      { label: "Businesswire (Core Scientific/Port Muskogee), Nov 2024", url: "https://www.businesswire.com/news/home/20241118256980/en/Core-Scientific-and-Port-Muskogee-Break-Ground-on-100-MW-HPC-Data-Center" },
+      { label: "Data Center Dynamics, Nov 2024", url: "https://www.datacenterdynamics.com/en/news/coreweave-and-core-scientific-break-ground-on-100mw-data-center-in-muskogee-oklahoma/" }
+    ],
+    notes: "100MW total (70MW critical IT + 30MW ancillary), leased to CoreWeave for Nvidia GPUs. Broke ground Nov 2024; described as energized/delivered to CoreWeave around Q2 2026 per Core Scientific earnings-call commentary (not yet independently confirmed by a dedicated trade-press piece — re-check next audit). Distinct from Core Scientific's much larger adjacent Polaris DS acquisition (up to 1.5GW), which is not confirmed as CoreWeave-contracted capacity."
+  },
+  {
+    id: "coreweave-marble",
+    provider: "CoreWeave",
+    site: "Core Scientific Marble",
+    city: "Marble",
+    country: "United States",
+    lat: 35.1401,
+    lon: -83.9515,
+    status: "Operational",
+    capacityMW: 65,
+    lastUpdated: "2026-08-21",
+    sources: [
+      { label: "Core Scientific SEC 8-K, Exhibit 99.1, Oct 2025", url: "https://investors.corescientific.com/sec-filings/all-sec-filings/content/0001140361-25-039864/ef20057996_ex99-1.htm" }
+    ],
+    notes: "Former Core Scientific crypto-mining site in Cherokee County, NC, converted for CoreWeave; ~65MW contracted/energized per Oct 2025 SEC filing. A directory listing (datacentermap.com) cites 105-117MW total facility capacity — likely total site build vs. the CoreWeave-specific allocation; unresolved discrepancy, not corroborated by a Tier 1/2 source, so 65MW is used here. No dedicated trade-press article found on this site specifically."
+  },
+  {
+    id: "coreweave-dalton",
+    provider: "CoreWeave",
+    site: "Core Scientific Dalton",
+    city: "Dalton",
+    country: "United States",
+    lat: 34.7698,
+    lon: -84.9702,
+    status: "Under construction",
+    capacityMW: 175,
+    lastUpdated: "2026-08-21",
+    sources: [
+      { label: "Core Scientific SEC 8-K, Exhibit 99.1, Oct 2025", url: "https://investors.corescientific.com/sec-filings/all-sec-filings/content/0001140361-25-039864/ef20057996_ex99-1.htm" }
+    ],
+    notes: "~175MW total contracted to CoreWeave per Oct 2025 SEC filing. Phased buildout: an initial ~30MW reported handed over around Q2 2026, remaining ~145MW under construction, full completion targeted early 2027 per Core Scientific earnings-call commentary (not yet corroborated by dedicated trade press — re-check next audit, Planned/UC entries move fast). Single-source-family (all Core Scientific primary disclosures); no independent trade-press corroboration found yet."
+  },
+  {
+    id: "coreweave-ellendale",
+    provider: "CoreWeave",
+    site: "Polaris Forge 1 (Applied Digital)",
+    city: "Ellendale",
+    country: "United States",
+    lat: 46.0011,
+    lon: -98.5326,
+    status: "Under construction",
+    capacityMW: 400,
+    lastUpdated: "2026-08-21",
+    sources: [
+      { label: "Applied Digital investor newsroom, Jun 2025", url: "https://ir.applieddigital.com/news-events/press-releases/detail/123/applied-digital-announces-250mw-ai-data-center-lease-with" },
+      { label: "Applied Digital investor newsroom, Aug 2025", url: "https://ir.applieddigital.com/news-events/press-releases/detail/128/applied-digital-finalizes-additional-150mw-lease-with" },
+      { label: "Data Center Dynamics, Oct 2025", url: "https://www.datacenterdynamics.com/en/news/first-50mw-ready-for-service-at-applied-digital-data-center-in-ellendale-north-dakota/" }
+    ],
+    notes: "Applied Digital's Polaris Forge 1 campus, fully contracted to CoreWeave (400MW across 3 buildings, ~15-year leases, ~$11B total anticipated lease revenue). Building 1 (100MW) fully energized Nov 2025; Building 2 (150MW) partially live (~75MW) as of ~Jul 2026; Building 3 (150MW) targeted 2027 — status set to \"Under construction\" reflecting the incomplete buildout. Campus designed to scale to 1GW long-term, per Applied Digital — that headline figure is aspirational/not yet contracted, distinct from the 400MW CoreWeave commitment."
   }
 ];
