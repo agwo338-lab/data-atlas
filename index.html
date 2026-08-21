@@ -95,6 +95,26 @@
     font-size:0.82rem;
   }
 
+  .tabs{
+    display:flex;
+    gap:0.25rem;
+    border-bottom:1px solid var(--border);
+  }
+  .tab-btn{
+    font-family:var(--font-sans);
+    font-size:0.92rem;
+    font-weight:500;
+    color:var(--ink-soft);
+    background:none;
+    border:none;
+    border-bottom:2px solid transparent;
+    padding:0.7rem 0.9rem 0.6rem;
+    margin-bottom:-1px;
+    cursor:pointer;
+  }
+  .tab-btn:hover{ color:var(--ink); }
+  .tab-btn.active{ color:var(--ink); border-bottom-color:var(--accent); }
+
   .toolbar{
     display:flex;
     align-items:center;
@@ -155,7 +175,8 @@
     position:relative;
     min-height:640px;
   }
-  .map-panel svg{ display:block; width:100%; height:100%; }
+  .map-panel svg{ display:block; width:100%; height:100%; cursor:grab; touch-action:none; }
+  .map-panel svg:active{ cursor:grabbing; }
   .map-loading{
     position:absolute; inset:0;
     display:flex; align-items:center; justify-content:center;
@@ -165,6 +186,21 @@
     text-transform:uppercase;
     color:var(--map-label);
   }
+  .reset-view{
+    position:absolute;
+    right:14px; top:14px;
+    font-family:var(--font-mono);
+    font-size:0.72rem;
+    letter-spacing:0.04em;
+    color:var(--map-label);
+    background:rgba(255,255,255,0.04);
+    border:1px solid var(--map-grid-strong);
+    border-radius:6px;
+    padding:0.3rem 0.6rem;
+    cursor:pointer;
+  }
+  .reset-view:hover{ color:#5EEAD4; border-color:#5EEAD4; }
+
   .map-caption{
     position:absolute;
     left:16px; bottom:14px;
@@ -337,39 +373,67 @@
     <p class="template-note">Data lives in <code>data/sites.js</code> — add, edit, or remove facilities there and the map, filters, and table all update automatically. Nothing in this file needs to change.</p>
   </header>
 
-  <div class="toolbar">
-    <div class="filters" id="filters"></div>
-    <p class="count" id="count"></p>
+  <div class="tabs" role="tablist">
+    <button class="tab-btn active" id="tabBtnMap" role="tab" aria-selected="true">Map</button>
+    <button class="tab-btn" id="tabBtnSources" role="tab" aria-selected="false">Sources</button>
   </div>
 
-  <main class="grid">
-    <div class="map-panel">
-      <svg id="map" viewBox="0 0 1000 560" preserveAspectRatio="xMidYMid meet" role="img" aria-label="World map with data center site markers"></svg>
-      <p class="map-loading" id="mapLoading">Loading coastlines…</p>
-      <p class="map-caption" id="mapCaption" style="display:none">30° graticule &nbsp; <span id="mapCount"></span></p>
+  <div id="mapTabPanel">
+
+    <div class="toolbar">
+      <div class="filters" id="filters"></div>
+      <p class="count" id="count"></p>
     </div>
 
-    <div class="detail-panel" id="detailPanel">
-      <p class="detail-empty">Select a site on the map or in the table below to see its details here.</p>
-    </div>
-  </main>
+    <main class="grid">
+      <div class="map-panel">
+        <svg id="map" viewBox="0 0 1000 560" preserveAspectRatio="xMidYMid meet" role="img" aria-label="World map with data center site markers"></svg>
+        <p class="map-loading" id="mapLoading">Loading coastlines…</p>
+        <button class="reset-view" id="resetView" title="Reset zoom">⤾ Reset view</button>
+        <p class="map-caption" id="mapCaption" style="display:none">scroll to zoom · drag to pan &nbsp; <span id="mapCount"></span></p>
+      </div>
 
-  <section class="table-section">
-    <div class="table-scroll">
-      <table>
-        <thead>
-          <tr>
-            <th>Operator</th>
-            <th>Site</th>
-            <th>Location</th>
-            <th>Status</th>
-            <th class="mono">Capacity</th>
-          </tr>
-        </thead>
-        <tbody id="tableBody"></tbody>
-      </table>
-    </div>
-  </section>
+      <div class="detail-panel" id="detailPanel">
+        <p class="detail-empty">Select a site on the map or in the table below to see its details here.</p>
+      </div>
+    </main>
+
+    <section class="table-section">
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Operator</th>
+              <th>Site</th>
+              <th>Location</th>
+              <th>Status</th>
+              <th class="mono">Capacity</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+  </div>
+
+  <div id="sourcesTabPanel" hidden>
+    <p class="subtitle">Every fact on this map traced back to where it came from — check here before relying on anything.</p>
+    <section class="table-section">
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Site</th>
+              <th class="mono">Last updated</th>
+              <th>Sources</th>
+            </tr>
+          </thead>
+          <tbody id="sourcesBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
 
   <footer class="foot">Status and capacity figures reflect public reporting as of when each entry was added — verify before relying on them. Coastline data from Natural Earth via world-atlas.</footer>
 
@@ -395,7 +459,10 @@
 
   var svg = document.getElementById("map");
   var pinEls = {};
-  var projection, geoPath;
+  var pinScaleEls = {};
+  var pinPos = {};
+  var projection, geoPath, zoom, zoomG;
+  var currentK = 1;
 
   function svgEl(tag, attrs){
     var el = document.createElementNS(svgNS, tag);
@@ -407,46 +474,87 @@
     projection = d3.geoNaturalEarth1().fitExtent([[16,16],[W-16,H-16]], landGeoJSON);
     geoPath = d3.geoPath(projection);
 
-    svg.appendChild(svgEl("path", { d: geoPath(landGeoJSON), class:"land" }));
+    zoomG = svgEl("g", { id:"zoomLayer" });
+    svg.appendChild(zoomG);
+
+    zoomG.appendChild(svgEl("path", { d: geoPath(landGeoJSON), class:"land" }));
 
     var graticule = d3.geoGraticule().step([30,30]);
-    svg.appendChild(svgEl("path", { d: geoPath(graticule()), class:"grid-line" }));
+    zoomG.appendChild(svgEl("path", { d: geoPath(graticule()), class:"grid-line" }));
 
     var equator = { type:"LineString", coordinates:[[-180,0],[180,0]] };
     var meridian = { type:"LineString", coordinates:[[0,-90],[0,90]] };
-    svg.appendChild(svgEl("path", { d: geoPath(equator), class:"grid-line strong" }));
-    svg.appendChild(svgEl("path", { d: geoPath(meridian), class:"grid-line strong" }));
+    zoomG.appendChild(svgEl("path", { d: geoPath(equator), class:"grid-line strong" }));
+    zoomG.appendChild(svgEl("path", { d: geoPath(meridian), class:"grid-line strong" }));
 
     [-60,-30,30,60].forEach(function(lat){
       var pt = projection([-179, lat]);
       if (!pt) return;
       var t = svgEl("text", { x: pt[0] + 4, y: pt[1] - 4, class:"grid-label" });
       t.textContent = (lat > 0 ? lat+"°N" : Math.abs(lat)+"°S");
-      svg.appendChild(t);
+      zoomG.appendChild(t);
     });
 
     SITES.forEach(function(site){
       var pos = projection([site.lon, site.lat]);
       if (!pos) return;
-      var g = svgEl("g", { class:"pin", tabindex:"0", "data-id":site.id });
+      pinPos[site.id] = pos;
+      var g = svgEl("g", { class:"pin", tabindex:"0", "data-id":site.id, transform:"translate(" + pos[0] + "," + pos[1] + ")" });
+      var scaleG = svgEl("g", { class:"pin-scale" });
       var color = colorFor(site.provider);
 
-      var halo = svgEl("circle", { class:"halo", cx:pos[0], cy:pos[1], r:14, fill:color });
-      var core = svgEl("circle", { class:"core", cx:pos[0], cy:pos[1], r:5, fill:color, stroke:"#060B12", "stroke-width":"1.4" });
+      var hit = svgEl("circle", { class:"hit", cx:0, cy:0, r:16, fill:"rgba(0,0,0,0.001)" });
+      var halo = svgEl("circle", { class:"halo", cx:0, cy:0, r:14, fill:color });
+      var core = svgEl("circle", { class:"core", cx:0, cy:0, r:5, fill:color, stroke:"#060B12", "stroke-width":"1.4" });
       var title = svgEl("title", {});
       title.textContent = site.provider + (site.site ? " · " + site.site : "") + " (" + site.city + ")";
 
-      g.appendChild(halo); g.appendChild(core); g.appendChild(title);
-      g.addEventListener("click", function(){ selectSite(site.id); });
+      scaleG.appendChild(hit); scaleG.appendChild(halo); scaleG.appendChild(core);
+      g.appendChild(scaleG); g.appendChild(title);
+      g.addEventListener("click", function(e){ e.stopPropagation(); selectSite(site.id); });
       g.addEventListener("keydown", function(e){ if (e.key === "Enter" || e.key === " ") { e.preventDefault(); selectSite(site.id); } });
-      svg.appendChild(g);
+      zoomG.appendChild(g);
       pinEls[site.id] = g;
+      pinScaleEls[site.id] = scaleG;
     });
+
+    setupZoom();
 
     document.getElementById("mapLoading").style.display = "none";
     document.getElementById("mapCaption").style.display = "block";
     document.getElementById("mapCount").textContent = SITES.length + " sites plotted";
   }
+
+  function applyPinCounterScale(k){
+    currentK = k;
+    Object.keys(pinScaleEls).forEach(function(id){
+      pinScaleEls[id].setAttribute("transform", "scale(" + (1 / k) + ")");
+    });
+  }
+
+  function setupZoom(){
+    zoom = d3.zoom()
+      .scaleExtent([1, 10])
+      .translateExtent([[0,0],[W,H]])
+      .on("zoom", function(event){
+        zoomG.setAttribute("transform", event.transform);
+        applyPinCounterScale(event.transform.k);
+      });
+    d3.select(svg).call(zoom).on("dblclick.zoom", null);
+  }
+
+  function zoomToSite(site, targetK){
+    var pos = pinPos[site.id];
+    if (!pos || !zoom) return;
+    var k = targetK || 4;
+    var t = d3.zoomIdentity.translate(W/2, H/2).scale(k).translate(-pos[0], -pos[1]);
+    d3.select(svg).transition().duration(650).call(zoom.transform, t);
+  }
+
+  document.getElementById("resetView").addEventListener("click", function(){
+    if (!zoom) return;
+    d3.select(svg).transition().duration(500).call(zoom.transform, d3.zoomIdentity);
+  });
 
   fetch("https://cdn.jsdelivr.net/npm/world-atlas@2/land-110m.json")
     .then(function(r){ return r.json(); })
@@ -517,8 +625,13 @@
 
     Object.keys(pinEls).forEach(function(k){ pinEls[k].classList.toggle("active", k === id); });
     Object.keys(rowEls).forEach(function(k){ rowEls[k].classList.toggle("active", k === id); });
+    zoomToSite(site);
 
     var color = colorFor(site.provider);
+    var sourcesHtml = (site.sources || []).map(function(s){
+      return '<a href="' + s.url + '" target="_blank" rel="noopener">' + s.label + '</a>';
+    }).join(', ');
+
     detailPanel.innerHTML =
       '<div class="detail-head">' +
         '<div><h2>' + site.city + '</h2><p class="region-code">' + (site.site || site.country) + '</p></div>' +
@@ -531,8 +644,43 @@
         '<dt>Capacity</dt><dd>' + (site.capacityMW != null ? site.capacityMW + ' MW' : 'Not disclosed') + '</dd>' +
       '</dl>' +
       '<div class="notes-box">' + (site.notes && site.notes.length ? site.notes : "No notes yet — add one in data/sites.js.") + '</div>' +
-      (site.source ? '<p class="source-line">Source: <a href="' + site.sourceUrl + '" target="_blank" rel="noopener">' + site.source + '</a></p>' : '');
+      '<p class="source-line">Updated ' + (site.lastUpdated || '—') + (sourcesHtml ? ' · Source: ' + sourcesHtml : '') + '</p>';
   }
+
+  // ---- Sources tab --------------------------------------------------------
+  function renderSourcesTab(){
+    var body = document.getElementById("sourcesBody");
+    body.innerHTML = "";
+    SITES.forEach(function(site){
+      var tr = document.createElement("tr");
+      var links = (site.sources || []).map(function(s){
+        return '<a href="' + s.url + '" target="_blank" rel="noopener">' + s.label + '</a>';
+      }).join('<br>');
+      tr.innerHTML =
+        '<td><span class="provider-dot" style="background:' + colorFor(site.provider) + '"></span>' +
+          site.provider + ' — ' + site.city + (site.site ? ' <span class="region-code">(' + site.site + ')</span>' : '') + '</td>' +
+        '<td class="mono">' + (site.lastUpdated || '—') + '</td>' +
+        '<td>' + (links || '<span class="detail-empty" style="margin:0">No sources logged</span>') + '</td>';
+      body.appendChild(tr);
+    });
+  }
+  renderSourcesTab();
+
+  // ---- Tabs ---------------------------------------------------------------
+  var tabBtnMap = document.getElementById("tabBtnMap");
+  var tabBtnSources = document.getElementById("tabBtnSources");
+  var mapTabPanel = document.getElementById("mapTabPanel");
+  var sourcesTabPanel = document.getElementById("sourcesTabPanel");
+  tabBtnMap.addEventListener("click", function(){
+    tabBtnMap.classList.add("active"); tabBtnMap.setAttribute("aria-selected","true");
+    tabBtnSources.classList.remove("active"); tabBtnSources.setAttribute("aria-selected","false");
+    mapTabPanel.hidden = false; sourcesTabPanel.hidden = true;
+  });
+  tabBtnSources.addEventListener("click", function(){
+    tabBtnSources.classList.add("active"); tabBtnSources.setAttribute("aria-selected","true");
+    tabBtnMap.classList.remove("active"); tabBtnMap.setAttribute("aria-selected","false");
+    sourcesTabPanel.hidden = false; mapTabPanel.hidden = true;
+  });
 
 })();
 </script>
