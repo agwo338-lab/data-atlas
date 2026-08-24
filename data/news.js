@@ -176,5 +176,18 @@ var NEWS = {
         { label: "Data Center Dynamics, Aug 2026", url: "https://www.datacenterdynamics.com/en/news/aws-pledges-6bn-investment-in-data-center-campus-in-shreveport-louisiana/" }
       ]
     }
+  ],
+  "SpaceXAI": [
+    {
+      date: "2026-02-02",
+      headline: "SpaceX announces all-stock merger with xAI at a combined $1.25T valuation; xAI folds entirely into SpaceX's new \"SpaceXAI\" division by May 2026",
+      why: "The foundational event for this entity — the largest private merger on record, and the reason xAI's data centers, Grok, and X (formerly Twitter) are now on SpaceX's balance sheet ahead of its IPO.",
+      category: "other",
+      sources: [
+        { label: "xAI newsroom — \"xAI joins SpaceX\"", url: "https://x.ai/news/xai-joins-spacex" },
+        { label: "Data Center Dynamics, Feb 2026", url: "https://www.datacenterdynamics.com/en/news/elon-musks-spacex-to-merge-xai-at-125tn-valuation-as-it-eyes-space-data-center-buildout/" },
+        { label: "Bloomberg, Feb 2, 2026", url: "https://www.bloomberg.com/news/articles/2026-02-02/elon-musk-s-spacex-said-to-combine-with-xai-ahead-of-mega-ipo" }
+      ]
+    }
   ]
 };

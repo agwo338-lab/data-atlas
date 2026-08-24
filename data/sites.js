@@ -606,5 +606,74 @@ var SITES = [
       { label: "Data Center Dynamics — \"Amazon Data Services gains approval for data center on 56 acres in Gilroy, California\"", url: "https://www.datacenterdynamics.com/en/news/amazon-data-services-gains-approval-for-data-center-on-56-acres-in-gilroy-california/" }
     ],
     notes: "56-acre site at 8050 Camino Arroyo; two ~218,000 sq ft buildings (438,500 sq ft total) plus a security building. Approved administratively by Gilroy's Community Development Director on Jul 3, 2025, without a City Council public hearing — drew local controversy over the lack of public process. First phase requires a 49MW PG&E interconnection (a utility/facility spec, not a confirmed nameplate IT-capacity figure) plus 25 x 2.5MW emergency generators — left capacityMW null rather than treating the interconnection number as equivalent, same treatment as other entries with only a substation spec on file. Total investment reported at ~$2B, but that traces to press estimation, not an AWS-disclosed figure — treat as approximate. The Data Center Dynamics source was read via a search-result summary (direct fetch was blocked) rather than the full article — worth a direct re-read at next audit. Coordinates are a Gilroy city-center approximation, not geocoded to 8050 Camino Arroyo."
+  },
+  {
+    id: "aws-santaclara",
+    provider: "AWS",
+    site: "Mission College Data Center",
+    city: "Santa Clara, CA",
+    country: "United States",
+    lat: 37.3860,
+    lon: -121.9622,
+    status: "Under construction",
+    capacityMW: 20,
+    lastUpdated: "2026-08-23",
+    sources: [
+      { label: "Silicon Valley Voice — \"SVP Makes Deal with Amazon to Power Data Center\"", url: "https://www.svvoice.com/svp-makes-deal-with-amazon-to-power-data-center/" },
+      { label: "Data Center Dynamics — Silicon Valley Power to build 60kV substation for AWS Santa Clara", url: "https://www.datacenterdynamics.com/en/news/silicon-valley-power-to-build-60kv-substation-for-amazon-web-services-data-center-in-santa-clara/" },
+      { label: "California Energy Commission — Mission College Data Center backup generation filing", url: "https://www.energy.ca.gov/powerplant/backup-generating-system/mission-college-data-center" }
+    ],
+    notes: "2305 Mission College Blvd. Silicon Valley Power (the city's municipal utility) signed a 15-year power agreement with AWS in Jul 2024 securing 20MW of contracted grid capacity for this site (with SVP authorized to secure up to 80MW more for other customers) — 20MW used here as the disclosed contracted-capacity figure. A separate California Energy Commission filing discloses 78.1MW of on-site backup diesel generation (43 x 2.5MW + 2 x 600kW gensets) — that's backup power, not IT load, so not used as capacityMW. SVP is building a new 60kV \"Freedom Circle Junction\" substation specifically for this site ($5.39M cost billed to Amazon, ~26-month build), still under construction as of mid-2026; developer of record is Oppidan Investment Company, building on AWS's behalf. Originally acquired for $101.4M in Dec 2019 (former PGIM Real Estate property); industry sources describe this as anchoring AWS's us-west-1 (N. California) region, though that specific framing is inferred, not AWS-confirmed. Coordinates are a Mission College Blvd-area approximation, not geocoded to the exact parcel."
+  },
+  {
+    id: "aws-wallawalla",
+    provider: "AWS",
+    site: "Advance Phase LLC — Port of Walla Walla Site",
+    city: "Walla Walla County, WA",
+    country: "United States",
+    lat: 46.0968,
+    lon: -118.9088,
+    status: "Planned",
+    capacityMW: null,
+    lastUpdated: "2026-08-23",
+    sources: [
+      { label: "Walla Walla County — official Amazon Data Center FAQ page", url: "https://www.wwcowa.gov/government/community_development/amazon_data_center_faqs.php" },
+      { label: "Data Center Dynamics — \"AWS likely behind $4.8bn data center in Walla Walla, Washington\"", url: "https://www.datacenterdynamics.com/en/news/aws-likely-behind-48bn-data-center-in-walla-walla-washington/" }
+    ],
+    notes: "Port of Walla Walla sold ~554 acres to Amazon Data Services (via project entity \"Advance Phase LLC\") on Feb 12, 2026, in the Wallula/Burbank area east of US-12 near the Columbia River. Reported as a ~$4.8-5B project. Initial application (Phase 1) covers 134 acres for 3 data center buildings (~218,000-220,000 sq ft each); the full master plan spans up to 16 buildings across 4 phases on the full 554 acres. As of Aug 11, 2026 (most recent check), permitting remained incomplete — a Traffic Impact Analysis was due Aug 24, 2026, and the county's own site states no application had yet been received as of its Jun 24, 2026 update. No MW figure disclosed anywhere — left null rather than guessed. Re-check status after the Aug 24, 2026 permitting deadline. Coordinates are a Wallula/Burbank-area approximation, not geocoded to the exact parcel."
+  },
+  {
+    id: "spacexai-colossus1",
+    provider: "SpaceXAI",
+    site: "Colossus 1",
+    city: "Memphis, TN",
+    country: "United States",
+    lat: 35.0454,
+    lon: -90.0715,
+    status: "Operational",
+    capacityMW: null,
+    lastUpdated: "2026-08-23",
+    sources: [
+      { label: "NVIDIA Newsroom — \"NVIDIA Ethernet Networking Accelerates World's Largest AI Supercomputer, Built by xAI\"", url: "https://nvidianews.nvidia.com/news/spectrum-x-ethernet-networking-xai-colossus" },
+      { label: "Data Center Dynamics — \"xAI targets one million GPUs for Colossus supercomputer in Memphis\"", url: "https://www.datacenterdynamics.com/en/news/xai-elon-musk-memphis-colossus-gpu/" }
+    ],
+    notes: "Former Electrolux manufacturing plant, 3231 Paul R. Lowry Road, South Memphis — built and made operational in a widely-reported \"122 days\" starting mid-2024, originally under the xAI name (xAI folded into SpaceX's \"SpaceXAI\" division May 2026 after the Feb 2026 SpaceX/xAI merger — see data/providers.js). GPU/power figures are contested and keep moving: reported at ~100,000 GPUs at 2024 launch, later ~230,000 (150k H100 + 50k H200 + 30k GB200), and a Jan 2026 Musk claim of 555,000 GPUs / 2GW / $18B tied to a third building on the campus — that largest figure traces mainly to Musk's own statements and vendor/newsletter blogs (Introl, SemiAnalysis), not independently verified trade press, so capacityMW is left null rather than picking one contested number. In May 2026, xAI/SpaceXAI reportedly signed a 4-year deal giving Anthropic most of this facility's compute (~220,000 GPUs, ~300MW) for ~$1.25B/month, tied to SpaceX's IPO-related SEC disclosures (TechCrunch, The Verge, Data Center Dynamics) — that's a compute lease figure, not necessarily the site's full built capacity. Coordinates are a South Memphis-area approximation, not geocoded to the exact parcel."
+  },
+  {
+    id: "spacexai-southaven",
+    provider: "SpaceXAI",
+    site: "Colossus 3 (\"Macrohardrr\")",
+    city: "Southaven, MS",
+    country: "United States",
+    lat: 34.9889,
+    lon: -90.0126,
+    status: "Under construction",
+    capacityMW: null,
+    lastUpdated: "2026-08-23",
+    sources: [
+      { label: "Office of Mississippi Governor Tate Reeves — official announcement", url: "https://governorreeves.ms.gov/tech-leader-xai-investing-more-than-20-billion-in-southaven/" },
+      { label: "Data Center Dynamics — \"xAI confirms new data center in Mississippi, Elon Musk pledges $20bn investment in state\"", url: "https://www.datacenterdynamics.com/en/news/xai-confirms-new-data-center-in-mississippi-elon-musk-pledges-20bn-investment-in-state/" }
+    ],
+    notes: "2400 Stateline Road West, Southaven, MS (DeSoto County) — announced Jan 8, 2026 via the Mississippi Governor's office: >$20B investment in a data center plus adjacent power plant, described as SpaceXAI's (then xAI's) third Memphis-metro facility. Stated goal on completion is to bring the combined Memphis-metro cluster to \"nearly 2GW\" — that's an announced target, not a confirmed built figure, so capacityMW is left null. Site currently runs 69 temporary gas turbines for on-site power, under an agreed regulatory order to remove them by Jul 2027 and replace them with a permitted 1.2GW/41-turbine permanent plant. Subject of active federal litigation as of Apr 2026 (NAACP, via the Southern Environmental Law Center and Earthjustice) alleging Clean Air Act violations from the unpermitted turbines in a majority-Black community, with the U.S. DOJ moving to intervene on xAI's side in Jun 2026 citing national security — a live regulatory/reputational risk worth tracking, not routine controversy. Operations were targeted to begin Feb 2026. Coordinates are a Southaven-area approximation, not geocoded to the exact parcel."
   }
 ];
