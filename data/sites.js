@@ -296,5 +296,128 @@ var SITES = [
       { label: "Data Center Dynamics, Oct 2025", url: "https://www.datacenterdynamics.com/en/news/first-50mw-ready-for-service-at-applied-digital-data-center-in-ellendale-north-dakota/" }
     ],
     notes: "Applied Digital's Polaris Forge 1 campus, fully contracted to CoreWeave (400MW across 3 buildings, ~15-year leases, ~$11B total anticipated lease revenue). Building 1 (100MW) fully energized Nov 2025; Building 2 (150MW) partially live (~75MW) as of ~Jul 2026; Building 3 (150MW) targeted 2027 — status set to \"Under construction\" reflecting the incomplete buildout. Campus designed to scale to 1GW long-term, per Applied Digital — that headline figure is aspirational/not yet contracted, distinct from the 400MW CoreWeave commitment."
+  },
+  {
+    id: "coreweave-barcelona",
+    provider: "CoreWeave",
+    site: "MERLIN Edged — Port of Barcelona",
+    city: "Barcelona",
+    country: "Spain",
+    lat: 41.3512,
+    lon: 2.1637,
+    status: "Operational",
+    capacityMW: 15,
+    lastUpdated: "2026-08-23",
+    sources: [
+      { label: "CoreWeave investor newsroom, May 2025", url: "https://investors.coreweave.com/news/news-details/2025/The-Mayor-of-Barcelona-Jaume-Collboni-Inaugurates-Data-Center-Hosting-CoreWeaves-Leading-AI-Cloud-Platform-in-Partnership-with-MERLIN-Edged/default.aspx" },
+      { label: "Data Center Dynamics, May 2025 — \"Merlin Edged launches Barcelona data center, CoreWeave to take 15MW\"", url: "https://www.datacenterdynamics.com/en/news/merlin-edged-launches-barcelona-data-center-coreweave-to-take-15mw/" }
+    ],
+    notes: "Inaugurated May 2025; first phase 10,224 Nvidia H200 GPUs over InfiniBand, 100% renewable power. Part of a stated $2.2B CoreWeave European investment. Coordinates are a Port of Barcelona approximation — not independently geocoded to the exact facility address. No later capacity-expansion figure found — check for growth at next audit."
+  },
+  {
+    id: "coreweave-stockholm",
+    provider: "CoreWeave",
+    site: "Conapto — Stockholm 4 South",
+    city: "Stockholm",
+    country: "Sweden",
+    lat: 59.3293,
+    lon: 18.0686,
+    status: "Operational",
+    capacityMW: null,
+    lastUpdated: "2026-08-23",
+    sources: [
+      { label: "CoreWeave newsroom, Jun 2026", url: "https://www.coreweave.com/news/coreweave-partners-with-conapto-to-expand-ai-cloud-capacity-in-sweden-powered-by-renewable-energy" },
+      { label: "Data Center Dynamics, Jun 2026", url: "https://www.datacenterdynamics.com/en/news/coreweave-signs-colocation-agreement-with-conapto-in-sweden/" }
+    ],
+    notes: "Colocation deal covers two Conapto campuses in Stockholm; only \"Stockholm 4 South\" is named and has initial capacity live as of Jun 2026. Second campus unnamed, timeline undisclosed. No MW figure disclosed by either party — left null rather than guessed. 100% renewable power; waste heat recovered into Stockholm Exergi's district heating network. Coordinates are a Stockholm city-center approximation, not the exact campus address."
+  },
+  {
+    id: "coreweave-jakarta",
+    provider: "CoreWeave",
+    site: "",
+    city: "Jakarta",
+    country: "Indonesia",
+    lat: -6.2088,
+    lon: 106.8456,
+    status: "Planned",
+    capacityMW: 360,
+    lastUpdated: "2026-08-23",
+    sources: [
+      { label: "CoreWeave newsroom, Aug 2026", url: "https://www.coreweave.com/news/coreweave-expands-cloud-ai-platform-to-indonesia-marking-first-move-into-asia-pacific-region" },
+      { label: "Data Center Dynamics, Aug 2026", url: "https://www.datacenterdynamics.com/en/news/coreweave-plans-to-launch-360mw-of-data-center-capacity-in-indonesia/" },
+      { label: "Bloomberg, Aug 2026", url: "https://www.bloomberg.com/news/articles/2026-08-04/coreweave-to-enter-asian-market-with-indonesian-data-centers" }
+    ],
+    notes: "CoreWeave's first Asia-Pacific presence; 3 company-owned-and-operated facilities totaling 360MW contracted IT power, expected online 2028 per the Aug 4 2026 announcement — that's \"expected,\" not a firm delivery commitment, and 2 years out, so re-check well before then. Individual facility names/addresses not yet public; coordinates are a Jakarta city-center placeholder. Consider splitting into per-facility entries once sites are named."
+  },
+  {
+    id: "coreweave-helios-texas",
+    provider: "CoreWeave",
+    site: "Helios Data Center Campus (Galaxy Digital)",
+    city: "Dickens County, TX",
+    country: "United States",
+    lat: 33.6187,
+    lon: -100.7551,
+    status: "Under construction",
+    capacityMW: 526,
+    lastUpdated: "2026-08-23",
+    sources: [
+      { label: "Galaxy Digital (PRNewswire) — Phase I completion", url: "https://www.prnewswire.com/news-releases/galaxy-completes-phase-i-of-its-helios-data-center-campus-delivering-133-megawatts-of-critical-it-load-to-coreweave-302818664.html" },
+      { label: "Data Center Dynamics — \"CoreWeave leases another 260MW capacity from Galaxy in Texas\"", url: "https://www.datacenterdynamics.com/en/news/coreweave-leases-another-260mw-capacity-from-galaxy-in-texas/" },
+      { label: "Blockspace — Galaxy delivers Helios to CoreWeave", url: "https://blockspace.media/insight/galaxy-delivers-helios-to-coreweave/" },
+      { label: "Data Center Dynamics — Galaxy closes $1.4bn debt facility for Helios", url: "https://www.datacenterdynamics.com/en/news/galaxy-digital-closes-14bn-debt-facility-for-helios-data-center-campus-in-texas/" }
+    ],
+    notes: "15-year lease near Afton, TX, with two 5-year extension options; Galaxy expects >$1B avg annual revenue from CoreWeave over the term. Phase I (133MW critical IT / ~200MW gross) delivered, rent commencing Q2 2026. Phase II (260MW) under construction, targeting H1 2027. CoreWeave has committed to the \"full 800MW of gross power currently approved and contracted\" (≈526MW critical IT total across all phases) — 526MW used here as the critical-IT figure, consistent with how other entries report critical IT load rather than gross power. Campus's long-term scale-up target of up to 3.6GW is Galaxy's own aspirational ceiling, not a contracted figure. Coordinates are a Dickens, TX approximation, not independently geocoded to the exact campus address."
+  },
+  {
+    id: "coreweave-plano",
+    provider: "CoreWeave",
+    site: "Lincoln Rackhouse — 1000 Coit Rd",
+    city: "Plano, TX",
+    country: "United States",
+    lat: 33.0198,
+    lon: -96.6989,
+    status: "Operational",
+    capacityMW: 30,
+    lastUpdated: "2026-08-23",
+    sources: [
+      { label: "Data Center Dynamics — \"CoreWeave plans $1.6bn AI cloud data center in Plano, Texas\"", url: "https://www.datacenterdynamics.com/en/news/coreweave-plans-16bn-ai-cloud-data-center-in-plano-texas/" },
+      { label: "Dallas Innovates — \"$1.6B CoreWeave Data Center in North Texas\"", url: "https://dallasinnovates.com/coreweave-to-open-1-6b-data-center-in-plano-expanding-access-to-high-performance-gpus/" },
+      { label: "Community Impact, Jul 2023", url: "https://communityimpact.com/dallas-fort-worth/plano-south/development/2023/07/26/coreweave-to-open-16b-data-center-in-plano/" }
+    ],
+    notes: "CoreWeave's original flagship Texas facility, distinct from the later Core Scientific/Galaxy/Applied Digital deals; 454,421 sq ft on a 23.8-acre campus, operational since late 2023, $1.6B total investment. 6-year Master Services Agreement (not a lease) with Lincoln Property Company, $75/kW/month, two 2-year renewal options. 30MW critical IT capacity in 4 data halls, plus 50,000 sq ft of powered shell space for future expansion (30MW figure corroborated by a directory listing, datacentermap.com, matching the trade-press description). No Tier 1 CoreWeave press release located for this site — worth a search at next audit. Coordinates are a Plano city-center approximation, not geocoded to 1000 Coit Rd."
+  },
+  {
+    id: "coreweave-austin",
+    provider: "CoreWeave",
+    site: "Core Scientific Austin",
+    city: "Austin, TX",
+    country: "United States",
+    lat: 30.2672,
+    lon: -97.7431,
+    status: "Operational",
+    capacityMW: 16,
+    lastUpdated: "2026-08-23",
+    sources: [
+      { label: "Core Scientific investor newsroom, Mar 2024", url: "https://investors.corescientific.com/news-events/press-releases/detail/9/core-scientific-to-provide-coreweave-up-to-16-mw-of-data-center-infrastructure-to-support-ai-and-hpc-workloads-in-long-term-hosting-contract-with-potential-revenue-of-more-than-100-million" },
+      { label: "Data Center Dynamics — \"CoreWeave to lease 16MW of data center space from cryptominer Core Scientific\"", url: "https://www.datacenterdynamics.com/en/news/coreweave-to-lease-16mw-of-data-center-space-from-cryptominer-core-scientific/" }
+    ],
+    notes: "CoreWeave's first Core Scientific hosting deal, signed Mar 2024 — predates the later Denton/Muskogee/Marble/Dalton deals. Former HPE hosting/HPC facility at 3301 Hibbetts Rd, 118,000 sq ft, 8-year contract, >$100M potential revenue ($97.8M in lease payments). A Q1 2026 Core Scientific investor summary lists this site at ~20MW as part of the company's ~590MW total CoreWeave portfolio — that figure isn't yet corroborated by a dedicated primary/trade-press source, so the original disclosed 16MW is used here; re-check for a confirmed expansion. Coordinates are an Austin city-center approximation."
+  },
+  {
+    id: "coreweave-cedarcreek",
+    provider: "CoreWeave",
+    site: "EdgeConneX — Cedar Creek Campus",
+    city: "Cedar Creek, TX",
+    country: "United States",
+    lat: 30.0836,
+    lon: -97.3286,
+    status: "Under construction",
+    capacityMW: null,
+    lastUpdated: "2026-08-23",
+    sources: [
+      { label: "Data Center Dynamics — \"CoreWeave to lease capacity from EdgeConneX at data center campus in Cedar Creek, Texas\"", url: "https://www.datacenterdynamics.com/en/news/coreweave-to-lease-capacity-from-edgeconnex-at-data-center-campus-in-cedar-creek-texas/" },
+      { label: "Community Impact, Jul 2026 — \"AI cloud company CoreWeave to fill $440M Cedar Creek data center\"", url: "https://communityimpact.com/bastrop-cedar-creek/development/ai-cloud-company-coreweave-to-fill-440m-cedar-creek-data-center/" }
+    ],
+    notes: "CoreWeave named as qualifying tenant for the first of up to 19 potential EdgeConneX buildings planned at this Bastrop County campus; confirmed via the county's Dec 2024 10-year/75% property tax abatement and a Jul 2025 Texas Comptroller large-data-center-project certification. First building ($440M) under construction as of Jul 2026, expected to open ~Aug 2026. No MW figure disclosed by CoreWeave or EdgeConneX in any source found — left null rather than guessed. Re-check status soon; opening date is essentially now. Coordinates are a Cedar Creek/Bastrop County approximation."
   }
 ];
