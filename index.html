@@ -80,53 +80,109 @@
   .tab-btn:hover{ color:var(--ink); }
   .tab-btn.active{ color:var(--ink); border-bottom-color:var(--accent); }
 
-  .toolbar{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:1rem;
-    flex-wrap:wrap;
-  }
-  .filters{
-    display:flex;
-    gap:0.55rem;
-    flex-wrap:wrap;
-  }
-  .chip{
-    display:inline-flex;
-    align-items:center;
-    gap:0.45rem;
-    font-family:var(--font-mono);
-    font-size:0.82rem;
-    letter-spacing:0.02em;
-    padding:0.45rem 0.75rem;
-    border-radius:999px;
-    border:1px solid var(--border);
-    background:var(--surface);
-    color:var(--ink-soft);
-    cursor:pointer;
-    transition:opacity 0.15s ease, border-color 0.15s ease;
-  }
-  .chip .dot{
-    width:8px; height:8px; border-radius:50%;
-    background:var(--dot);
-    box-shadow:0 0 0 3px color-mix(in srgb, var(--dot) 25%, transparent);
-  }
-  .chip[aria-pressed="false"]{ opacity:0.4; }
-  .chip:hover{ border-color:var(--dot); }
-  .chip-capacity{
-    color:var(--ink-soft);
-    font-weight:400;
-    font-size:0.76rem;
-  }
-  .chip-capacity::before{ content:"· "; }
-
   .count{
     font-family:var(--font-mono);
     font-size:0.82rem;
     color:var(--ink-soft);
   }
   .count b{ color:var(--ink); font-weight:600; }
+
+  /* ---- Provider dashboard ---- */
+  .provider-dashboard{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(230px, 1fr));
+    gap:1rem;
+  }
+  .provider-card{
+    position:relative;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:1.1rem 1.2rem 1rem;
+    display:flex;
+    flex-direction:column;
+    gap:0.75rem;
+    transition:opacity 0.15s ease, border-color 0.15s ease;
+  }
+  .provider-card.inactive{ opacity:0.42; }
+  .provider-card:hover{ border-color:var(--dot); }
+  .provider-card-head{
+    display:flex;
+    align-items:center;
+    gap:0.55rem;
+    padding-right:2.2rem;
+  }
+  .provider-card-dot{
+    width:10px; height:10px; border-radius:50%;
+    background:var(--dot);
+    box-shadow:0 0 0 3px color-mix(in srgb, var(--dot) 25%, transparent);
+    flex-shrink:0;
+  }
+  .provider-card-name{
+    font-weight:650;
+    font-size:1rem;
+    letter-spacing:-0.005em;
+  }
+  .provider-card-stats{
+    display:flex;
+    gap:1.5rem;
+  }
+  .provider-stat-value{
+    font-family:var(--font-mono);
+    font-size:1.2rem;
+    font-weight:600;
+    font-variant-numeric:tabular-nums;
+    line-height:1.1;
+  }
+  .provider-stat-label{
+    font-family:var(--font-mono);
+    font-size:0.66rem;
+    letter-spacing:0.07em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    margin-top:0.2rem;
+  }
+  .provider-newsfeed{
+    border-top:1px dashed var(--border);
+    padding-top:0.65rem;
+    font-size:0.8rem;
+    color:var(--ink-soft);
+    line-height:1.5;
+    font-style:italic;
+  }
+  .provider-toggle{
+    position:absolute;
+    top:0.95rem;
+    right:0.95rem;
+    width:32px;
+    height:19px;
+    border-radius:999px;
+    border:1px solid var(--border);
+    background:var(--surface-2);
+    cursor:pointer;
+    padding:0;
+    transition:border-color 0.15s ease;
+  }
+  .provider-toggle::after{
+    content:"";
+    display:block;
+    width:13px; height:13px;
+    margin:2px;
+    border-radius:50%;
+    background:var(--ink-soft);
+    transition:transform 0.15s ease, background 0.15s ease;
+  }
+  .provider-toggle[aria-pressed="true"]{ border-color:var(--dot); }
+  .provider-toggle[aria-pressed="true"]::after{
+    transform:translateX(13px);
+    background:var(--dot);
+  }
+
+  .table-toolbar{
+    display:flex;
+    justify-content:flex-end;
+    padding:0.7rem 1rem 0;
+  }
 
   main.grid{
     display:grid;
@@ -362,11 +418,6 @@
 
   <div id="mapTabPanel">
 
-    <div class="toolbar">
-      <div class="filters" id="filters"></div>
-      <p class="count" id="count"></p>
-    </div>
-
     <main class="grid">
       <div class="map-panel">
         <svg id="map" viewBox="0 0 1000 560" preserveAspectRatio="xMidYMid meet" role="img" aria-label="World map with data center site markers"></svg>
@@ -380,7 +431,12 @@
       </div>
     </main>
 
+    <section class="provider-dashboard" id="providerDashboard"></section>
+
     <section class="table-section">
+      <div class="table-toolbar">
+        <p class="count" id="count"></p>
+      </div>
       <div class="table-scroll">
         <table>
           <thead>
@@ -575,35 +631,56 @@
       document.getElementById("mapLoading").textContent = "Couldn't load coastline data — check your connection and reload.";
     });
 
-  // ---- Filters (one chip per provider found in the data) ----------------
+  // ---- Provider dashboard (one card per provider found in the data) -----
   var providers = Object.keys(providerColor);
   var activeProviders = {};
   providers.forEach(function(p){ activeProviders[p] = true; });
-  function operationalCapacityLabel(p){
-    var opSites = SITES.filter(function(s){ return s.provider === p && s.status === "Operational"; });
-    var disclosed = opSites.filter(function(s){ return s.capacityMW != null; });
-    if (opSites.length === 0) return "no operational sites yet";
-    if (disclosed.length === 0) return "operational capacity undisclosed";
+
+  function providerStats(p){
+    var sites = SITES.filter(function(s){ return s.provider === p; });
+    var disclosed = sites.filter(function(s){ return s.capacityMW != null; });
     var totalGW = disclosed.reduce(function(sum, s){ return sum + s.capacityMW; }, 0) / 1000;
-    return totalGW.toFixed(2) + " GW operational";
+    return { siteCount: sites.length, totalGW: totalGW, disclosedCount: disclosed.length };
   }
 
-  var filtersEl = document.getElementById("filters");
+  var dashboardEl = document.getElementById("providerDashboard");
   providers.forEach(function(p){
-    var btn = document.createElement("button");
-    btn.className = "chip";
-    btn.setAttribute("aria-pressed", "true");
-    btn.style.setProperty("--dot", colorFor(p));
-    btn.innerHTML = '<span class="dot"></span>' + p + '<span class="chip-capacity">' + operationalCapacityLabel(p) + '</span>';
-    btn.addEventListener("click", function(){
+    var stats = providerStats(p);
+    var capacityLabel = stats.disclosedCount === 0 ? "—" : stats.totalGW.toFixed(2);
+    var capacitySub = stats.disclosedCount === 0
+      ? "capacity undisclosed"
+      : (stats.disclosedCount < stats.siteCount ? "GW (" + stats.disclosedCount + "/" + stats.siteCount + " disclosed)" : "GW disclosed");
+
+    var card = document.createElement("div");
+    card.className = "provider-card";
+    card.style.setProperty("--dot", colorFor(p));
+    card.innerHTML =
+      '<div class="provider-card-head">' +
+        '<span class="provider-card-dot"></span>' +
+        '<span class="provider-card-name">' + p + '</span>' +
+      '</div>' +
+      '<div class="provider-card-stats">' +
+        '<div><div class="provider-stat-value">' + capacityLabel + '</div><div class="provider-stat-label">' + capacitySub + '</div></div>' +
+        '<div><div class="provider-stat-value">' + stats.siteCount + '</div><div class="provider-stat-label">site' + (stats.siteCount === 1 ? '' : 's') + '</div></div>' +
+      '</div>' +
+      '<div class="provider-newsfeed">Newsfeed coming soon.</div>';
+
+    var toggle = document.createElement("button");
+    toggle.className = "provider-toggle";
+    toggle.setAttribute("aria-pressed", "true");
+    toggle.title = "Toggle " + p + " on map";
+    toggle.addEventListener("click", function(){
       activeProviders[p] = !activeProviders[p];
-      btn.setAttribute("aria-pressed", String(activeProviders[p]));
+      toggle.setAttribute("aria-pressed", String(activeProviders[p]));
+      card.classList.toggle("inactive", !activeProviders[p]);
       renderTable();
       SITES.forEach(function(s){
         if (pinEls[s.id]) pinEls[s.id].classList.toggle("dim", !activeProviders[s.provider]);
       });
     });
-    filtersEl.appendChild(btn);
+    card.appendChild(toggle);
+
+    dashboardEl.appendChild(card);
   });
 
   // ---- Table ------------------------------------------------------------
