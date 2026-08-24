@@ -45,6 +45,18 @@
 
 var PROVIDERS = [
   {
+    // Skeleton entry — color pinned ahead of time, no sites/partners yet.
+    // AWS's brand orange is well-documented as #FF9900 ("Smile Orange");
+    // softened here the same way CoreWeave's blue was, to sit next to this
+    // site's muted palette instead of the raw saturated brand hex. Won't
+    // show up anywhere in the UI (dashboard, map, provider page) until at
+    // least one data/sites.js entry has provider: "AWS" — color/provider
+    // assignment in index.html only considers providers that actually have
+    // sites.
+    name: "AWS",
+    color: "#E0A752"
+  },
+  {
     name: "Nebius",
     color: "#4CAF6D",
     partners: [
