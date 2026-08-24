@@ -229,6 +229,118 @@
     padding:0.7rem 1rem 0;
   }
 
+  /* ---- Provider page (opened by clicking a dashboard card) ---- */
+  .provider-card{ cursor:pointer; }
+  .back-link{
+    background:none;
+    border:none;
+    color:var(--ink-soft);
+    font-family:var(--font-mono);
+    font-size:0.82rem;
+    letter-spacing:0.02em;
+    cursor:pointer;
+    padding:0.3rem 0;
+  }
+  .back-link:hover{ color:var(--accent); }
+  .provider-page-head{
+    display:flex;
+    align-items:center;
+    gap:0.75rem;
+    margin-top:0.5rem;
+  }
+  .provider-page-dot{
+    width:14px; height:14px; border-radius:50%;
+    background:var(--dot);
+    box-shadow:0 0 0 4px color-mix(in srgb, var(--dot) 25%, transparent);
+    flex-shrink:0;
+  }
+  .provider-page-head h1{
+    margin:0;
+    font-size:1.7rem;
+    font-weight:650;
+    letter-spacing:-0.01em;
+  }
+  .provider-page-stats{
+    display:flex;
+    gap:2.25rem;
+    flex-wrap:wrap;
+    padding:1.1rem 0 0.25rem;
+  }
+  .provider-page-stat-value{
+    font-family:var(--font-mono);
+    font-size:1.55rem;
+    font-weight:600;
+    font-variant-numeric:tabular-nums;
+    line-height:1.1;
+  }
+  .provider-page-stat-label{
+    font-family:var(--font-mono);
+    font-size:0.68rem;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    margin-top:0.25rem;
+  }
+  .provider-page-body{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+    gap:1.5rem;
+    margin-top:1.5rem;
+  }
+  @media (max-width:860px){ .provider-page-body{ grid-template-columns:1fr; } }
+  .provider-page-body section{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:1.1rem 1.2rem;
+  }
+  .provider-page-body h2{
+    margin:0 0 0.75rem;
+    font-size:0.95rem;
+    font-weight:600;
+  }
+  .provider-page-locations ul{
+    list-style:none;
+    margin:0;
+    padding:0;
+    display:flex;
+    flex-direction:column;
+    max-height:420px;
+    overflow-y:auto;
+  }
+  .headline-list{
+    list-style:none;
+    margin:0;
+    padding:0;
+  }
+  .headline-item{
+    padding:0.55rem 0;
+    border-bottom:1px solid var(--border);
+    font-size:0.85rem;
+    line-height:1.4;
+  }
+  .headline-item:last-child{ border-bottom:none; }
+  .headline-item a{ color:var(--ink); font-weight:500; }
+  .headline-item a:hover{ color:var(--accent); }
+  .headline-meta{
+    display:block;
+    margin-top:0.2rem;
+    font-family:var(--font-mono);
+    font-size:0.7rem;
+    color:var(--ink-soft);
+  }
+  .headline-empty{
+    color:var(--ink-soft);
+    font-size:0.85rem;
+    font-style:italic;
+  }
+  .provider-page-search-link{
+    display:inline-block;
+    margin-top:0.9rem;
+    font-family:var(--font-mono);
+    font-size:0.78rem;
+  }
+
   main.grid{
     display:grid;
     grid-template-columns:minmax(0,1.62fr) minmax(320px,1fr);
@@ -587,6 +699,26 @@
     </section>
   </div>
 
+  <div id="providerTabPanel" hidden>
+    <button class="back-link" id="providerBack">← Back to map</button>
+    <div class="provider-page-head">
+      <span class="provider-page-dot" id="providerPageDot"></span>
+      <h1 id="providerPageName"></h1>
+    </div>
+    <div class="provider-page-stats" id="providerPageStats"></div>
+    <div class="provider-page-body">
+      <section class="provider-page-locations">
+        <h2>Locations</h2>
+        <ul id="providerPageLocations"></ul>
+      </section>
+      <section class="provider-page-news">
+        <h2>Latest headlines</h2>
+        <ul class="headline-list" id="providerPageHeadlines"></ul>
+        <a class="provider-page-search-link" id="providerPageSearchLink" target="_blank" rel="noopener">Search for more coverage →</a>
+      </section>
+    </div>
+  </div>
+
   <footer class="foot">Status and capacity figures reflect public reporting as of when each entry was added — verify before relying on them. Basemap © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors, © <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>.</footer>
 
 </div>
@@ -775,14 +907,17 @@
       '<div class="provider-newsfeed">Newsfeed coming soon.</div>';
 
     card.querySelectorAll(".provider-site-item").forEach(function(li){
-      li.addEventListener("click", function(){ selectSite(li.getAttribute("data-id")); });
+      li.addEventListener("click", function(e){ e.stopPropagation(); goToSiteOnMap(li.getAttribute("data-id")); });
     });
+
+    card.addEventListener("click", function(){ openProviderPage(p); });
 
     var toggle = document.createElement("button");
     toggle.className = "provider-toggle";
     toggle.setAttribute("aria-pressed", "true");
     toggle.title = "Toggle " + p + " on map";
-    toggle.addEventListener("click", function(){
+    toggle.addEventListener("click", function(e){
+      e.stopPropagation();
       activeProviders[p] = !activeProviders[p];
       toggle.setAttribute("aria-pressed", String(activeProviders[p]));
       card.classList.toggle("inactive", !activeProviders[p]);
@@ -826,6 +961,11 @@
   // ---- Selection ----------------------------------------------------------
   var currentId = null;
   var detailPanel = document.getElementById("detailPanel");
+
+  function goToSiteOnMap(id){
+    switchToMapTab();
+    selectSite(id);
+  }
 
   function selectSite(id){
     currentId = id;
@@ -875,21 +1015,123 @@
   }
   renderSourcesTab();
 
+  // ---- Provider page (opened by clicking a dashboard card) --------------
+  var providerTabPanel = document.getElementById("providerTabPanel");
+  var providerPageDot = document.getElementById("providerPageDot");
+  var providerPageName = document.getElementById("providerPageName");
+  var providerPageStats = document.getElementById("providerPageStats");
+  var providerPageLocations = document.getElementById("providerPageLocations");
+  var providerPageHeadlines = document.getElementById("providerPageHeadlines");
+  var providerPageSearchLink = document.getElementById("providerPageSearchLink");
+
+  function renderProviderPage(p){
+    var stats = providerStats(p);
+    providerPageDot.style.setProperty("--dot", colorFor(p));
+    providerPageName.textContent = p;
+
+    var capacityLabel, capacitySub;
+    if (stats.operationalCount === 0) {
+      capacityLabel = "—"; capacitySub = "no operational sites yet";
+    } else if (stats.disclosedCount === 0) {
+      capacityLabel = "—"; capacitySub = "operational capacity undisclosed";
+    } else {
+      capacityLabel = stats.totalGW.toFixed(2);
+      capacitySub = stats.disclosedCount < stats.operationalCount
+        ? "GW (" + stats.disclosedCount + "/" + stats.operationalCount + " operational disclosed)"
+        : "GW operational";
+    }
+    providerPageStats.innerHTML =
+      '<div><div class="provider-page-stat-value">' + capacityLabel + '</div><div class="provider-page-stat-label">' + capacitySub + '</div></div>' +
+      '<div><div class="provider-page-stat-value">' + stats.siteCount + '</div><div class="provider-page-stat-label">total site' + (stats.siteCount === 1 ? '' : 's') + '</div></div>' +
+      '<div><div class="provider-page-stat-value">' + stats.operationalCount + '</div><div class="provider-page-stat-label">operational</div></div>';
+
+    var providerSites = SITES.filter(function(s){ return s.provider === p; }).sort(tableSortCompare);
+    providerPageLocations.innerHTML = providerSites.map(function(s){
+      return '<li class="provider-site-item" data-id="' + s.id + '">' +
+        '<span class="status-dot status-' + statusSlug(s.status) + '"></span>' +
+        '<span class="provider-site-name">' + (s.site || s.city) + '</span>' +
+        '<span class="provider-site-loc">' + s.city + ', ' + s.country + '</span>' +
+        '<span class="provider-site-cap">' + (s.capacityMW != null ? s.capacityMW + ' MW' : '—') + '</span>' +
+      '</li>';
+    }).join('');
+    providerPageLocations.querySelectorAll(".provider-site-item").forEach(function(li){
+      li.addEventListener("click", function(){ goToSiteOnMap(li.getAttribute("data-id")); });
+    });
+
+    // "Headlines" is coverage already vetted for the sourcing standard in
+    // data/sites.js — not a fabricated feed. Dedupe by URL across the
+    // provider's sites, newest site update first.
+    var seenUrls = {};
+    var headlines = [];
+    providerSites
+      .slice()
+      .sort(function(a, b){ return (b.lastUpdated || "").localeCompare(a.lastUpdated || ""); })
+      .forEach(function(s){
+        (s.sources || []).forEach(function(src){
+          if (seenUrls[src.url]) return;
+          seenUrls[src.url] = true;
+          headlines.push({ label: src.label, url: src.url, site: s.site || s.city, lastUpdated: s.lastUpdated });
+        });
+      });
+
+    providerPageHeadlines.innerHTML = headlines.length
+      ? headlines.map(function(h){
+          return '<li class="headline-item">' +
+            '<a href="' + h.url + '" target="_blank" rel="noopener">' + h.label + '</a>' +
+            '<span class="headline-meta">' + h.site + (h.lastUpdated ? ' · checked ' + h.lastUpdated : '') + '</span>' +
+          '</li>';
+        }).join('')
+      : '<li class="headline-empty">No sourced coverage logged yet — see data/sites.js.</li>';
+
+    providerPageSearchLink.href = "https://www.google.com/search?tbm=nws&q=" + encodeURIComponent(p + " data center");
+    providerPageSearchLink.textContent = "Search for more coverage of " + p + " →";
+  }
+
+  function openProviderPage(p){
+    renderProviderPage(p);
+    mapTabPanel.hidden = true;
+    sourcesTabPanel.hidden = true;
+    providerTabPanel.hidden = false;
+    tabBtnMap.classList.remove("active"); tabBtnMap.setAttribute("aria-selected","false");
+    tabBtnSources.classList.remove("active"); tabBtnSources.setAttribute("aria-selected","false");
+    if (location.hash !== "#provider/" + encodeURIComponent(p)) {
+      history.pushState(null, "", "#provider/" + encodeURIComponent(p));
+    }
+  }
+
+  document.getElementById("providerBack").addEventListener("click", function(){ switchToMapTab(); });
+
   // ---- Tabs ---------------------------------------------------------------
   var tabBtnMap = document.getElementById("tabBtnMap");
   var tabBtnSources = document.getElementById("tabBtnSources");
   var mapTabPanel = document.getElementById("mapTabPanel");
   var sourcesTabPanel = document.getElementById("sourcesTabPanel");
-  tabBtnMap.addEventListener("click", function(){
+
+  function switchToMapTab(){
     tabBtnMap.classList.add("active"); tabBtnMap.setAttribute("aria-selected","true");
     tabBtnSources.classList.remove("active"); tabBtnSources.setAttribute("aria-selected","false");
-    mapTabPanel.hidden = false; sourcesTabPanel.hidden = true;
-  });
-  tabBtnSources.addEventListener("click", function(){
+    mapTabPanel.hidden = false; sourcesTabPanel.hidden = true; providerTabPanel.hidden = true;
+    if (location.hash) history.pushState(null, "", location.pathname + location.search);
+  }
+  function switchToSourcesTab(){
     tabBtnSources.classList.add("active"); tabBtnSources.setAttribute("aria-selected","true");
     tabBtnMap.classList.remove("active"); tabBtnMap.setAttribute("aria-selected","false");
-    sourcesTabPanel.hidden = false; mapTabPanel.hidden = true;
-  });
+    sourcesTabPanel.hidden = false; mapTabPanel.hidden = true; providerTabPanel.hidden = true;
+    if (location.hash) history.pushState(null, "", location.pathname + location.search);
+  }
+  tabBtnMap.addEventListener("click", switchToMapTab);
+  tabBtnSources.addEventListener("click", switchToSourcesTab);
+
+  window.addEventListener("popstate", function(){ applyHash(); });
+  function applyHash(){
+    var m = /^#provider\/(.+)$/.exec(location.hash);
+    if (m) {
+      var p = decodeURIComponent(m[1]);
+      if (providerColor[p]) { renderProviderPage(p); mapTabPanel.hidden = true; sourcesTabPanel.hidden = true; providerTabPanel.hidden = false; return; }
+    }
+    switchToMapTab();
+  }
+  applyHash();
 
 })();
 </script>
