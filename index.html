@@ -105,6 +105,13 @@
   }
   .provider-card.inactive{ opacity:0.42; }
   .provider-card:hover{ border-color:var(--dot); }
+  .provider-card.active{ border-color:var(--dot); }
+  .provider-card.collapsed{ padding-bottom:1.1rem; gap:0; }
+  .provider-card.collapsed .provider-card-stats,
+  .provider-card.collapsed .provider-sitelist,
+  .provider-card.collapsed .provider-newsfeed{
+    display:none;
+  }
   .provider-card-head{
     display:flex;
     align-items:center;
@@ -806,7 +813,31 @@
 
     <section class="provider-dashboard" id="providerDashboard"></section>
 
-    <section class="table-section">
+    <div id="providerTabPanel" hidden>
+      <button class="back-link" id="providerBack">← Back to full list</button>
+      <div class="provider-page-head">
+        <span class="provider-page-dot" id="providerPageDot"></span>
+        <h1 id="providerPageName"></h1>
+      </div>
+      <div class="provider-page-stats" id="providerPageStats"></div>
+      <section class="provider-page-partners">
+        <h2>Partnerships</h2>
+        <ul id="providerPagePartners"></ul>
+      </section>
+      <div class="provider-page-body">
+        <section class="provider-page-locations">
+          <h2>Locations</h2>
+          <ul id="providerPageLocations"></ul>
+        </section>
+        <section class="provider-page-news">
+          <h2>Latest headlines</h2>
+          <ul class="headline-list" id="providerPageHeadlines"></ul>
+          <a class="provider-page-search-link" id="providerPageSearchLink" target="_blank" rel="noopener">Search for more coverage →</a>
+        </section>
+      </div>
+    </div>
+
+    <section class="table-section" id="tableSection">
       <div class="table-toolbar">
         <p class="count" id="count"></p>
       </div>
@@ -849,30 +880,6 @@
         </table>
       </div>
     </section>
-  </div>
-
-  <div id="providerTabPanel" hidden>
-    <button class="back-link" id="providerBack">← Back to map</button>
-    <div class="provider-page-head">
-      <span class="provider-page-dot" id="providerPageDot"></span>
-      <h1 id="providerPageName"></h1>
-    </div>
-    <div class="provider-page-stats" id="providerPageStats"></div>
-    <section class="provider-page-partners">
-      <h2>Partnerships</h2>
-      <ul id="providerPagePartners"></ul>
-    </section>
-    <div class="provider-page-body">
-      <section class="provider-page-locations">
-        <h2>Locations</h2>
-        <ul id="providerPageLocations"></ul>
-      </section>
-      <section class="provider-page-news">
-        <h2>Latest headlines</h2>
-        <ul class="headline-list" id="providerPageHeadlines"></ul>
-        <a class="provider-page-search-link" id="providerPageSearchLink" target="_blank" rel="noopener">Search for more coverage →</a>
-      </section>
-    </div>
   </div>
 
   <footer class="foot">Status and capacity figures reflect public reporting as of when each entry was added — verify before relying on them. Basemap © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors, © <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>.</footer>
@@ -1044,6 +1051,7 @@
   }
 
   var dashboardEl = document.getElementById("providerDashboard");
+  var providerCardEls = {};
   providers.forEach(function(p){
     var stats = providerStats(p);
     var capacityLabel, capacitySub;
@@ -1089,7 +1097,8 @@
       li.addEventListener("click", function(e){ e.stopPropagation(); goToSiteOnMap(li.getAttribute("data-id")); });
     });
 
-    card.addEventListener("click", function(){ openProviderPage(p); });
+    card.addEventListener("click", function(){ expandProvider(p); });
+    providerCardEls[p] = card;
 
     var toggle = document.createElement("button");
     toggle.className = "provider-toggle";
@@ -1348,19 +1357,36 @@
     providerPageSearchLink.textContent = "Search for more coverage of " + p + " →";
   }
 
-  function openProviderPage(p){
+  // Expanding a provider replaces the site table (not the map/detail-card
+  // area above) with that provider's full panel, and collapses every
+  // dashboard card down to just its heading — an inline accordion, not a
+  // separate page/route. Clicking the same provider's (now-collapsed)
+  // heading again, or the back link, returns to the normal view.
+  var tableSection = document.getElementById("tableSection");
+  var expandedProvider = null;
+
+  function expandProvider(p){
+    if (expandedProvider === p) { collapseProviderPanel(); return; }
+    expandedProvider = p;
     renderProviderPage(p);
-    mapTabPanel.hidden = true;
-    sourcesTabPanel.hidden = true;
+    Object.keys(providerCardEls).forEach(function(name){
+      providerCardEls[name].classList.add("collapsed");
+      providerCardEls[name].classList.toggle("active", name === p);
+    });
+    tableSection.hidden = true;
     providerTabPanel.hidden = false;
-    tabBtnMap.classList.remove("active"); tabBtnMap.setAttribute("aria-selected","false");
-    tabBtnSources.classList.remove("active"); tabBtnSources.setAttribute("aria-selected","false");
-    if (location.hash !== "#provider/" + encodeURIComponent(p)) {
-      history.pushState(null, "", "#provider/" + encodeURIComponent(p));
-    }
   }
 
-  document.getElementById("providerBack").addEventListener("click", function(){ switchToMapTab(); });
+  function collapseProviderPanel(){
+    expandedProvider = null;
+    Object.keys(providerCardEls).forEach(function(name){
+      providerCardEls[name].classList.remove("collapsed", "active");
+    });
+    providerTabPanel.hidden = true;
+    tableSection.hidden = false;
+  }
+
+  document.getElementById("providerBack").addEventListener("click", collapseProviderPanel);
 
   // ---- Tabs ---------------------------------------------------------------
   var tabBtnMap = document.getElementById("tabBtnMap");
@@ -1371,28 +1397,15 @@
   function switchToMapTab(){
     tabBtnMap.classList.add("active"); tabBtnMap.setAttribute("aria-selected","true");
     tabBtnSources.classList.remove("active"); tabBtnSources.setAttribute("aria-selected","false");
-    mapTabPanel.hidden = false; sourcesTabPanel.hidden = true; providerTabPanel.hidden = true;
-    if (location.hash) history.pushState(null, "", location.pathname + location.search);
+    mapTabPanel.hidden = false; sourcesTabPanel.hidden = true;
   }
   function switchToSourcesTab(){
     tabBtnSources.classList.add("active"); tabBtnSources.setAttribute("aria-selected","true");
     tabBtnMap.classList.remove("active"); tabBtnMap.setAttribute("aria-selected","false");
-    sourcesTabPanel.hidden = false; mapTabPanel.hidden = true; providerTabPanel.hidden = true;
-    if (location.hash) history.pushState(null, "", location.pathname + location.search);
+    sourcesTabPanel.hidden = false; mapTabPanel.hidden = true;
   }
   tabBtnMap.addEventListener("click", switchToMapTab);
   tabBtnSources.addEventListener("click", switchToSourcesTab);
-
-  window.addEventListener("popstate", function(){ applyHash(); });
-  function applyHash(){
-    var m = /^#provider\/(.+)$/.exec(location.hash);
-    if (m) {
-      var p = decodeURIComponent(m[1]);
-      if (providerColor[p]) { renderProviderPage(p); mapTabPanel.hidden = true; sourcesTabPanel.hidden = true; providerTabPanel.hidden = false; return; }
-    }
-    switchToMapTab();
-  }
-  applyHash();
 
 })();
 </script>
