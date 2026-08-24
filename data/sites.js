@@ -589,5 +589,22 @@ var SITES = [
       { label: "CoreWeave newsroom — \"Introducing LGA1: CoreWeave's Cutting-Edge Data Center in NYC\"", url: "https://www.coreweave.com/blog/lga1-coreweaves-cutting-edge-data-center-in-nyc" }
     ],
     notes: "One of CoreWeave's original three named cloud-region facilities (\"LGA1\"), at the mouth of the Lincoln Tunnel in Weehawken, NJ, serving the NYC metro with sub-1ms latency to Manhattan. Confirmed live via CoreWeave's own blog (Tier 1) but no independent trade-press corroboration or MW figure found yet — worth a search at next audit. Distinct from the Kenilworth, NJ NEST campus (coreweave-kenilworth), ~20 miles away — not a duplicate. Coordinates are a Weehawken town-center approximation, not geocoded to the exact facility address."
+  },
+  {
+    id: "aws-gilroy",
+    provider: "AWS",
+    site: "Gilroy Data Center",
+    city: "Gilroy, CA",
+    country: "United States",
+    lat: 37.0058,
+    lon: -121.5683,
+    status: "Under construction",
+    capacityMW: null,
+    lastUpdated: "2026-08-23",
+    sources: [
+      { label: "City of Gilroy — official project page, \"Gilroy Data Center (by Amazon Web Services)\"", url: "https://www.cityofgilroy.org/1019/Gilroy-Data-Center-by-AWS" },
+      { label: "Data Center Dynamics — \"Amazon Data Services gains approval for data center on 56 acres in Gilroy, California\"", url: "https://www.datacenterdynamics.com/en/news/amazon-data-services-gains-approval-for-data-center-on-56-acres-in-gilroy-california/" }
+    ],
+    notes: "56-acre site at 8050 Camino Arroyo; two ~218,000 sq ft buildings (438,500 sq ft total) plus a security building. Approved administratively by Gilroy's Community Development Director on Jul 3, 2025, without a City Council public hearing — drew local controversy over the lack of public process. First phase requires a 49MW PG&E interconnection (a utility/facility spec, not a confirmed nameplate IT-capacity figure) plus 25 x 2.5MW emergency generators — left capacityMW null rather than treating the interconnection number as equivalent, same treatment as other entries with only a substation spec on file. Total investment reported at ~$2B, but that traces to press estimation, not an AWS-disclosed figure — treat as approximate. The Data Center Dynamics source was read via a search-result summary (direct fetch was blocked) rather than the full article — worth a direct re-read at next audit. Coordinates are a Gilroy city-center approximation, not geocoded to 8050 Camino Arroyo."
   }
 ];
