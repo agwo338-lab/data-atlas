@@ -5,6 +5,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@5/dist/maplibre-gl.css">
 <script src="https://cdn.jsdelivr.net/npm/maplibre-gl@5/dist/maplibre-gl.js"></script>
 <script src="data/sites.js"></script>
+<script src="data/news.js"></script>
 
 <style>
   /* Committed dark theme — this page always renders dark, regardless of OS/browser setting */
@@ -314,7 +315,7 @@
     padding:0;
   }
   .headline-item{
-    padding:0.55rem 0;
+    padding:0.65rem 0;
     border-bottom:1px solid var(--border);
     font-size:0.85rem;
     line-height:1.4;
@@ -322,13 +323,44 @@
   .headline-item:last-child{ border-bottom:none; }
   .headline-item a{ color:var(--ink); font-weight:500; }
   .headline-item a:hover{ color:var(--accent); }
+  .headline-top{
+    display:flex;
+    align-items:center;
+    gap:0.5rem;
+    margin-bottom:0.2rem;
+  }
+  .headline-date{
+    font-family:var(--font-mono);
+    font-size:0.68rem;
+    color:var(--ink-soft);
+    white-space:nowrap;
+  }
+  .headline-category{
+    font-family:var(--font-mono);
+    font-size:0.62rem;
+    letter-spacing:0.05em;
+    text-transform:uppercase;
+    padding:0.1rem 0.4rem;
+    border-radius:999px;
+    border:1px solid var(--border);
+    color:var(--ink-soft);
+  }
+  .headline-title{ display:block; }
+  .headline-why{
+    margin:0.25rem 0 0;
+    color:var(--ink-soft);
+    font-size:0.8rem;
+    line-height:1.45;
+  }
   .headline-meta{
     display:block;
-    margin-top:0.2rem;
+    margin-top:0.3rem;
     font-family:var(--font-mono);
     font-size:0.7rem;
     color:var(--ink-soft);
   }
+  .headline-meta a{ color:var(--ink-soft); font-weight:400; }
+  .headline-meta a:hover{ color:var(--accent); }
   .headline-empty{
     color:var(--ink-soft);
     font-size:0.85rem;
@@ -731,7 +763,7 @@
   // ---- Provider colors ---------------------------------------------------
   // Known operators can be pinned to a specific color here; anything new
   // gets the next unused color from PALETTE automatically, no edit needed.
-  var COLOR_OVERRIDES = { "Nebius": "#4CAF6D" };
+  var COLOR_OVERRIDES = { "Nebius": "#4CAF6D", "CoreWeave": "#0541E9" };
   var PALETTE = ["#E39149", "#5B9BE0", "#9A85E0", "#E0708A", "#D9C24E", "#4FC2C9", "#C97AD1"];
   var providerColor = {};
   (function assignColors(){
@@ -1058,30 +1090,54 @@
       li.addEventListener("click", function(){ goToSiteOnMap(li.getAttribute("data-id")); });
     });
 
-    // "Headlines" is coverage already vetted for the sourcing standard in
-    // data/sites.js — not a fabricated feed. Dedupe by URL across the
-    // provider's sites, newest site update first.
-    var seenUrls = {};
-    var headlines = [];
-    providerSites
-      .slice()
-      .sort(function(a, b){ return (b.lastUpdated || "").localeCompare(a.lastUpdated || ""); })
-      .forEach(function(s){
-        (s.sources || []).forEach(function(src){
-          if (seenUrls[src.url]) return;
-          seenUrls[src.url] = true;
-          headlines.push({ label: src.label, url: src.url, site: s.site || s.city, lastUpdated: s.lastUpdated });
-        });
-      });
+    // Curated company-level headlines (data/news.js, via news-agent) take
+    // priority when available. Falls back to citations already attached to
+    // this provider's sites (data/sites.js) when there's no curated list
+    // yet — that fallback is fact-sourcing, not real news, but beats
+    // showing nothing.
+    var curated = (typeof NEWS !== "undefined" && NEWS[p]) ? NEWS[p] : [];
 
-    providerPageHeadlines.innerHTML = headlines.length
-      ? headlines.map(function(h){
-          return '<li class="headline-item">' +
-            '<a href="' + h.url + '" target="_blank" rel="noopener">' + h.label + '</a>' +
-            '<span class="headline-meta">' + h.site + (h.lastUpdated ? ' · checked ' + h.lastUpdated : '') + '</span>' +
-          '</li>';
-        }).join('')
-      : '<li class="headline-empty">No sourced coverage logged yet — see data/sites.js.</li>';
+    if (curated.length) {
+      providerPageHeadlines.innerHTML = curated.slice().sort(function(a, b){
+        return (b.date || "").localeCompare(a.date || "");
+      }).map(function(h){
+        var sourceLinks = (h.sources || []).map(function(s){
+          return '<a href="' + s.url + '" target="_blank" rel="noopener">' + s.label + '</a>';
+        }).join(', ');
+        return '<li class="headline-item">' +
+          '<div class="headline-top">' +
+            '<span class="headline-date">' + (h.date || '') + '</span>' +
+            '<span class="headline-category">' + (h.category || 'other') + '</span>' +
+          '</div>' +
+          '<span class="headline-title">' + h.headline + '</span>' +
+          (h.why ? '<p class="headline-why">' + h.why + '</p>' : '') +
+          (sourceLinks ? '<span class="headline-meta">Source: ' + sourceLinks + '</span>' : '') +
+        '</li>';
+      }).join('');
+    } else {
+      var seenUrls = {};
+      var fallbackHeadlines = [];
+      providerSites
+        .slice()
+        .sort(function(a, b){ return (b.lastUpdated || "").localeCompare(a.lastUpdated || ""); })
+        .forEach(function(s){
+          (s.sources || []).forEach(function(src){
+            if (seenUrls[src.url]) return;
+            seenUrls[src.url] = true;
+            fallbackHeadlines.push({ label: src.label, url: src.url, site: s.site || s.city, lastUpdated: s.lastUpdated });
+          });
+        });
+
+      providerPageHeadlines.innerHTML = fallbackHeadlines.length
+        ? '<li class="headline-empty">No curated headlines yet — showing sourced citations from this provider\'s sites instead.</li>' +
+          fallbackHeadlines.map(function(h){
+            return '<li class="headline-item">' +
+              '<a href="' + h.url + '" target="_blank" rel="noopener">' + h.label + '</a>' +
+              '<span class="headline-meta">' + h.site + (h.lastUpdated ? ' · checked ' + h.lastUpdated : '') + '</span>' +
+            '</li>';
+          }).join('')
+        : '<li class="headline-empty">No sourced coverage logged yet — see data/sites.js.</li>';
+    }
 
     providerPageSearchLink.href = "https://www.google.com/search?tbm=nws&q=" + encodeURIComponent(p + " data center");
     providerPageSearchLink.textContent = "Search for more coverage of " + p + " →";

@@ -17,10 +17,16 @@ capacity. Built as a single static site with no backend and no build step.
   a way that survived several rounds of targeted optimization — a GPU-vector
   tile basemap solves that class of problem architecturally instead.)
 - `data/sites.js` — all site data, loaded by `index.html` as a plain script.
-  This is the only file that should need regular edits. Its header comment
+  This is the file that needs the most regular edits. Its header comment
   documents the field schema and the sourcing standard (how sources are
   tiered, what needs verification, when to recheck). Follow that standard
   whenever adding or updating an entry.
+- `data/news.js` — curated company-level headlines shown on each provider's
+  dedicated page (opened by clicking its card on the dashboard), keyed by
+  provider name. Deliberately separate from `sites.js`'s per-site `sources`
+  field — see its own header comment for the schema and how it relates to
+  `news-agent` below. A provider with no entry here falls back to a list
+  built from its sites' `sources` instead.
 - The site itself (`index.html`, `data/sites.js`) has no package manager, no
   build step, no framework — keep it that way. The one exception is
   `.claude/mcp/openrouter/`, a small local tool with its own `package.json`;
@@ -64,9 +70,10 @@ provider-level headlines (funding, expansion, partnerships, leadership,
 controversies) for the provider dashboard page's newsfeed — deliberately
 kept apart from `research-agent` since it's a different job: recency and
 notability rather than per-field fact verification. Also research-only,
-same review-before-applying rule. As of Aug 2026 nothing in `index.html`
-consumes its output yet — the provider page's "headlines" section is still
-generated from each site's existing `sources` array in `data/sites.js`.
+same review-before-applying rule: its findings get reviewed and
+hand-transcribed into `data/news.js`, never auto-applied. The provider
+page prefers `data/news.js` for a given provider when it has an entry, and
+falls back to a `sources`-derived list (from `data/sites.js`) otherwise.
 
 ## Research cost
 
