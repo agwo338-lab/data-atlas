@@ -441,7 +441,7 @@
     border:1px solid var(--border);
     overflow:hidden;
     position:relative;
-    min-height:640px;
+    min-height:760px;
   }
   #map{ position:absolute; inset:0; }
   .maplibregl-ctrl-attrib{ font-size:10px !important; }
@@ -586,7 +586,7 @@
   .detail-panel{
     position:absolute;
     right:16px;
-    bottom:16px;
+    top:50%;
     width:380px;
     max-width:calc(100% - 32px);
     max-height:calc(100% - 32px);
@@ -601,13 +601,16 @@
     box-shadow:0 12px 34px rgba(0,0,0,0.45);
     z-index:6;
     opacity:0;
-    transform:translateY(10px);
+    /* Two translateY()s compose: -50% centers the panel on the map's
+       vertical midpoint (relative to its own height), the fixed 10px is
+       just the open/close slide-in offset on top of that center point. */
+    transform:translateY(-50%) translateY(10px);
     pointer-events:none;
     transition:opacity 0.15s ease, transform 0.15s ease;
   }
   .detail-panel.open{
     opacity:1;
-    transform:translateY(0);
+    transform:translateY(-50%);
     pointer-events:auto;
   }
   .detail-close{
@@ -708,7 +711,9 @@
     border-radius:var(--radius);
     overflow:hidden;
   }
-  .table-scroll{ overflow-x:auto; }
+  /* ~25 rows visible before scrolling — row height (~43.6px, from tbody
+     td's padding + line-height) times 25 plus the header's own height. */
+  .table-scroll{ overflow-x:auto; overflow-y:auto; max-height:1120px; }
   table{
     width:100%;
     border-collapse:collapse;
@@ -726,6 +731,9 @@
     padding:0.8rem 1rem;
     border-bottom:1px solid var(--border);
     background:var(--surface-2);
+    position:sticky;
+    top:0;
+    z-index:1;
   }
   tbody td{
     padding:0.7rem 1rem;
@@ -901,11 +909,17 @@
     [Math.max.apply(null, lons), Math.max.apply(null, lats)]
   ];
 
+  // Default landing view is North America, not a fit-to-all-sites bound —
+  // "Reset view" still fits every site (fitBoundsArg below), a distinct,
+  // still-useful "show me everything" action.
+  var DEFAULT_CENTER = [-98, 39];
+  var DEFAULT_ZOOM = 3;
+
   var map = new maplibregl.Map({
     container: "map",
     style: "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
-    center: [10, 20],
-    zoom: 1.2,
+    center: DEFAULT_CENTER,
+    zoom: DEFAULT_ZOOM,
     minZoom: 0.8,
     maxZoom: 14,
     dragRotate: false,
@@ -966,7 +980,6 @@
   }
 
   map.on("load", function(){
-    map.fitBounds(fitBoundsArg, { padding: 60, duration: 0 });
     buildPins();
   });
   map.on("error", function(e){
