@@ -7,8 +7,15 @@ capacity. Built as a single static site with no backend and no build step.
 ## Stack
 
 - `index.html` — the entire app: markup, CSS, and JS in one file. Renders a
-  world map (D3 + real coastline data, fetched from a public CDN at load
-  time), a detail panel, a site table, and a Sources tab.
+  world map (MapLibre GL JS + CARTO's Dark Matter vector basemap, both from
+  a public CDN, no API key currently required), a provider dashboard, a
+  detail panel, a site table, and a Sources tab. Site markers are plain DOM
+  elements handed to MapLibre — it repositions them on pan/zoom itself, so
+  there's no custom per-frame transform code to maintain. (Previously a
+  hand-rolled D3 + SVG + topojson map; replaced because SVG's per-frame
+  re-rasterization of complex coastline geometry made pan/zoom sluggish in
+  a way that survived several rounds of targeted optimization — a GPU-vector
+  tile basemap solves that class of problem architecturally instead.)
 - `data/sites.js` — all site data, loaded by `index.html` as a plain script.
   This is the only file that should need regular edits. Its header comment
   documents the field schema and the sourcing standard (how sources are

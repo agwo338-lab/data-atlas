@@ -2,9 +2,8 @@
 <title>Site Atlas</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
-<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/topojson-simplify@3/dist/topojson-simplify.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@4/dist/maplibre-gl.css">
+<script src="https://cdn.jsdelivr.net/npm/maplibre-gl@4/dist/maplibre-gl.js"></script>
 <script src="data/sites.js"></script>
 
 <style>
@@ -20,10 +19,6 @@
     --accent-soft:rgba(53,214,184,0.16);
 
     --map-bg:#060B12;
-    --map-land:rgba(94,234,212,0.10);
-    --map-land-stroke:rgba(148,235,220,0.45);
-    --map-border:rgba(148,235,220,0.28);
-    --map-grid:rgba(94,234,212,0.12);
     --map-grid-strong:rgba(94,234,212,0.24);
     --map-label:rgba(197,225,219,0.55);
 
@@ -252,9 +247,8 @@
     position:relative;
     min-height:640px;
   }
-  .map-panel svg{ display:block; width:100%; height:100%; cursor:grab; touch-action:none; }
-  #zoomLayer{ will-change:transform; }
-  .map-panel svg:active{ cursor:grabbing; }
+  #map{ position:absolute; inset:0; }
+  .maplibregl-ctrl-attrib{ font-size:10px !important; }
   .map-loading{
     position:absolute; inset:0;
     display:flex; align-items:center; justify-content:center;
@@ -291,38 +285,65 @@
   }
   .map-caption span{ color:#5EEAD4; }
 
-  .land{ fill:var(--map-land); stroke:var(--map-land-stroke); stroke-width:0.6; stroke-linejoin:round; }
-  .country-border{ fill:none; stroke:var(--map-border); stroke-width:0.5; stroke-dasharray:2,2; stroke-linejoin:round; }
-  .grid-line{ fill:none; stroke:var(--map-grid); stroke-width:0.6; }
-  .grid-line.strong{ stroke:var(--map-grid-strong); stroke-width:0.8; }
-  .grid-label{ font-family:var(--font-mono); font-size:10px; fill:var(--map-label); }
-
-  .pin{ cursor:pointer; }
-  .pin .halo{ fill:none; opacity:0; transition:opacity 0.15s ease, r 0.15s ease; }
-  .pin .core{ transition:r 0.15s ease; }
-  .pin:hover .halo, .pin.active .halo{ opacity:0.35; }
-  .pin.active .core{ r:7; }
-  .pin.dim{ opacity:0.16; }
+  /* Pins are plain DOM elements handed to MapLibre as marker content — the
+     library positions/repositions them on pan/zoom itself (off the main
+     thread's rendering path), so unlike the old SVG version there's no
+     per-frame JS needed to keep them placed or constant-sized. */
+  .pin-marker{
+    width:30px; height:30px;
+    display:flex; align-items:center; justify-content:center;
+    position:relative;
+    cursor:pointer;
+  }
+  .pin-marker.dim{ opacity:0.16; }
+  .pin-core{
+    width:10px; height:10px;
+    border-radius:50%;
+    background:var(--dot);
+    border:1.4px solid #060B12;
+    transition:transform 0.15s ease;
+  }
+  .pin-marker.active .pin-core{ transform:scale(1.4); }
+  .pin-halo{
+    position:absolute;
+    width:26px; height:26px;
+    border-radius:50%;
+    background:var(--dot);
+    opacity:0;
+    transition:opacity 0.15s ease;
+  }
+  .pin-marker:hover .pin-halo, .pin-marker.active .pin-halo{ opacity:0.35; }
 
   /* Operational sites pulse to read as "live"; planned/under-construction sites
      stay static and muted, with a dashed ring standing in for "not built yet".
-     Animates `transform: scale()` rather than `r` — scaling composites on the
-     GPU, animating `r` forces a main-thread layout+paint every frame for every
-     operational pin, continuously, which competes with pan/zoom for frame time. */
-  .pin .pulse{ fill:none; opacity:0; transform-box:fill-box; transform-origin:center; }
-  .pin.status-operational .core{ opacity:1; }
-  .pin.status-operational .pulse{ animation:pin-pulse 2.4s cubic-bezier(0.2,0.6,0.4,1) infinite; }
-  @keyframes pin-pulse{
-    0%   { transform:scale(1); stroke-width:3; opacity:0.6; }
-    100% { transform:scale(3); stroke-width:0.5; opacity:0; }
+     Animates transform:scale() (GPU-composited) rather than width/height, so
+     it doesn't force a layout recalculation every frame. */
+  .pin-marker.pin-status-operational .pin-core{ opacity:1; }
+  .pin-pulse{
+    position:absolute;
+    width:10px; height:10px;
+    border-radius:50%;
+    border:2px solid var(--dot);
+    opacity:0;
   }
-  .pin.status-under-construction .core{ opacity:0.6; }
-  .pin.status-under-construction .ring{ fill:none; stroke-width:1.2; stroke-dasharray:3,2.5; opacity:0.7; }
-  .pin.status-planned .core{ opacity:0.4; r:4; }
-  .pin.status-planned .ring{ fill:none; stroke-width:1; stroke-dasharray:1,3; opacity:0.55; }
+  .pin-marker.pin-status-operational .pin-pulse{ animation:pin-pulse 2.4s cubic-bezier(0.2,0.6,0.4,1) infinite; }
+  @keyframes pin-pulse{
+    0%   { transform:scale(1); border-width:3px; opacity:0.6; }
+    100% { transform:scale(3); border-width:0.5px; opacity:0; }
+  }
+  .pin-marker.pin-status-under-construction .pin-core{ opacity:0.6; }
+  .pin-ring{
+    position:absolute;
+    width:18px; height:18px;
+    border-radius:50%;
+    border:1.2px dashed var(--dot);
+    opacity:0.7;
+  }
+  .pin-marker.pin-status-planned .pin-core{ opacity:0.4; width:8px; height:8px; }
+  .pin-marker.pin-status-planned .pin-ring{ border-style:dotted; opacity:0.55; }
 
   @media (prefers-reduced-motion: reduce){
-    .pin.status-operational .pulse{ animation:none; display:none; }
+    .pin-marker.pin-status-operational .pin-pulse{ animation:none; display:none; }
   }
 
   .detail-panel{
@@ -475,9 +496,9 @@
 
     <main class="grid">
       <div class="map-panel">
-        <svg id="map" viewBox="0 0 1000 560" preserveAspectRatio="xMidYMid meet" role="img" aria-label="World map with data center site markers"></svg>
-        <p class="map-loading" id="mapLoading">Loading coastlines…</p>
-        <button class="reset-view" id="resetView" title="Reset zoom">⤾ Reset view</button>
+        <div id="map" role="img" aria-label="World map with data center site markers"></div>
+        <p class="map-loading" id="mapLoading">Loading map…</p>
+        <button class="reset-view" id="resetView" title="Reset view">⤾ Reset view</button>
         <p class="map-caption" id="mapCaption" style="display:none">scroll to zoom · drag to pan &nbsp; <span id="mapCount"></span></p>
       </div>
 
@@ -528,7 +549,7 @@
     </section>
   </div>
 
-  <footer class="foot">Status and capacity figures reflect public reporting as of when each entry was added — verify before relying on them. Coastline data from Natural Earth via world-atlas.</footer>
+  <footer class="foot">Status and capacity figures reflect public reporting as of when each entry was added — verify before relying on them. Basemap © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors, © <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>.</footer>
 
 </div>
 
@@ -566,151 +587,86 @@
     var sb = STATUS_ORDER[b.status] != null ? STATUS_ORDER[b.status] : 99;
     return sa - sb;
   }
-  var svgNS = "http://www.w3.org/2000/svg";
-  var W = 1000, H = 560;
-
-  var svg = document.getElementById("map");
+  // ---- Map (MapLibre GL, CARTO Dark Matter vector basemap) --------------
+  // Markers are plain DOM elements MapLibre positions/repositions itself on
+  // pan/zoom — no custom projection math or per-frame transform code needed
+  // (that was the source of the old SVG map's sluggishness under load).
   var pinEls = {};
-  var pinScaleEls = {};
-  var pinScaleList = [];
-  var pinPos = {};
-  var projection, geoPath, zoom, zoomG;
-  var currentK = 1;
+  var DEFAULT_SITE_ZOOM = 9;
 
-  function svgEl(tag, attrs){
-    var el = document.createElementNS(svgNS, tag);
-    for (var k in attrs) el.setAttribute(k, attrs[k]);
-    return el;
-  }
+  var lons = SITES.map(function(s){ return s.lon; });
+  var lats = SITES.map(function(s){ return s.lat; });
+  var fitBoundsArg = [
+    [Math.min.apply(null, lons), Math.min.apply(null, lats)],
+    [Math.max.apply(null, lons), Math.max.apply(null, lats)]
+  ];
 
-  function buildMap(landGeoJSON, bordersMesh){
-    projection = d3.geoNaturalEarth1().fitExtent([[16,16],[W-16,H-16]], landGeoJSON);
-    geoPath = d3.geoPath(projection);
+  var map = new maplibregl.Map({
+    container: "map",
+    style: "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
+    center: [10, 20],
+    zoom: 1.2,
+    minZoom: 0.8,
+    maxZoom: 14,
+    dragRotate: false,
+    pitchWithRotate: false,
+    touchPitch: false
+  });
+  map.touchZoomRotate.disableRotation();
 
-    zoomG = svgEl("g", { id:"zoomLayer" });
-    svg.appendChild(zoomG);
-
-    zoomG.appendChild(svgEl("path", { d: geoPath(landGeoJSON), class:"land" }));
-    if (bordersMesh) {
-      zoomG.appendChild(svgEl("path", { d: geoPath(bordersMesh), class:"country-border" }));
-    }
-
-    var graticule = d3.geoGraticule().step([30,30]);
-    zoomG.appendChild(svgEl("path", { d: geoPath(graticule()), class:"grid-line" }));
-
-    var equator = { type:"LineString", coordinates:[[-180,0],[180,0]] };
-    var meridian = { type:"LineString", coordinates:[[0,-90],[0,90]] };
-    zoomG.appendChild(svgEl("path", { d: geoPath(equator), class:"grid-line strong" }));
-    zoomG.appendChild(svgEl("path", { d: geoPath(meridian), class:"grid-line strong" }));
-
-    [-60,-30,30,60].forEach(function(lat){
-      var pt = projection([-179, lat]);
-      if (!pt) return;
-      var t = svgEl("text", { x: pt[0] + 4, y: pt[1] - 4, class:"grid-label" });
-      t.textContent = (lat > 0 ? lat+"°N" : Math.abs(lat)+"°S");
-      zoomG.appendChild(t);
-    });
-
+  function buildPins(){
     SITES.forEach(function(site){
-      var pos = projection([site.lon, site.lat]);
-      if (!pos) return;
-      pinPos[site.id] = pos;
       var slug = statusSlug(site.status);
-      var g = svgEl("g", { class:"pin status-" + slug, tabindex:"0", "data-id":site.id, transform:"translate(" + pos[0] + "," + pos[1] + ")" });
-      var scaleG = svgEl("g", { class:"pin-scale" });
-      var color = colorFor(site.provider);
+      var el = document.createElement("div");
+      el.className = "pin-marker pin-status-" + slug;
+      el.style.setProperty("--dot", colorFor(site.provider));
+      el.title = site.provider + (site.site ? " · " + site.site : "") + " (" + site.city + ") — " + site.status;
+      el.tabIndex = 0;
 
-      var hit = svgEl("circle", { class:"hit", cx:0, cy:0, r:16, fill:"rgba(0,0,0,0.001)" });
       if (slug !== "operational") {
-        scaleG.appendChild(svgEl("circle", { class:"ring", cx:0, cy:0, r:9, stroke:color }));
+        var ring = document.createElement("span");
+        ring.className = "pin-ring";
+        el.appendChild(ring);
       }
-      var halo = svgEl("circle", { class:"halo", cx:0, cy:0, r:14, fill:color });
-      var core = svgEl("circle", { class:"core", cx:0, cy:0, r:5, fill:color, stroke:"#060B12", "stroke-width":"1.4" });
-      var title = svgEl("title", {});
-      title.textContent = site.provider + (site.site ? " · " + site.site : "") + " (" + site.city + ") — " + site.status;
-
-      scaleG.appendChild(hit);
       if (slug === "operational") {
-        scaleG.appendChild(svgEl("circle", { class:"pulse", cx:0, cy:0, r:5, stroke:color }));
+        var pulse = document.createElement("span");
+        pulse.className = "pin-pulse";
+        el.appendChild(pulse);
       }
-      scaleG.appendChild(halo); scaleG.appendChild(core);
-      g.appendChild(scaleG); g.appendChild(title);
-      g.addEventListener("click", function(e){ e.stopPropagation(); selectSite(site.id); });
-      g.addEventListener("keydown", function(e){ if (e.key === "Enter" || e.key === " ") { e.preventDefault(); selectSite(site.id); } });
-      zoomG.appendChild(g);
-      pinEls[site.id] = g;
-      pinScaleEls[site.id] = scaleG;
-      pinScaleList.push(scaleG);
-    });
+      var halo = document.createElement("span");
+      halo.className = "pin-halo";
+      var core = document.createElement("span");
+      core.className = "pin-core";
+      el.appendChild(halo);
+      el.appendChild(core);
 
-    setupZoom();
+      el.addEventListener("click", function(e){ e.stopPropagation(); selectSite(site.id); });
+      el.addEventListener("keydown", function(e){ if (e.key === "Enter" || e.key === " ") { e.preventDefault(); selectSite(site.id); } });
+
+      new maplibregl.Marker({ element: el, anchor: "center" }).setLngLat([site.lon, site.lat]).addTo(map);
+      pinEls[site.id] = el;
+    });
 
     document.getElementById("mapLoading").style.display = "none";
     document.getElementById("mapCaption").style.display = "block";
     document.getElementById("mapCount").textContent = SITES.length + " sites plotted";
   }
 
-  function applyPinCounterScale(k){
-    currentK = k;
-    var inv = "scale(" + (1 / k) + ")";
-    for (var i = 0; i < pinScaleList.length; i++) {
-      pinScaleList[i].setAttribute("transform", inv);
-    }
-  }
+  map.on("load", function(){
+    map.fitBounds(fitBoundsArg, { padding: 60, duration: 0 });
+    buildPins();
+  });
+  map.on("error", function(e){
+    document.getElementById("mapLoading").textContent = "Couldn't load the map — check your connection and reload.";
+  });
 
-  function setupZoom(){
-    zoom = d3.zoom()
-      .scaleExtent([1, 10])
-      .translateExtent([[0,0],[W,H]])
-      .on("zoom", function(event){
-        zoomG.setAttribute("transform", event.transform);
-        applyPinCounterScale(event.transform.k);
-      });
-    d3.select(svg).call(zoom).on("dblclick.zoom", null);
-  }
-
-  function zoomToSite(site, targetK){
-    var pos = pinPos[site.id];
-    if (!pos || !zoom) return;
-    var k = targetK || 4;
-    var t = d3.zoomIdentity.translate(W/2, H/2).scale(k).translate(-pos[0], -pos[1]);
-    d3.select(svg).transition().duration(650).call(zoom.transform, t);
+  function zoomToSite(site, targetZoom){
+    map.flyTo({ center: [site.lon, site.lat], zoom: targetZoom || DEFAULT_SITE_ZOOM, duration: 650 });
   }
 
   document.getElementById("resetView").addEventListener("click", function(){
-    if (!zoom) return;
-    d3.select(svg).transition().duration(500).call(zoom.transform, d3.zoomIdentity);
+    map.fitBounds(fitBoundsArg, { padding: 60, duration: 500 });
   });
-
-  Promise.all([
-    fetch("https://cdn.jsdelivr.net/npm/world-atlas@2/land-50m.json").then(function(r){ return r.json(); }),
-    fetch("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json").then(function(r){ return r.json(); })
-  ])
-    .then(function(results){
-      var landWorld = results[0], countriesWorld = results[1];
-
-      // The 50m land topology has far more vertices than this map ever
-      // displays cleanly — most are visually redundant points on long,
-      // near-straight coastline runs, and re-rendering all of them on every
-      // pan/zoom frame (not just the initial draw) is the main cost behind
-      // sluggish interaction. Simplify once, topology-aware (so adjacent
-      // shapes stay aligned, no gaps), instead of dropping to a coarser
-      // source file and losing real detail.
-      var simplifiedLand = topojson.presimplify(landWorld);
-      var minWeight = topojson.quantile(simplifiedLand, 0.35);
-      simplifiedLand = topojson.simplify(simplifiedLand, minWeight);
-
-      var land = topojson.feature(simplifiedLand, simplifiedLand.objects.land);
-      // Borders deliberately use the coarser 110m topology — coastline detail
-      // benefits from precision, but dashed administrative-border strokes
-      // don't need it, and dashed strokes are themselves expensive to
-      // re-rasterize every frame.
-      var borders = topojson.mesh(countriesWorld, countriesWorld.objects.countries, function(a, b){ return a !== b; });
-      buildMap(land, borders);
-    })
-    .catch(function(){
-      document.getElementById("mapLoading").textContent = "Couldn't load coastline data — check your connection and reload.";
-    });
 
   // ---- Provider dashboard (one card per provider found in the data) -----
   var providers = Object.keys(providerColor);
