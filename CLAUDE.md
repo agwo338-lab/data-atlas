@@ -85,6 +85,14 @@ hand-transcribed into `data/news.js`, never auto-applied. The provider
 page prefers `data/news.js` for a given provider when it has an entry, and
 falls back to a `sources`-derived list (from `data/sites.js`) otherwise.
 
+A `/reconcile` slash command (`.claude/commands/reconcile.md`) codifies a
+third research task, distinct from both agents above: re-checking claims
+*already recorded* in the data (by default, every partner entry in
+`data/providers.js`) against current public sources to catch drift —
+"is this still true," not "vet something new" (research-agent's usual
+job) or "what's new" (news-agent's job). It dispatches to research-agent
+under the hood and is equally findings-only.
+
 ## Research cost
 
 `.mcp.json` registers a small local MCP server (`.claude/mcp/openrouter/`)
