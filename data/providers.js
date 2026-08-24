@@ -46,6 +46,20 @@
 var PROVIDERS = [
   {
     // Skeleton entry — color pinned ahead of time, no sites/partners yet.
+    // SpaceX acquired xAI (Feb 2026); xAI folded entirely into SpaceX's
+    // "SpaceXAI" AI division (May 2026) rather than remaining a separate
+    // company — this entry is the merged entity, not standalone xAI.
+    // Unlike AWS/CoreWeave, SpaceXAI has no real chromatic brand identity
+    // to derive a color from — x.ai's own site is almost entirely black
+    // and white. Rather than invent a fake "sourced" hex, this is a
+    // plainly interpretive choice: a distinct steel-gray, chosen so it
+    // doesn't collide with AWS's orange or the auto-palette on the map,
+    // not scraped from any brand asset.
+    name: "SpaceXAI",
+    color: "#9AA5B1"
+  },
+  {
+    // Skeleton entry — color pinned ahead of time, no sites/partners yet.
     // AWS's brand orange is well-documented as #FF9900 ("Smile Orange");
     // softened here the same way CoreWeave's blue was, to sit next to this
     // site's muted palette instead of the raw saturated brand hex. Won't
