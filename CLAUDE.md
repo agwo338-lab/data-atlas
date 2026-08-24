@@ -22,12 +22,15 @@ capacity. Built as a single static site with no backend and no build step.
   tiered, what needs verification, when to recheck). Follow that standard
   whenever adding or updating an entry.
 - `data/providers.js` — one entry per operator, for anything that's about
-  the *company* rather than one specific site — currently just a pinned
-  display color (dashboard card, map pins, table dot, provider page).
-  A provider doesn't need an entry here to show up on the map; any new
-  `provider` string in `sites.js` is auto-assigned a color from a shared
-  palette. Add an entry only to pin a specific color, or as a home for
-  future provider-level fields.
+  the *company* rather than one specific site: a pinned display color
+  (dashboard card, map pins, table dot, provider page) and its disclosed
+  partnerships/customers (shown as a "Partnerships" section on the
+  provider page). A provider doesn't need an entry here to show up on the
+  map; any new `provider` string in `sites.js` is auto-assigned a color
+  from a shared palette and shows an empty partnerships section. Partner
+  entries should trace back to something already vetted (e.g. a
+  `news-agent` finding kept in `data/news.js`), not be typed in from
+  general knowledge — see the file's own header comment.
 - `data/news.js` — curated company-level headlines shown on each provider's
   dedicated page (opened by clicking its card on the dashboard), keyed by
   provider name. Deliberately separate from `sites.js`'s per-site `sources`

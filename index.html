@@ -283,6 +283,67 @@
     color:var(--ink-soft);
     margin-top:0.25rem;
   }
+  .provider-page-partners{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:1.1rem 1.2rem;
+    margin-top:1.5rem;
+  }
+  .provider-page-partners h2{
+    margin:0 0 0.75rem;
+    font-size:0.95rem;
+    font-weight:600;
+  }
+  .provider-page-partners ul{
+    list-style:none;
+    margin:0;
+    padding:0;
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(260px, 1fr));
+    gap:0.75rem;
+  }
+  .partner-card{
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:0.7rem 0.85rem;
+  }
+  .partner-top{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:0.5rem;
+  }
+  .partner-name{ font-weight:600; font-size:0.9rem; }
+  .partner-relationship{
+    font-family:var(--font-mono);
+    font-size:0.66rem;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+    color:var(--accent);
+    white-space:nowrap;
+  }
+  .partner-detail{
+    margin:0.35rem 0 0;
+    font-size:0.8rem;
+    color:var(--ink-soft);
+    line-height:1.45;
+  }
+  .partner-meta{
+    display:block;
+    margin-top:0.4rem;
+    font-family:var(--font-mono);
+    font-size:0.68rem;
+    color:var(--ink-soft);
+  }
+  .partner-meta a{ color:var(--ink-soft); }
+  .partner-meta a:hover{ color:var(--accent); }
+  .partners-empty{
+    color:var(--ink-soft);
+    font-size:0.85rem;
+    font-style:italic;
+  }
+
   .provider-page-body{
     display:grid;
     grid-template-columns:minmax(0,1fr) minmax(0,1fr);
@@ -739,6 +800,10 @@
       <h1 id="providerPageName"></h1>
     </div>
     <div class="provider-page-stats" id="providerPageStats"></div>
+    <section class="provider-page-partners">
+      <h2>Partnerships</h2>
+      <ul id="providerPagePartners"></ul>
+    </section>
     <div class="provider-page-body">
       <section class="provider-page-locations">
         <h2>Locations</h2>
@@ -1058,6 +1123,7 @@
   var providerPageName = document.getElementById("providerPageName");
   var providerPageStats = document.getElementById("providerPageStats");
   var providerPageLocations = document.getElementById("providerPageLocations");
+  var providerPagePartners = document.getElementById("providerPagePartners");
   var providerPageHeadlines = document.getElementById("providerPageHeadlines");
   var providerPageSearchLink = document.getElementById("providerPageSearchLink");
 
@@ -1094,6 +1160,26 @@
     providerPageLocations.querySelectorAll(".provider-site-item").forEach(function(li){
       li.addEventListener("click", function(){ goToSiteOnMap(li.getAttribute("data-id")); });
     });
+
+    // Partnerships (data/providers.js) — major labs/companies with a
+    // disclosed relationship to this provider, distinct from the site-level
+    // sources and the dated headline feed.
+    var partners = (providerLookup[p] && providerLookup[p].partners) || [];
+    providerPagePartners.innerHTML = partners.length
+      ? partners.map(function(partner){
+          var sourceLinks = (partner.sources || []).map(function(s){
+            return '<a href="' + s.url + '" target="_blank" rel="noopener">' + s.label + '</a>';
+          }).join(', ');
+          return '<li class="partner-card">' +
+            '<div class="partner-top">' +
+              '<span class="partner-name">' + partner.name + '</span>' +
+              '<span class="partner-relationship">' + partner.relationship + '</span>' +
+            '</div>' +
+            (partner.detail ? '<p class="partner-detail">' + partner.detail + '</p>' : '') +
+            (sourceLinks ? '<span class="partner-meta">' + (partner.since ? partner.since + ' · ' : '') + sourceLinks + '</span>' : '') +
+          '</li>';
+        }).join('')
+      : '<li class="partners-empty">No disclosed partnerships logged yet — see data/providers.js.</li>';
 
     // Curated company-level headlines (data/news.js, via news-agent) take
     // priority when available. Falls back to citations already attached to
