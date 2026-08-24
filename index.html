@@ -21,6 +21,7 @@
     --map-bg:#060B12;
     --map-land:rgba(94,234,212,0.10);
     --map-land-stroke:rgba(148,235,220,0.45);
+    --map-border:rgba(148,235,220,0.28);
     --map-grid:rgba(94,234,212,0.12);
     --map-grid-strong:rgba(94,234,212,0.24);
     --map-label:rgba(197,225,219,0.55);
@@ -176,6 +177,15 @@
     font-size:0.72rem;
     flex-shrink:0;
   }
+  .provider-site-cap{
+    color:var(--ink-soft);
+    font-family:var(--font-mono);
+    font-size:0.72rem;
+    font-variant-numeric:tabular-nums;
+    flex-shrink:0;
+    width:4.6em;
+    text-align:right;
+  }
   .status-dot{ width:6px; height:6px; border-radius:50%; flex-shrink:0; }
   .status-dot.status-operational{ background:#4ADE80; }
   .status-dot.status-under-construction{ background:#FBBF24; }
@@ -280,6 +290,7 @@
   .map-caption span{ color:#5EEAD4; }
 
   .land{ fill:var(--map-land); stroke:var(--map-land-stroke); stroke-width:0.6; stroke-linejoin:round; }
+  .country-border{ fill:none; stroke:var(--map-border); stroke-width:0.5; stroke-dasharray:2,2; stroke-linejoin:round; }
   .grid-line{ fill:none; stroke:var(--map-grid); stroke-width:0.6; }
   .grid-line.strong{ stroke:var(--map-grid-strong); stroke-width:0.8; }
   .grid-label{ font-family:var(--font-mono); font-size:10px; fill:var(--map-label); }
@@ -566,7 +577,7 @@
     return el;
   }
 
-  function buildMap(landGeoJSON){
+  function buildMap(landGeoJSON, bordersMesh){
     projection = d3.geoNaturalEarth1().fitExtent([[16,16],[W-16,H-16]], landGeoJSON);
     geoPath = d3.geoPath(projection);
 
@@ -574,6 +585,9 @@
     svg.appendChild(zoomG);
 
     zoomG.appendChild(svgEl("path", { d: geoPath(landGeoJSON), class:"land" }));
+    if (bordersMesh) {
+      zoomG.appendChild(svgEl("path", { d: geoPath(bordersMesh), class:"country-border" }));
+    }
 
     var graticule = d3.geoGraticule().step([30,30]);
     zoomG.appendChild(svgEl("path", { d: geoPath(graticule()), class:"grid-line" }));
@@ -660,11 +674,12 @@
     d3.select(svg).transition().duration(500).call(zoom.transform, d3.zoomIdentity);
   });
 
-  fetch("https://cdn.jsdelivr.net/npm/world-atlas@2/land-110m.json")
+  fetch("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-50m.json")
     .then(function(r){ return r.json(); })
     .then(function(world){
       var land = topojson.feature(world, world.objects.land);
-      buildMap(land);
+      var borders = topojson.mesh(world, world.objects.countries, function(a, b){ return a !== b; });
+      buildMap(land, borders);
     })
     .catch(function(){
       document.getElementById("mapLoading").textContent = "Couldn't load coastline data — check your connection and reload.";
@@ -696,6 +711,7 @@
         '<span class="status-dot status-' + statusSlug(s.status) + '"></span>' +
         '<span class="provider-site-name">' + (s.site || s.city) + '</span>' +
         '<span class="provider-site-loc">' + s.city + '</span>' +
+        '<span class="provider-site-cap">' + (s.capacityMW != null ? s.capacityMW + ' MW' : '—') + '</span>' +
       '</li>';
     }).join('');
 

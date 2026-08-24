@@ -28,6 +28,14 @@ capacity. Built as a single static site with no backend and no build step.
   `file://`, since the map fetches data over HTTP.
 - Commit messages are the project's changelog — write them to actually
   describe what changed, since there's no separate log kept anywhere else.
+- The user isn't a coder and reviews work by checking the live deployed
+  result, not by reading a diff. So once a change to `index.html` is
+  complete and locally verified (served and checked, not just written),
+  commit and push to `main` immediately rather than pausing to ask "should
+  I push?" — that question isn't useful to someone who can't evaluate the
+  code anyway. This doesn't relax the research-findings review step below:
+  for `data/sites.js`, still get the user's call on *which* findings to
+  apply before editing — but once applied, push those immediately too.
 
 ## Data quality
 
