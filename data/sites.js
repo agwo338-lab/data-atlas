@@ -419,5 +419,175 @@ var SITES = [
       { label: "Community Impact, Jul 2026 — \"AI cloud company CoreWeave to fill $440M Cedar Creek data center\"", url: "https://communityimpact.com/bastrop-cedar-creek/development/ai-cloud-company-coreweave-to-fill-440m-cedar-creek-data-center/" }
     ],
     notes: "CoreWeave named as qualifying tenant for the first of up to 19 potential EdgeConneX buildings planned at this Bastrop County campus; confirmed via the county's Dec 2024 10-year/75% property tax abatement and a Jul 2025 Texas Comptroller large-data-center-project certification. First building ($440M) under construction as of Jul 2026, expected to open ~Aug 2026. No MW figure disclosed by CoreWeave or EdgeConneX in any source found — left null rather than guessed. Re-check status soon; opening date is essentially now. Coordinates are a Cedar Creek/Bastrop County approximation."
+  },
+  {
+    id: "coreweave-kenilworth",
+    provider: "CoreWeave",
+    site: "NEST11 — NEST Campus",
+    city: "Kenilworth, NJ",
+    country: "United States",
+    lat: 40.6787,
+    lon: -74.2907,
+    status: "Under construction",
+    capacityMW: null,
+    lastUpdated: "2026-08-23",
+    sources: [
+      { label: "Data Center Dynamics — \"CoreWeave acquires NEST data center for $322m\"", url: "https://www.datacenterdynamics.com/en/news/coreweave-acquires-nest-data-center-for-322m-at-life-sciences-campus-in-new-jersey/" },
+      { label: "REBusinessOnline — \"CoreWeave to invest $1.2B for new data center facility at NEST campus\"", url: "https://rebusinessonline.com/coreweave-to-invest-1-2b-for-new-data-center-facility-at-nest-campus-in-kenilworth-new-jersey/" },
+      { label: "News 12 NJ — construction/resident reaction", url: "https://newjersey.news12.com/ai-data-center-under-construction-in-kenilworth-draws-mixed-reactions-from-residents" }
+    ],
+    notes: "CoreWeave acquired the NEST11 building (280,000 sq ft) and a 27-acre parcel at the former Merck HQ / Northeast Science & Technology campus for $322M, with $1.2B total investment to convert to a data center; site has a 50MW substation, but that's a facility spec, not a confirmed CoreWeave-contracted MW figure — left null rather than guessed. Under construction per local news coverage as of 2026. Coordinates are a Kenilworth city-center approximation, not geocoded to the exact campus address."
+  },
+  {
+    id: "coreweave-chester",
+    provider: "CoreWeave",
+    site: "CTP-01 (Chirisa Technology Parks)",
+    city: "Chester, VA",
+    country: "United States",
+    lat: 37.3401,
+    lon: -77.4419,
+    status: "Operational",
+    capacityMW: 18.6,
+    lastUpdated: "2026-08-23",
+    sources: [
+      { label: "Data Center Frontier — \"CoreWeave Continues Growth With Major Collaborative Effort\"", url: "https://www.datacenterfrontier.com/site-selection/article/55140492/coreweave-continues-growth-with-major-collaborative-effort-on-new-ai-data-center-project" },
+      { label: "Data Center Dynamics — \"Blue Owl, Chirisa and PowerHouse announce $5bn data center JV for CoreWeave\"", url: "https://www.datacenterdynamics.com/en/news/blue-owl-chirisa-and-powerhouse-announce-5bn-data-center-jv-for-coreweave/" }
+    ],
+    notes: "1401 Meadowville Technology Parkway, Chesterfield County. Operational since ~Aug 2024; 12-year license with two 5-year extension options, initially ~18.6MW at $115/kW/month. Owned/operated by Chirisa Technology Parks, part of a $5B Blue Owl/Chirisa/PowerHouse JV for CoreWeave capacity. Secondary/directory sources (Epoch AI, Baxtel, morethanjustparks.com) describe scaling toward 28MW, and separately float much larger figures (82–113MW) tied to a $3–4B multi-phase buildout — those larger numbers aren't corroborated by named trade press or a primary release, so 18.6MW (the figure agreed by Tier 2 sources) is used here; re-check for a confirmed expansion. Coordinates are a Chester, VA approximation, not geocoded to the Meadowville Technology Parkway address."
+  },
+  {
+    id: "coreweave-hammond",
+    provider: "CoreWeave",
+    site: "Digital Crossroads — 301 Digital Crossroads Dr",
+    city: "Hammond, IN",
+    country: "United States",
+    lat: 41.5834,
+    lon: -87.5000,
+    status: "Planned",
+    capacityMW: 180,
+    lastUpdated: "2026-08-23",
+    sources: [
+      { label: "Data Center Dynamics — \"CoreWeave to develop 180MW data center at Digital Crossroads campus\"", url: "https://www.datacenterdynamics.com/en/news/coreweave-to-develop-180mw-data-center-at-digital-crossroads-campus-in-hammond-indiana/" },
+      { label: "City of Hammond, Indiana — official approval notice", url: "https://www.gohammond.com/hammond-approves-development-agreement-for-new-data-center/" }
+    ],
+    notes: "New 180MW, 450,000 sq ft building (301 Digital Crossroads Drive) on the former State Line Generating Plant coal site, developed by Decennial Group under a 20-year CoreWeave lease, approved by Hammond City Council Jun 9, 2025, targeted operational 2027 — contingent on a NIPSCO power agreement, so kept as \"Planned\" rather than \"Under construction\" pending confirmation groundbreaking has started. CoreWeave separately already occupies a smaller, existing Digital Crossroads facility on the same campus (100 Digital Crossroads Drive, ~105,000 sq ft) — no MW figure or start date found for that one; not enough to log as its own entry yet. Coordinates are a Hammond city-center approximation, not geocoded to the campus address."
+  },
+  {
+    id: "coreweave-cheyenne",
+    provider: "CoreWeave",
+    site: "Related Digital Cheyenne Campus",
+    city: "Cheyenne, WY",
+    country: "United States",
+    lat: 41.1400,
+    lon: -104.8202,
+    status: "Under construction",
+    capacityMW: 88,
+    lastUpdated: "2026-08-23",
+    sources: [
+      { label: "Data Center Dynamics — \"Related Digital breaks ground on $1.2bn data center in Cheyenne, Wyoming, will host CoreWeave servers\"", url: "https://www.datacenterdynamics.com/en/news/related-digital-breaks-ground-on-12bn-data-center-in-cheyenne-wyoming-will-host-coreweave-servers/" },
+      { label: "Related Digital newsroom — \"Related Digital Breaks Ground on 302 MW Data Center Campus in Cheyenne, Wyoming\"", url: "https://www.related-digital.com/news/related-digital-breaks-ground-on-302-mw-data-center-campus-in-cheyenne-wyoming" }
+    ],
+    notes: "Related Digital broke ground Oct 2025 on a 115-acre, up-to-302MW critical IT campus; CoreWeave is the anchor tenant on a long-term lease for the first building (184,000 sq ft, 88MW critical IT, air-cooled), targeted complete late 2026, part of a $1.2B total investment. 88MW is CoreWeave's confirmed first-building commitment — the 302MW figure is the campus's full build-out ceiling, not all contracted to CoreWeave yet. Coordinates are a Cheyenne city-center approximation, not geocoded to the campus address."
+  },
+  {
+    id: "coreweave-cambridge-on",
+    provider: "CoreWeave",
+    site: "Cohere / Related Digital facility",
+    city: "Cambridge, ON",
+    country: "Canada",
+    lat: 43.3616,
+    lon: -80.3144,
+    status: "Planned",
+    capacityMW: null,
+    lastUpdated: "2026-08-23",
+    sources: [
+      { label: "Data Center Dynamics — \"AI startup Cohere and CoreWeave plan multibillion-dollar data center in Canada\"", url: "https://www.datacenterdynamics.com/en/news/ai-startup-cohere-and-coreweave-plan-multibillion-dollar-data-center-in-canada/" },
+      { label: "The Globe and Mail — CoreWeave/Cohere Cambridge, Ontario data centre", url: "https://www.theglobeandmail.com/business/article-coreweave-ai-data-centre-cambridge-ontario-cohere/" }
+    ],
+    notes: "CoreWeave will operate a data center in Cambridge, Ontario with Cohere as anchor tenant; Cohere received $240M in Canadian federal funding toward a $725M facility, part of Canada's $2B Sovereign AI Compute Strategy. Property tied to TowerBrook Capital Partners, partnered with Related Digital. A \"64MW\" figure surfaced in early searches but couldn't be confirmed as specific to this site (may belong to a different, unrelated Related Digital Ontario project) — left null rather than guessed. Note: a separate, unrelated facility (\"Ascent TOR1\") also sits in the Cambridge/Kitchener-Waterloo corridor but is operated by Ascent Data Centers, with no CoreWeave connection — do not conflate the two. Coordinates are a Cambridge, ON city-center approximation."
+  },
+  {
+    id: "coreweave-northlanarkshire",
+    provider: "CoreWeave",
+    site: "DataVita — DV1 & DV3",
+    city: "North Lanarkshire",
+    country: "United Kingdom",
+    lat: 55.7803,
+    lon: -3.9917,
+    status: "Under construction",
+    capacityMW: null,
+    lastUpdated: "2026-08-23",
+    sources: [
+      { label: "Data Center Dynamics — \"DataVita secures £300m debt facility to expand North Lanarkshire data center campus\"", url: "https://www.datacenterdynamics.com/en/news/datavita-secures-300m-debt-facility-to-expand-north-lanarkshire-data-center-campus/" },
+      { label: "Data Centre Magazine — \"Behind DataVita's £300m AI Data Centre Expansion in Scotland\"", url: "https://datacentremagazine.com/news/inside-datavitas-300m-ai-data-centre-expansion-in-scotland" }
+    ],
+    notes: "CoreWeave has contracted capacity at both DataVita's DV1 (existing facility, being expanded) and DV3 (new-build) under a 15-year lease, backed by a £300M debt facility (ING, ABN AMRO, Santander, SNIB, Siemens Financial Services) plus a £202M UK National Wealth Fund guarantee, part of North Lanarkshire's AI Growth Zone. No CoreWeave-specific MW figure disclosed — left null rather than guessed. Coordinates are a North Lanarkshire regional approximation (council HQ, Motherwell) — DataVita's exact site address wasn't confirmed in research; re-geocode once located."
+  },
+  {
+    id: "coreweave-hillsboro",
+    provider: "CoreWeave",
+    site: "Flexential Hillsboro",
+    city: "Hillsboro, OR",
+    country: "United States",
+    lat: 45.5229,
+    lon: -122.9898,
+    status: "Operational",
+    capacityMW: null,
+    lastUpdated: "2026-08-23",
+    sources: [
+      { label: "Data Center Dynamics — \"CoreWeave to lease Flexential data centers in Oregon and Georgia\"", url: "https://www.datacenterdynamics.com/en/news/coreweave-to-lease-flexential-data-centers-in-oregon-and-georgia/" },
+      { label: "Data Center Frontier — \"Inside the Flexential-CoreWeave Alliance\"", url: "https://www.datacenterfrontier.com/colocation/article/55291596/inside-the-flexential-coreweave-alliance-scaling-ai-infrastructure-with-high-density-data-centers" }
+    ],
+    notes: "CoreWeave leased colocation capacity from Flexential across two existing, operational campuses — this one and Douglasville, GA (see coreweave-douglasville) — totaling 18MW combined, per CoreWeave's own CTO. No confirmed per-site split disclosed (described only as \"roughly evenly split\"), so left null here rather than guessing a per-facility number; see the Douglasville entry for the same combined total. Flexential separately has up to 72MW contiguous space available across both campuses, of which CoreWeave's 18MW is a subset. Coordinates are a Hillsboro city-center approximation."
+  },
+  {
+    id: "coreweave-douglasville",
+    provider: "CoreWeave",
+    site: "Flexential Douglasville",
+    city: "Douglasville, GA",
+    country: "United States",
+    lat: 33.7515,
+    lon: -84.7477,
+    status: "Operational",
+    capacityMW: null,
+    lastUpdated: "2026-08-23",
+    sources: [
+      { label: "Data Center Dynamics — \"CoreWeave to lease Flexential data centers in Oregon and Georgia\"", url: "https://www.datacenterdynamics.com/en/news/coreweave-to-lease-flexential-data-centers-in-oregon-and-georgia/" },
+      { label: "Data Center Frontier — \"Inside the Flexential-CoreWeave Alliance\"", url: "https://www.datacenterfrontier.com/colocation/article/55291596/inside-the-flexential-coreweave-alliance-scaling-ai-infrastructure-with-high-density-data-centers" }
+    ],
+    notes: "Paired with Hillsboro, OR (see coreweave-hillsboro) under the same Flexential colocation lease — 18MW combined across both sites, no confirmed per-site split disclosed, so left null here rather than guessing. Coordinates are a Douglasville city-center approximation."
+  },
+  {
+    id: "coreweave-lasvegas",
+    provider: "CoreWeave",
+    site: "LAS1 — Switch Core Campus",
+    city: "Las Vegas, NV",
+    country: "United States",
+    lat: 36.0839,
+    lon: -115.2350,
+    status: "Operational",
+    capacityMW: null,
+    lastUpdated: "2026-08-23",
+    sources: [
+      { label: "CoreWeave newsroom — \"CoreWeave Opens New Data Center in Las Vegas\"", url: "https://www.coreweave.com/blog/coreweave-opens-new-data-center-in-las-vegas-opening-specialized-cloud-capabilities-for-west-coast-firms" },
+      { label: "Data Center Frontier — \"Switch Hosts CoreWeave's Landmark NVIDIA GB300 Deployment\"", url: "https://www.datacenterfrontier.com/machine-learning/article/55305429/ai-at-scale-switch-hosts-coreweaves-landmark-nvidia-gb300-deployment" }
+    ],
+    notes: "One of CoreWeave's original three named cloud-region facilities (\"LAS1\"), hosted at Switch's Core Campus (Decatur Blvd / Badura Ave area); confirmed operational via CoreWeave's own blog, and reported hosting CoreWeave's launch deployment of Nvidia's GB300 NVL72 platform. No CoreWeave-specific MW carve-out disclosed — Switch's total campus build-out is up to 495MW, but that's the whole campus, not CoreWeave's allocation, so left null rather than guessed. Coordinates are a southwest Las Vegas valley approximation (Decatur/Badura area), not geocoded to the exact campus address."
+  },
+  {
+    id: "coreweave-weehawken",
+    provider: "CoreWeave",
+    site: "LGA1",
+    city: "Weehawken, NJ",
+    country: "United States",
+    lat: 40.7695,
+    lon: -74.0201,
+    status: "Operational",
+    capacityMW: null,
+    lastUpdated: "2026-08-23",
+    sources: [
+      { label: "CoreWeave newsroom — \"Introducing LGA1: CoreWeave's Cutting-Edge Data Center in NYC\"", url: "https://www.coreweave.com/blog/lga1-coreweaves-cutting-edge-data-center-in-nyc" }
+    ],
+    notes: "One of CoreWeave's original three named cloud-region facilities (\"LGA1\"), at the mouth of the Lincoln Tunnel in Weehawken, NJ, serving the NYC metro with sub-1ms latency to Manhattan. Confirmed live via CoreWeave's own blog (Tier 1) but no independent trade-press corroboration or MW figure found yet — worth a search at next audit. Distinct from the Kenilworth, NJ NEST campus (coreweave-kenilworth), ~20 miles away — not a duplicate. Coordinates are a Weehawken town-center approximation, not geocoded to the exact facility address."
   }
 ];
