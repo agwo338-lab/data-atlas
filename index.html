@@ -973,6 +973,20 @@
     document.getElementById("mapLoading").textContent = "Couldn't load the map — check your connection and reload.";
   });
 
+  // Scrolling/pinching out closes the detail card — treat it as the user
+  // backing out to look at the wider map again. Only reacts to genuine
+  // user gestures (e.getOriginalEvent() is set for wheel/touch/drag input,
+  // unset for our own flyTo/fitBounds calls) so selecting a site or
+  // hitting "reset view" doesn't self-close the card it just opened.
+  var lastZoom = map.getZoom();
+  map.on("zoom", function(e){
+    var z = map.getZoom();
+    if (e.originalEvent && z < lastZoom && detailPanel.classList.contains("open")) {
+      closeDetailPanel();
+    }
+    lastZoom = z;
+  });
+
   function zoomToSite(site, targetZoom){
     map.flyTo({ center: [site.lon, site.lat], zoom: targetZoom || DEFAULT_SITE_ZOOM, duration: 650 });
   }
