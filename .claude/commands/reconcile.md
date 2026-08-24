@@ -1,5 +1,5 @@
 ---
-description: Re-verify existing Site Atlas claims against current public sources via research-agent, to catch drift/staleness — findings only, nothing auto-applied.
+description: Re-verify existing Site Atlas claims against current public sources via research-agent, to catch drift/staleness. High-confidence findings are applied and pushed automatically; anything less needs the user's call.
 argument-hint: [scope] — e.g. "partnerships", "CoreWeave partnerships", "sites", a provider name. Defaults to every partner entry in data/providers.js.
 ---
 
@@ -43,11 +43,14 @@ Argument passed: $ARGUMENTS
 3. research-agent reports back per claim: confirmed / changed / could not
    verify / conflicting sources, with confidence and sources, same format
    it already uses.
-4. Present the findings plainly — don't edit any data file yet. Same rule
-   as everywhere else in this project: the user calls which findings get
-   applied.
-5. If asked to apply some or all findings, edit `data/providers.js` (or
-   `data/sites.js`) directly for the ones approved, update `lastUpdated`/
-   `since` and `sources` to reflect the re-verification, then push per
-   CLAUDE.md's workflow (data file edits still need the user's call on
-   *which* findings to apply — but once applied, push immediately).
+4. Split the findings by confidence (per CLAUDE.md's auto-apply policy):
+   - **High confidence** (confirmed or changed) → apply directly: edit
+     `data/providers.js` (or `data/sites.js`), update `lastUpdated`/
+     `since` and `sources` to reflect the re-verification, commit with a
+     message describing what changed and why, and push — no pause to ask
+     first.
+   - **Medium, Low, conflicting, or unverifiable** → do not touch the
+     data file. Present these to the user plainly and wait for their call
+     on which (if any) to apply.
+5. Summarize what happened either way: what was auto-applied and pushed,
+   and what's still waiting on a decision.

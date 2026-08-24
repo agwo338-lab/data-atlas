@@ -56,9 +56,11 @@ capacity. Built as a single static site with no backend and no build step.
   complete and locally verified (served and checked, not just written),
   commit and push to `main` immediately rather than pausing to ask "should
   I push?" — that question isn't useful to someone who can't evaluate the
-  code anyway. This doesn't relax the research-findings review step below:
-  for `data/sites.js`, still get the user's call on *which* findings to
-  apply before editing — but once applied, push those immediately too.
+  code anyway. This extends to research findings too, with one condition:
+  see the auto-apply policy in Data quality below — High-confidence
+  findings from research-agent, news-agent, or `/reconcile` get applied
+  and pushed automatically; anything less than High confidence still
+  needs the user's call before it's touched.
 
 ## Data quality
 
@@ -72,18 +74,16 @@ A `research-agent` subagent (`.claude/agents/research-agent.md`) handles
 research on request — vetting a new candidate, re-checking one entry or
 provider, or auditing the whole dataset — against a rigorous sourcing
 methodology (source grading, corroboration rules, conflict handling). It's
-research-only and can't edit files, so findings still need to be reviewed
-and applied deliberately.
+research-only and can't edit files itself.
 
 A separate `news-agent` subagent (`.claude/agents/news-agent.md`) curates
 provider-level headlines (funding, expansion, partnerships, leadership,
 controversies) for the provider dashboard page's newsfeed — deliberately
 kept apart from `research-agent` since it's a different job: recency and
-notability rather than per-field fact verification. Also research-only,
-same review-before-applying rule: its findings get reviewed and
-hand-transcribed into `data/news.js`, never auto-applied. The provider
-page prefers `data/news.js` for a given provider when it has an entry, and
-falls back to a `sources`-derived list (from `data/sites.js`) otherwise.
+notability rather than per-field fact verification. Also research-only.
+The provider page prefers `data/news.js` for a given provider when it has
+an entry, and falls back to a `sources`-derived list (from
+`data/sites.js`) otherwise.
 
 A `/reconcile` slash command (`.claude/commands/reconcile.md`) codifies a
 third research task, distinct from both agents above: re-checking claims
@@ -91,7 +91,21 @@ third research task, distinct from both agents above: re-checking claims
 `data/providers.js`) against current public sources to catch drift —
 "is this still true," not "vet something new" (research-agent's usual
 job) or "what's new" (news-agent's job). It dispatches to research-agent
-under the hood and is equally findings-only.
+under the hood.
+
+**Auto-apply policy (added Aug 2026):** all three of the above are
+research-only — none of them can edit a file themselves, by design (no
+Write/Edit tool). What changed is what happens to their report next: a
+**High-confidence** finding (research-agent's own scale — 2+ independent
+A/B sources agreeing, at least one recent) gets applied to the relevant
+data file and pushed automatically, no pause to ask first. Anything
+Medium confidence, Low confidence, conflicting, or unverifiable still gets
+surfaced for the user's own call before it's touched — that half of the
+review gate stays in place, specifically because it's what caught two
+fabricated/overstated claims in the `openrouter_ask` incident below. When
+auto-applying, still update `lastUpdated`/`since` and `sources` to reflect
+the re-verification, and write a commit message describing what changed
+and why, same as any other data edit.
 
 ## Research cost
 
