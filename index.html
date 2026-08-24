@@ -687,7 +687,7 @@
       var label = document.createElement("span");
       label.className = "pin-label";
       label.innerHTML =
-        '<span class="pin-label-name">' + (site.site || site.city) + '</span>' +
+        '<span class="pin-label-name">' + site.provider + ' - ' + site.city + '</span>' +
         '<span class="pin-label-cap">' + (site.capacityMW != null ? site.capacityMW + ' MW' : 'Capacity not disclosed') + '</span>';
       el.appendChild(label);
 
