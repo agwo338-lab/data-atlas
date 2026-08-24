@@ -687,6 +687,23 @@
   .status-operational{ background:rgba(74,222,128,0.14); color:#4ADE80; }
   .status-under-construction{ background:rgba(251,191,36,0.14); color:#FBBF24; }
   .status-planned{ background:rgba(148,163,184,0.14); color:#94A3B8; }
+  .status-all{ background:var(--surface-2); color:var(--ink-soft); }
+
+  .status-th{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:0.6rem;
+  }
+  .status-toggle{
+    font-family:var(--font-mono);
+    text-transform:none;
+    letter-spacing:0.02em;
+    border:1px solid transparent;
+    cursor:pointer;
+    transition:border-color 0.12s ease;
+  }
+  .status-toggle:hover{ border-color:currentColor; }
 
   .source-line{
     font-size:0.78rem;
@@ -800,7 +817,12 @@
               <th>Operator</th>
               <th>Site</th>
               <th>Location</th>
-              <th>Status</th>
+              <th>
+                <div class="status-th">
+                  <span>Status</span>
+                  <button class="status-toggle status-pill" id="statusToggle" type="button"></button>
+                </div>
+              </th>
               <th class="mono">Capacity</th>
             </tr>
           </thead>
@@ -1091,6 +1113,32 @@
   // ---- Table ------------------------------------------------------------
   var tbody = document.getElementById("tableBody");
   var rowEls = {};
+
+  // Status column filter — defaults to "operational only" since that's
+  // almost always what's actually relevant; "All" brings back
+  // planned/under-construction rows too.
+  var statusFilter = "operational";
+  var statusToggle = document.getElementById("statusToggle");
+  function updateStatusToggle(){
+    if (statusFilter === "operational") {
+      statusToggle.className = "status-toggle status-pill status-operational";
+      statusToggle.textContent = "Operational";
+      statusToggle.setAttribute("aria-pressed", "true");
+      statusToggle.title = "Showing operational sites only — click to show all statuses";
+    } else {
+      statusToggle.className = "status-toggle status-pill status-all";
+      statusToggle.textContent = "All";
+      statusToggle.setAttribute("aria-pressed", "false");
+      statusToggle.title = "Showing all statuses — click to show operational only";
+    }
+  }
+  statusToggle.addEventListener("click", function(){
+    statusFilter = statusFilter === "operational" ? "all" : "operational";
+    updateStatusToggle();
+    renderTable();
+  });
+  updateStatusToggle();
+
   function renderTable(){
     tbody.innerHTML = "";
     rowEls = {};
@@ -1098,6 +1146,7 @@
     var sorted = SITES.slice().sort(tableSortCompare);
     sorted.forEach(function(site){
       if (!activeProviders[site.provider]) return;
+      if (statusFilter === "operational" && site.status !== "Operational") return;
       shown++;
       var tr = document.createElement("tr");
       tr.setAttribute("data-id", site.id);
