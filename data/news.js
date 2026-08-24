@@ -23,10 +23,17 @@
 // provider page showing citations pulled from its sites' own `sources`
 // fields instead — see renderProviderPage() in index.html.
 //
-// Standard: run news-agent, review its findings, then hand-transcribe the
-// ones worth keeping here — same "findings need a human call before they
-// land in a data file" rule as data/sites.js. Re-run periodically (news
-// goes stale fast); no fixed cadence yet.
+// Standard: run news-agent, then grade each headline it returns against
+// research-agent's source-tier rubric (see .claude/agents/research-agent.md)
+// — news-agent's own sourcing bar is intentionally lighter (a single
+// reputable outlet can be enough for a headline), so don't just take its
+// output at face value. Per CLAUDE.md's auto-apply policy: a headline
+// backed by 2+ independent A/B sources (or otherwise meeting "High
+// confidence") gets transcribed in and pushed automatically; anything
+// resting on a single C/D-grade source, or 2 C/D sources agreeing, is
+// Medium/Low confidence and needs the user's call before it's added — note
+// it in the commit/conversation rather than adding it here. Re-run
+// periodically (news goes stale fast); no fixed cadence yet.
 //
 // First populated 2026-08-23 from a news-agent run covering Nebius and
 // CoreWeave. One source was dropped from the list news-agent returned: a
@@ -133,6 +140,29 @@ var NEWS = {
       sources: [
         { label: "Reuters, Aug 4, 2026", url: "https://www.reuters.com/world/asia-pacific/coreweave-expands-into-indonesia-announces-first-data-center-asia-pacific-2026-08-04/" },
         { label: "CoreWeave newsroom, Aug 4, 2026", url: "https://www.coreweave.com/news/coreweave-expands-cloud-ai-platform-to-indonesia-marking-first-move-into-asia-pacific-region" }
+      ]
+    }
+  ],
+  "AWS": [
+    {
+      date: "2026-04-20",
+      headline: "Amazon commits up to $25B more in Anthropic (on top of an existing $8B stake); Anthropic commits $100B+ over 10 years on AWS Trainium/Graviton compute",
+      why: "One of the largest AI-infrastructure commitments announced anywhere in 2026, cementing AWS's custom Trainium silicon as the backbone of Anthropic's frontier-model training/inference.",
+      category: "partnership",
+      sources: [
+        { label: "Amazon newsroom, Apr 20, 2026", url: "https://www.aboutamazon.com/news/company-news/amazon-invests-additional-5-billion-anthropic-ai" },
+        { label: "Anthropic newsroom, Apr 20, 2026", url: "https://www.anthropic.com/news/anthropic-amazon-compute" },
+        { label: "CNBC, Apr 20, 2026", url: "https://www.cnbc.com/2026/04/20/amazon-invest-up-to-25-billion-in-anthropic-part-of-ai-infrastructure.html" }
+      ]
+    },
+    {
+      date: "2026-08-19",
+      headline: "Raised planned investment in northwest Louisiana data centers to $18B total, adding a third campus (Resilient Technology Park, west Shreveport)",
+      why: "A concrete, dollar-quantified signal of how fast AWS is scaling US data-center capex regionally — up from a $12B commitment announced just six months earlier (Feb 2026).",
+      category: "expansion",
+      sources: [
+        { label: "Amazon newsroom, Aug 2026", url: "https://www.aboutamazon.com/news/company-news/amazon-data-center-louisiana-new-jobs" },
+        { label: "Data Center Dynamics, Aug 2026", url: "https://www.datacenterdynamics.com/en/news/aws-pledges-6bn-investment-in-data-center-campus-in-shreveport-louisiana/" }
       ]
     }
   ]
