@@ -2,8 +2,8 @@
 <title>Site Atlas</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@4/dist/maplibre-gl.css">
-<script src="https://cdn.jsdelivr.net/npm/maplibre-gl@4/dist/maplibre-gl.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@5/dist/maplibre-gl.css">
+<script src="https://cdn.jsdelivr.net/npm/maplibre-gl@5/dist/maplibre-gl.js"></script>
 <script src="data/sites.js"></script>
 
 <style>
@@ -292,7 +292,12 @@
   .pin-marker{
     width:30px; height:30px;
     display:flex; align-items:center; justify-content:center;
-    position:relative;
+    /* No position here: MapLibre's own .maplibregl-marker rule sets
+       position:absolute, which it needs for its placement transform to be
+       relative to the map, not this element's normal-flow position. Setting
+       position:relative here (same specificity, later in the cascade) used
+       to silently win and break marker placement. absolute still works fine
+       as the positioning context .pin-halo/.pin-pulse/.pin-ring need. */
     cursor:pointer;
   }
   .pin-marker.dim{ opacity:0.16; }
@@ -613,6 +618,12 @@
     touchPitch: false
   });
   map.touchZoomRotate.disableRotation();
+  // Globe instead of flat Mercator: vector tiles are Mercator-projected at
+  // the data level regardless, but rendering them onto a sphere removes the
+  // flat projection's area/distance distortion (no more oversized Nordic
+  // countries) since a globe has no projection to distort in the first
+  // place — it's a straightforward map onto the actual 3D shape.
+  map.on("style.load", function(){ map.setProjection({ type: "globe" }); });
 
   function buildPins(){
     SITES.forEach(function(site){
