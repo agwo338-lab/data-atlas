@@ -290,12 +290,16 @@
     color:var(--ink-soft);
     margin-top:0.25rem;
   }
+  .provider-page-col-left{
+    display:flex;
+    flex-direction:column;
+    gap:1.5rem;
+  }
   .provider-page-partners{
     background:var(--surface);
     border:1px solid var(--border);
     border-radius:var(--radius);
     padding:1.1rem 1.2rem;
-    margin-top:1.5rem;
   }
   .provider-page-partners h2{
     margin:0 0 0.75rem;
@@ -449,7 +453,12 @@
     overflow:hidden;
     position:relative;
     min-height:760px;
+    transition:min-height 0.3s ease;
   }
+  /* ~40% shorter while a provider panel is expanded, so the site table's
+     replacement (the provider panel) doesn't push the map far down the
+     page. */
+  .map-panel.compact{ min-height:456px; }
   #map{ position:absolute; inset:0; }
   .maplibregl-ctrl-attrib{ font-size:10px !important; }
   .map-loading{
@@ -820,15 +829,17 @@
         <h1 id="providerPageName"></h1>
       </div>
       <div class="provider-page-stats" id="providerPageStats"></div>
-      <section class="provider-page-partners">
-        <h2>Partnerships</h2>
-        <ul id="providerPagePartners"></ul>
-      </section>
       <div class="provider-page-body">
-        <section class="provider-page-locations">
-          <h2>Locations</h2>
-          <ul id="providerPageLocations"></ul>
-        </section>
+        <div class="provider-page-col-left">
+          <section class="provider-page-locations">
+            <h2>Locations</h2>
+            <ul id="providerPageLocations"></ul>
+          </section>
+          <section class="provider-page-partners">
+            <h2>Partnerships</h2>
+            <ul id="providerPagePartners"></ul>
+          </section>
+        </div>
         <section class="provider-page-news">
           <h2>Latest headlines</h2>
           <ul class="headline-list" id="providerPageHeadlines"></ul>
@@ -1281,7 +1292,10 @@
       '</li>';
     }).join('');
     providerPageLocations.querySelectorAll(".provider-site-item").forEach(function(li){
-      li.addEventListener("click", function(){ goToSiteOnMap(li.getAttribute("data-id")); });
+      li.addEventListener("click", function(){
+        goToSiteOnMap(li.getAttribute("data-id"));
+        scrollToMap();
+      });
     });
 
     // Partnerships (data/providers.js) — major labs/companies with a
@@ -1363,7 +1377,19 @@
   // separate page/route. Clicking the same provider's (now-collapsed)
   // heading again, or the back link, returns to the normal view.
   var tableSection = document.getElementById("tableSection");
+  var mapPanelEl = document.querySelector(".map-panel");
   var expandedProvider = null;
+
+  function scrollToMap(){
+    if (mapPanelEl) mapPanelEl.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  // MapLibre v5 auto-observes container resizes, but firing an explicit
+  // resize right as the CSS transition finishes avoids any lag/blank-tile
+  // flash while it catches up on its own.
+  mapPanelEl.addEventListener("transitionend", function(e){
+    if (e.propertyName === "min-height") map.resize();
+  });
 
   function expandProvider(p){
     if (expandedProvider === p) { collapseProviderPanel(); return; }
@@ -1375,10 +1401,12 @@
     });
     tableSection.hidden = true;
     providerTabPanel.hidden = false;
+    mapPanelEl.classList.add("compact");
   }
 
   function collapseProviderPanel(){
     expandedProvider = null;
+    mapPanelEl.classList.remove("compact");
     Object.keys(providerCardEls).forEach(function(name){
       providerCardEls[name].classList.remove("collapsed", "active");
     });
