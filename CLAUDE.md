@@ -59,6 +59,15 @@ methodology (source grading, corroboration rules, conflict handling). It's
 research-only and can't edit files, so findings still need to be reviewed
 and applied deliberately.
 
+A separate `news-agent` subagent (`.claude/agents/news-agent.md`) curates
+provider-level headlines (funding, expansion, partnerships, leadership,
+controversies) for the provider dashboard page's newsfeed — deliberately
+kept apart from `research-agent` since it's a different job: recency and
+notability rather than per-field fact verification. Also research-only,
+same review-before-applying rule. As of Aug 2026 nothing in `index.html`
+consumes its output yet — the provider page's "headlines" section is still
+generated from each site's existing `sources` array in `data/sites.js`.
+
 ## Research cost
 
 `.mcp.json` registers a small local MCP server (`.claude/mcp/openrouter/`)
