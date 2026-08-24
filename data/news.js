@@ -145,8 +145,19 @@ var NEWS = {
   ],
   "AWS": [
     {
+      date: "2026-02-27",
+      headline: "Amazon invests $50B in OpenAI; OpenAI and AWS expand their existing $38B cloud agreement by $100B over 8 years, including a 2GW Trainium commitment",
+      why: "The largest AWS customer/compute commitment found to date — OpenAI diversifying meaningfully off Azure-exclusivity onto AWS's own Trainium silicon, a strong proof point for Amazon's custom-chip strategy.",
+      category: "partnership",
+      sources: [
+        { label: "Amazon newsroom, Feb 27, 2026", url: "https://www.aboutamazon.com/news/aws/openai-amazon-partnership-explained" },
+        { label: "OpenAI newsroom, Feb 27, 2026", url: "https://openai.com/index/amazon-partnership/" },
+        { label: "CNBC, Feb 27, 2026", url: "https://www.cnbc.com/2026/02/27/amazon-open-ai-cloud-jassy-altman.html" }
+      ]
+    },
+    {
       date: "2026-04-20",
-      headline: "Amazon commits up to $25B more in Anthropic (on top of an existing $8B stake); Anthropic commits $100B+ over 10 years on AWS Trainium/Graviton compute",
+      headline: "Amazon invests $5B in Anthropic now (option for up to $25B more later, on top of an existing $8B stake); Anthropic separately commits $100B+ over 10 years on AWS Trainium/Graviton compute (up to 5GW capacity)",
       why: "One of the largest AI-infrastructure commitments announced anywhere in 2026, cementing AWS's custom Trainium silicon as the backbone of Anthropic's frontier-model training/inference.",
       category: "partnership",
       sources: [
