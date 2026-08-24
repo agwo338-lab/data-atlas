@@ -4,6 +4,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-simplify@3/dist/topojson-simplify.min.js"></script>
 <script src="data/sites.js"></script>
 
 <style>
@@ -687,11 +688,23 @@
   ])
     .then(function(results){
       var landWorld = results[0], countriesWorld = results[1];
-      var land = topojson.feature(landWorld, landWorld.objects.land);
+
+      // The 50m land topology has far more vertices than this map ever
+      // displays cleanly — most are visually redundant points on long,
+      // near-straight coastline runs, and re-rendering all of them on every
+      // pan/zoom frame (not just the initial draw) is the main cost behind
+      // sluggish interaction. Simplify once, topology-aware (so adjacent
+      // shapes stay aligned, no gaps), instead of dropping to a coarser
+      // source file and losing real detail.
+      var simplifiedLand = topojson.presimplify(landWorld);
+      var minWeight = topojson.quantile(simplifiedLand, 0.35);
+      simplifiedLand = topojson.simplify(simplifiedLand, minWeight);
+
+      var land = topojson.feature(simplifiedLand, simplifiedLand.objects.land);
       // Borders deliberately use the coarser 110m topology — coastline detail
-      // benefits from 50m precision, but dashed administrative-border strokes
-      // don't need it, and it's the priciest thing to re-rasterize on every
-      // pan/zoom frame.
+      // benefits from precision, but dashed administrative-border strokes
+      // don't need it, and dashed strokes are themselves expensive to
+      // re-rasterize every frame.
       var borders = topojson.mesh(countriesWorld, countriesWorld.objects.countries, function(a, b){ return a !== b; });
       buildMap(land, borders);
     })
