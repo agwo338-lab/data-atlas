@@ -308,7 +308,7 @@
     border:1.4px solid #060B12;
     transition:transform 0.15s ease;
   }
-  .pin-marker.active .pin-core{ transform:scale(1.4); }
+  .pin-marker:hover .pin-core, .pin-marker:focus .pin-core, .pin-marker.active .pin-core{ transform:scale(1.4); }
   .pin-halo{
     position:absolute;
     width:26px; height:26px;
@@ -317,7 +317,40 @@
     opacity:0;
     transition:opacity 0.15s ease;
   }
-  .pin-marker:hover .pin-halo, .pin-marker.active .pin-halo{ opacity:0.35; }
+  .pin-marker:hover .pin-halo, .pin-marker:focus .pin-halo, .pin-marker.active .pin-halo{ opacity:0.35; }
+  .pin-marker:hover, .pin-marker:focus{ z-index:10; }
+
+  .pin-label{
+    position:absolute;
+    bottom:calc(100% + 6px);
+    left:50%;
+    transform:translateX(-50%);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:0.1rem;
+    padding:0.35rem 0.55rem;
+    border-radius:6px;
+    background:var(--surface);
+    border:1px solid var(--border);
+    white-space:nowrap;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity 0.12s ease;
+  }
+  .pin-marker:hover .pin-label, .pin-marker:focus .pin-label{ opacity:1; }
+  .pin-label-name{
+    font-size:0.76rem;
+    font-weight:600;
+    color:var(--ink);
+    line-height:1.2;
+  }
+  .pin-label-cap{
+    font-family:var(--font-mono);
+    font-size:0.68rem;
+    color:var(--ink-soft);
+    line-height:1.2;
+  }
 
   /* Operational sites pulse to read as "live"; planned/under-construction sites
      stay static and muted, with a dashed ring standing in for "not built yet".
@@ -651,6 +684,13 @@
       el.appendChild(halo);
       el.appendChild(core);
 
+      var label = document.createElement("span");
+      label.className = "pin-label";
+      label.innerHTML =
+        '<span class="pin-label-name">' + (site.site || site.city) + '</span>' +
+        '<span class="pin-label-cap">' + (site.capacityMW != null ? site.capacityMW + ' MW' : 'Capacity not disclosed') + '</span>';
+      el.appendChild(label);
+
       el.addEventListener("click", function(e){ e.stopPropagation(); selectSite(site.id); });
       el.addEventListener("keydown", function(e){ if (e.key === "Enter" || e.key === " ") { e.preventDefault(); selectSite(site.id); } });
 
@@ -686,18 +726,28 @@
 
   function providerStats(p){
     var sites = SITES.filter(function(s){ return s.provider === p; });
-    var disclosed = sites.filter(function(s){ return s.capacityMW != null; });
+    var operational = sites.filter(function(s){ return s.status === "Operational"; });
+    var disclosed = operational.filter(function(s){ return s.capacityMW != null; });
     var totalGW = disclosed.reduce(function(sum, s){ return sum + s.capacityMW; }, 0) / 1000;
-    return { siteCount: sites.length, totalGW: totalGW, disclosedCount: disclosed.length };
+    return { siteCount: sites.length, operationalCount: operational.length, totalGW: totalGW, disclosedCount: disclosed.length };
   }
 
   var dashboardEl = document.getElementById("providerDashboard");
   providers.forEach(function(p){
     var stats = providerStats(p);
-    var capacityLabel = stats.disclosedCount === 0 ? "—" : stats.totalGW.toFixed(2);
-    var capacitySub = stats.disclosedCount === 0
-      ? "capacity undisclosed"
-      : (stats.disclosedCount < stats.siteCount ? "GW (" + stats.disclosedCount + "/" + stats.siteCount + " disclosed)" : "GW disclosed");
+    var capacityLabel, capacitySub;
+    if (stats.operationalCount === 0) {
+      capacityLabel = "—";
+      capacitySub = "no operational sites yet";
+    } else if (stats.disclosedCount === 0) {
+      capacityLabel = "—";
+      capacitySub = "operational capacity undisclosed";
+    } else {
+      capacityLabel = stats.totalGW.toFixed(2);
+      capacitySub = stats.disclosedCount < stats.operationalCount
+        ? "GW (" + stats.disclosedCount + "/" + stats.operationalCount + " operational disclosed)"
+        : "GW operational";
+    }
 
     var providerSites = SITES.filter(function(s){ return s.provider === p; }).sort(tableSortCompare);
     var sitesHtml = providerSites.map(function(s){
