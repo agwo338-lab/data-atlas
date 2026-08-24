@@ -21,6 +21,13 @@ capacity. Built as a single static site with no backend and no build step.
   documents the field schema and the sourcing standard (how sources are
   tiered, what needs verification, when to recheck). Follow that standard
   whenever adding or updating an entry.
+- `data/providers.js` — one entry per operator, for anything that's about
+  the *company* rather than one specific site — currently just a pinned
+  display color (dashboard card, map pins, table dot, provider page).
+  A provider doesn't need an entry here to show up on the map; any new
+  `provider` string in `sites.js` is auto-assigned a color from a shared
+  palette. Add an entry only to pin a specific color, or as a home for
+  future provider-level fields.
 - `data/news.js` — curated company-level headlines shown on each provider's
   dedicated page (opened by clicking its card on the dashboard), keyed by
   provider name. Deliberately separate from `sites.js`'s per-site `sources`

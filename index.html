@@ -5,6 +5,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@5/dist/maplibre-gl.css">
 <script src="https://cdn.jsdelivr.net/npm/maplibre-gl@5/dist/maplibre-gl.js"></script>
 <script src="data/sites.js"></script>
+<script src="data/providers.js"></script>
 <script src="data/news.js"></script>
 
 <style>
@@ -758,20 +759,24 @@
 <script>
 (function(){
 
-  // SITES comes from data/sites.js, loaded before this script.
+  // SITES comes from data/sites.js, PROVIDERS from data/providers.js —
+  // both loaded before this script.
 
   // ---- Provider colors ---------------------------------------------------
-  // Known operators can be pinned to a specific color here; anything new
-  // gets the next unused color from PALETTE automatically, no edit needed.
-  var COLOR_OVERRIDES = { "Nebius": "#4CAF6D", "CoreWeave": "#0541E9" };
+  // A provider entry in data/providers.js can pin a specific color; any
+  // provider name that shows up in SITES without one there gets the next
+  // unused color from PALETTE automatically, no edit needed.
   var PALETTE = ["#E39149", "#5B9BE0", "#9A85E0", "#E0708A", "#D9C24E", "#4FC2C9", "#C97AD1"];
+  var providerLookup = {};
+  (typeof PROVIDERS !== "undefined" ? PROVIDERS : []).forEach(function(p){ providerLookup[p.name] = p; });
   var providerColor = {};
   (function assignColors(){
     var seen = [];
     SITES.forEach(function(s){ if (seen.indexOf(s.provider) === -1) seen.push(s.provider); });
     var next = 0;
     seen.forEach(function(p){
-      providerColor[p] = COLOR_OVERRIDES[p] || PALETTE[next++ % PALETTE.length];
+      var pinned = providerLookup[p] && providerLookup[p].color;
+      providerColor[p] = pinned || PALETTE[next++ % PALETTE.length];
     });
   })();
   function colorFor(provider){ return providerColor[provider] || "#5EEAD4"; }
