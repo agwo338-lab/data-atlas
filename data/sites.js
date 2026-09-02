@@ -643,6 +643,60 @@ var SITES = [
     notes: "Port of Walla Walla sold ~554 acres to Amazon Data Services (via project entity \"Advance Phase LLC\") on Feb 12, 2026, in the Wallula/Burbank area east of US-12 near the Columbia River. Reported as a ~$4.8-5B project. Initial application (Phase 1) covers 134 acres for 3 data center buildings (~218,000-220,000 sq ft each); the full master plan spans up to 16 buildings across 4 phases on the full 554 acres. As of Aug 11, 2026 (most recent check), permitting remained incomplete — a Traffic Impact Analysis was due Aug 24, 2026, and the county's own site states no application had yet been received as of its Jun 24, 2026 update. No MW figure disclosed anywhere — left null rather than guessed. Re-check status after the Aug 24, 2026 permitting deadline. Coordinates are a Wallula/Burbank-area approximation, not geocoded to the exact parcel."
   },
   {
+    id: "aws-shreveport",
+    provider: "AWS",
+    site: "Resilient Technology Park (STACK Infrastructure)",
+    city: "Shreveport, LA",
+    country: "United States",
+    lat: 32.4474,
+    lon: -93.9054,
+    status: "Planned",
+    capacityMW: null,
+    lastUpdated: "2026-09-01",
+    sources: [
+      { label: "Data Center Dynamics — \"AWS pledges $6bn investment in data center campus in Shreveport, Louisiana\"", url: "https://www.datacenterdynamics.com/en/news/aws-pledges-6bn-investment-in-data-center-campus-in-shreveport-louisiana/" },
+      { label: "KSLA — \"Amazon Web Services announces a third data center campus is coming to Shreveport\"", url: "https://www.ksla.com/2026/08/18/amazon-web-services-announces-third-data-center-campus-is-coming-shreveport/" }
+    ],
+    notes: "Third AWS/STACK Infrastructure campus in the Caddo-Bossier area, announced Aug 18, 2026 ($6B, part of an $18B total across 3 LA campuses). Distinct from the earlier two-campus, $12B Feb 2026 announcement (Louisiana Economic Development). Coordinates approximate, from a commercial real-estate listing for the 7340 Greenwood Road parcel, not an official filing — no capacity (MW) disclosed. No confirmation construction has started on this specific campus as of Sep 2026; re-check in ~6 months per 'Planned' cadence."
+  },
+  {
+    id: "aws-boling",
+    provider: "AWS",
+    site: "Project Eagle",
+    city: "Boling, TX",
+    country: "United States",
+    lat: 29.2583,
+    lon: -95.9436,
+    status: "Planned",
+    capacityMW: null,
+    lastUpdated: "2026-09-01",
+    sources: [
+      { label: "Texas Department of Licensing and Regulation — TDLR Project TABS2026027114 (\"Project Eagle,\" Amazon Data Services, Inc.)", url: "https://www.tdlr.texas.gov/TABS/Search/Print/TABS2026027114" },
+      { label: "Data Center Dynamics — \"AWS files for $1.2bn data center campus outside Houston, Texas\"", url: "https://www.datacenterdynamics.com/en/news/aws-files-for-12bn-data-center-campus-outside-houston-texas/" },
+      { label: "Wharton Post — \"New Filings Expand Project Eagle Plans Near Boling\"", url: "https://whartonpost.com/2026/08/06/project-eagle-expands-10-data-centers-boling/" }
+    ],
+    notes: "Amazon Data Services, Inc. is the registered TDLR owner. Expanded from 4 to 10 registered data-center buildings (plus 1 auxiliary water building) as of Aug 2026 filings; TDLR-registered construction cost ~$3B, broader press estimates ~$10B all-in (land+equipment). ~2,700-3,000-acre site near FM 1301/FM 442, addresses on Eaglewood Rd. Site prep underway but project still needs additional county permits (a groundwater district tabled two large water-well permits in Jun 2026 over community concerns) — construction has not been confirmed to have actually started. One source (Houston Chronicle investigation, recirculated elsewhere) cites 'up to 75MW at peak' but this is single-sourced and not independently corroborated — left out of capacityMW pending a second source. Coordinates are Boling town-center approximation; exact parcel address (e.g. 270 Eaglewood Rd) not geocoded. Re-check within ~3 months given fast-moving permitting situation."
+  },
+  {
+    id: "aws-vicksburg",
+    provider: "AWS",
+    site: "Warren County Data Center Campus",
+    city: "Vicksburg, MS",
+    country: "United States",
+    lat: 32.3527,
+    lon: -90.8779,
+    status: "Under construction",
+    capacityMW: null,
+    lastUpdated: "2026-09-01",
+    sources: [
+      { label: "About Amazon — \"Amazon plans to invest at least $3 billion in Warren County, Mississippi, for next-generation data center campus\"", url: "https://www.aboutamazon.com/news/company-news/amazon-3-billion-mississippi-data-center-investment" },
+      { label: "Office of Governor Tate Reeves — official announcement", url: "https://governorreeves.ms.gov/governor-tate-reeves-announces-amazon-plans-to-invest-3-billion-in-vicksburg/" },
+      { label: "Data Center Dynamics — \"Amazon to build $3bn data center campus in Vicksburg, Mississippi\"", url: "https://www.datacenterdynamics.com/en/news/amazon-to-build-3bn-data-center-campus-in-vicksburg-mississippi/" },
+      { label: "Vicksburg Post — \"Prime site: AWS announces U.S. 61 site for Vicksburg data center\"", url: "https://www.vicksburgpost.com/news/aws-announces-us-61-site-for-vicksburg-data-center-e70c02b7" }
+    ],
+    notes: "$3B investment, largest private investment in Warren County history; ~200 direct jobs. Site is described only at road level — along U.S. Highway 61 South, entrance road off Old Cain Ridge Rd, near the Port of Vicksburg — no parcel address published, so lat/lon here is Vicksburg's city-center coordinate, NOT the actual site; treat as approximate pending a precise address. Status upgraded from Planned to Under construction based on Apr-Jun 2026 local reporting describing entrance-road construction / site mobilization (no confirmation of vertical building construction yet). No MW capacity disclosed. Re-check within 3-6 months — both the exact location and status are likely to firm up."
+  },
+  {
     id: "spacexai-colossus1",
     provider: "SpaceXAI",
     site: "Colossus 1",
