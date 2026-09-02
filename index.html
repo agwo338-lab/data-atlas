@@ -147,42 +147,6 @@
     color:var(--ink-soft);
     margin-top:0.2rem;
   }
-  .provider-site-item{
-    display:flex;
-    align-items:center;
-    gap:0.5rem;
-    padding:0.35rem 0.15rem;
-    font-size:0.8rem;
-    cursor:pointer;
-    border-radius:4px;
-  }
-  .provider-site-item:hover{ background:var(--surface-2); }
-  .provider-site-name{
-    flex:1;
-    min-width:0;
-    overflow:hidden;
-    text-overflow:ellipsis;
-    white-space:nowrap;
-  }
-  .provider-site-loc{
-    color:var(--ink-soft);
-    font-size:0.72rem;
-    flex-shrink:0;
-  }
-  .provider-site-cap{
-    color:var(--ink-soft);
-    font-family:var(--font-mono);
-    font-size:0.72rem;
-    font-variant-numeric:tabular-nums;
-    flex-shrink:0;
-    width:4.6em;
-    text-align:right;
-  }
-  .status-dot{ width:6px; height:6px; border-radius:50%; flex-shrink:0; }
-  .status-dot.status-operational{ background:#4ADE80; }
-  .status-dot.status-under-construction{ background:#FBBF24; }
-  .status-dot.status-planned{ background:#94A3B8; }
-
   .provider-newsfeed{
     border-top:1px dashed var(--border);
     padding-top:0.65rem;
@@ -359,15 +323,6 @@
     margin:0 0 0.75rem;
     font-size:0.95rem;
     font-weight:600;
-  }
-  .provider-page-locations ul{
-    list-style:none;
-    margin:0;
-    padding:0;
-    display:flex;
-    flex-direction:column;
-    max-height:420px;
-    overflow-y:auto;
   }
   .headline-list{
     list-style:none;
@@ -818,10 +773,6 @@
       <div class="provider-page-stats" id="providerPageStats"></div>
       <div class="provider-page-body">
         <div class="provider-page-col-left">
-          <section class="provider-page-locations">
-            <h2>Locations</h2>
-            <ul id="providerPageLocations"></ul>
-          </section>
           <section class="provider-page-partners">
             <h2>Partnerships</h2>
             <ul id="providerPagePartners"></ul>
@@ -1161,11 +1112,6 @@
   var detailPanel = document.getElementById("detailPanel");
   var detailPanelBody = document.getElementById("detailPanelBody");
 
-  function goToSiteOnMap(id){
-    switchToMapTab();
-    selectSite(id);
-  }
-
   function closeDetailPanel(){
     currentId = null;
     detailPanel.classList.remove("open");
@@ -1228,7 +1174,6 @@
   var providerPageDot = document.getElementById("providerPageDot");
   var providerPageName = document.getElementById("providerPageName");
   var providerPageStats = document.getElementById("providerPageStats");
-  var providerPageLocations = document.getElementById("providerPageLocations");
   var providerPagePartners = document.getElementById("providerPagePartners");
   var providerPageHeadlines = document.getElementById("providerPageHeadlines");
   var providerPageSearchLink = document.getElementById("providerPageSearchLink");
@@ -1255,20 +1200,6 @@
       '<div><div class="provider-page-stat-value">' + stats.operationalCount + '</div><div class="provider-page-stat-label">operational</div></div>';
 
     var providerSites = SITES.filter(function(s){ return s.provider === p; }).sort(tableSortCompare);
-    providerPageLocations.innerHTML = providerSites.map(function(s){
-      return '<li class="provider-site-item" data-id="' + s.id + '">' +
-        '<span class="status-dot status-' + statusSlug(s.status) + '"></span>' +
-        '<span class="provider-site-name">' + (s.site || s.city) + '</span>' +
-        '<span class="provider-site-loc">' + s.city + ', ' + s.country + '</span>' +
-        '<span class="provider-site-cap">' + (s.capacityMW != null ? s.capacityMW + ' MW' : '—') + '</span>' +
-      '</li>';
-    }).join('');
-    providerPageLocations.querySelectorAll(".provider-site-item").forEach(function(li){
-      li.addEventListener("click", function(){
-        goToSiteOnMap(li.getAttribute("data-id"));
-        scrollToMap();
-      });
-    });
 
     // Partnerships (data/providers.js) — major labs/companies with a
     // disclosed relationship to this provider, distinct from the site-level
