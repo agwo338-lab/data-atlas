@@ -108,7 +108,6 @@
   .provider-card.active{ border-color:var(--dot); }
   .provider-card.collapsed{ padding-bottom:1.1rem; gap:0; }
   .provider-card.collapsed .provider-card-stats,
-  .provider-card.collapsed .provider-sitelist,
   .provider-card.collapsed .provider-newsfeed{
     display:none;
   }
@@ -148,18 +147,6 @@
     color:var(--ink-soft);
     margin-top:0.2rem;
   }
-  .provider-sitelist{
-    list-style:none;
-    margin:0;
-    padding:0.15rem 0;
-    max-height:132px;
-    overflow-y:auto;
-    display:flex;
-    flex-direction:column;
-    border-top:1px solid var(--border);
-  }
-  .provider-sitelist::-webkit-scrollbar{ width:6px; }
-  .provider-sitelist::-webkit-scrollbar-thumb{ background:var(--border); border-radius:3px; }
   .provider-site-item{
     display:flex;
     align-items:center;
@@ -512,7 +499,7 @@
        as the positioning context .pin-halo/.pin-pulse/.pin-ring need. */
     cursor:pointer;
   }
-  .pin-marker.dim{ opacity:0.16; }
+  .pin-marker.dim{ display:none; }
   .pin-core{
     width:10px; height:10px;
     border-radius:50%;
@@ -1079,16 +1066,6 @@
         : "GW operational";
     }
 
-    var providerSites = SITES.filter(function(s){ return s.provider === p; }).sort(tableSortCompare);
-    var sitesHtml = providerSites.map(function(s){
-      return '<li class="provider-site-item" data-id="' + s.id + '">' +
-        '<span class="status-dot status-' + statusSlug(s.status) + '"></span>' +
-        '<span class="provider-site-name">' + (s.site || s.city) + '</span>' +
-        '<span class="provider-site-loc">' + s.city + '</span>' +
-        '<span class="provider-site-cap">' + (s.capacityMW != null ? s.capacityMW + ' MW' : '—') + '</span>' +
-      '</li>';
-    }).join('');
-
     var card = document.createElement("div");
     card.className = "provider-card";
     card.style.setProperty("--dot", colorFor(p));
@@ -1101,12 +1078,7 @@
         '<div><div class="provider-stat-value">' + capacityLabel + '</div><div class="provider-stat-label">' + capacitySub + '</div></div>' +
         '<div><div class="provider-stat-value">' + stats.siteCount + '</div><div class="provider-stat-label">site' + (stats.siteCount === 1 ? '' : 's') + '</div></div>' +
       '</div>' +
-      '<ul class="provider-sitelist">' + sitesHtml + '</ul>' +
       '<div class="provider-newsfeed">Newsfeed coming soon.</div>';
-
-    card.querySelectorAll(".provider-site-item").forEach(function(li){
-      li.addEventListener("click", function(e){ e.stopPropagation(); goToSiteOnMap(li.getAttribute("data-id")); });
-    });
 
     card.addEventListener("click", function(){ expandProvider(p); });
     providerCardEls[p] = card;
