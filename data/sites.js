@@ -395,13 +395,13 @@ var SITES = [
     lat: 30.2672,
     lon: -97.7431,
     status: "Operational",
-    capacityMW: 16,
-    lastUpdated: "2026-08-23",
+    capacityMW: 20,
+    lastUpdated: "2026-09-02",
     sources: [
       { label: "Core Scientific investor newsroom, Mar 2024", url: "https://investors.corescientific.com/news-events/press-releases/detail/9/core-scientific-to-provide-coreweave-up-to-16-mw-of-data-center-infrastructure-to-support-ai-and-hpc-workloads-in-long-term-hosting-contract-with-potential-revenue-of-more-than-100-million" },
       { label: "Data Center Dynamics — \"CoreWeave to lease 16MW of data center space from cryptominer Core Scientific\"", url: "https://www.datacenterdynamics.com/en/news/coreweave-to-lease-16mw-of-data-center-space-from-cryptominer-core-scientific/" }
     ],
-    notes: "CoreWeave's first Core Scientific hosting deal, signed Mar 2024 — predates the later Denton/Muskogee/Marble/Dalton deals. Former HPE hosting/HPC facility at 3301 Hibbetts Rd, 118,000 sq ft, 8-year contract, >$100M potential revenue ($97.8M in lease payments). A Q1 2026 Core Scientific investor summary lists this site at ~20MW as part of the company's ~590MW total CoreWeave portfolio — that figure isn't yet corroborated by a dedicated primary/trade-press source, so the original disclosed 16MW is used here; re-check for a confirmed expansion. Coordinates are an Austin city-center approximation."
+    notes: "CoreWeave's first Core Scientific hosting deal, signed Mar 2024 — predates the later Denton/Muskogee/Marble/Dalton deals. Former HPE hosting/HPC facility at 3301 Hibbetts Rd, 118,000 sq ft, 8-year contract, >$100M potential revenue ($97.8M in lease payments). Originally disclosed at 16MW; Core Scientific's Q4 2025 and Q1 2026 investor disclosures both list this site at 20MW as part of the company's named 590MW/5-site CoreWeave portfolio (Denton/Dalton/Muskogee/Marble/Austin) — updated to 20MW on the strength of that repeated primary-source figure, though independent trade-press confirmation is still pending. Coordinates are an Austin city-center approximation."
   },
   {
     id: "coreweave-cedarcreek",
@@ -413,12 +413,13 @@ var SITES = [
     lon: -97.3286,
     status: "Under construction",
     capacityMW: null,
-    lastUpdated: "2026-08-23",
+    lastUpdated: "2026-09-02",
     sources: [
       { label: "Data Center Dynamics — \"CoreWeave to lease capacity from EdgeConneX at data center campus in Cedar Creek, Texas\"", url: "https://www.datacenterdynamics.com/en/news/coreweave-to-lease-capacity-from-edgeconnex-at-data-center-campus-in-cedar-creek-texas/" },
-      { label: "Community Impact, Jul 2026 — \"AI cloud company CoreWeave to fill $440M Cedar Creek data center\"", url: "https://communityimpact.com/bastrop-cedar-creek/development/ai-cloud-company-coreweave-to-fill-440m-cedar-creek-data-center/" }
+      { label: "Community Impact, Jul 2026 — \"AI cloud company CoreWeave to fill $440M Cedar Creek data center\"", url: "https://communityimpact.com/bastrop-cedar-creek/development/ai-cloud-company-coreweave-to-fill-440m-cedar-creek-data-center/" },
+      { label: "Community Impact — \"EdgeConneX plans second data center campus in Bastrop County\"", url: "https://communityimpact.com/austin/bastrop-cedar-creek/government/2026/03/31/edgeconnex-plans-second-data-center-campus-in-bastrop-county/" }
     ],
-    notes: "CoreWeave named as qualifying tenant for the first of up to 19 potential EdgeConneX buildings planned at this Bastrop County campus; confirmed via the county's Dec 2024 10-year/75% property tax abatement and a Jul 2025 Texas Comptroller large-data-center-project certification. First building ($440M) under construction as of Jul 2026, expected to open ~Aug 2026. No MW figure disclosed by CoreWeave or EdgeConneX in any source found — left null rather than guessed. Re-check status soon; opening date is essentially now. Coordinates are a Cedar Creek/Bastrop County approximation."
+    notes: "CoreWeave named as qualifying tenant for EdgeConneX's Campus 1 at this Bastrop County site — 4 buildings, ~2.8M sq ft, ~$1.4B — confirmed via the county's Dec 2024 10-year/75% property tax abatement and a Jul 2025 Texas Comptroller large-data-center-project certification. First building ($440M) under construction as of Jul 2026, expected to open mid-to-late 2026 (local press varies between Jun and Aug 2026). Correction: the earlier \"up to 19 potential buildings\" figure conflated Campus 1 with two separate, later-announced EdgeConneX campuses (up to 9 buildings each) elsewhere in the county — those are distinct developments with no confirmed CoreWeave involvement as of this update. No MW figure disclosed by CoreWeave or EdgeConneX for Campus 1 in any source found — left null rather than guessed. Coordinates are a Cedar Creek/Bastrop County approximation."
   },
   {
     id: "coreweave-kenilworth",
@@ -498,13 +499,14 @@ var SITES = [
     lat: 43.3616,
     lon: -80.3144,
     status: "Planned",
-    capacityMW: null,
-    lastUpdated: "2026-08-23",
+    capacityMW: 54,
+    lastUpdated: "2026-09-02",
     sources: [
       { label: "Data Center Dynamics — \"AI startup Cohere and CoreWeave plan multibillion-dollar data center in Canada\"", url: "https://www.datacenterdynamics.com/en/news/ai-startup-cohere-and-coreweave-plan-multibillion-dollar-data-center-in-canada/" },
-      { label: "The Globe and Mail — CoreWeave/Cohere Cambridge, Ontario data centre", url: "https://www.theglobeandmail.com/business/article-coreweave-ai-data-centre-cambridge-ontario-cohere/" }
+      { label: "The Globe and Mail — CoreWeave/Cohere Cambridge, Ontario data centre", url: "https://www.theglobeandmail.com/business/article-coreweave-ai-data-centre-cambridge-ontario-cohere/" },
+      { label: "CPP Investments newsroom — \"CPP Investments Commits to $225 Million in Construction Financing for Ontario Data Centre\"", url: "https://www.cppinvestments.com/newsroom/cpp-investments-commits-to-225-million-in-construction-financing-for-ontario-data-centre/" }
     ],
-    notes: "CoreWeave will operate a data center in Cambridge, Ontario with Cohere as anchor tenant; Cohere received $240M in Canadian federal funding toward a $725M facility, part of Canada's $2B Sovereign AI Compute Strategy. Property tied to TowerBrook Capital Partners, partnered with Related Digital. A \"64MW\" figure surfaced in early searches but couldn't be confirmed as specific to this site (may belong to a different, unrelated Related Digital Ontario project) — left null rather than guessed. Note: a separate, unrelated facility (\"Ascent TOR1\") also sits in the Cambridge/Kitchener-Waterloo corridor but is operated by Ascent Data Centers, with no CoreWeave connection — do not conflate the two. Coordinates are a Cambridge, ON city-center approximation."
+    notes: "CoreWeave will operate a data center in Cambridge, Ontario with Cohere as anchor tenant; Cohere received $240M in Canadian federal funding toward a $725M facility, part of Canada's $2B Sovereign AI Compute Strategy. CPP Investments announced (Jul 31, 2025) a C$225M construction-loan commitment (50% of a $450M facility, Deutsche Bank as lead lender) to expand this site from ~6MW to 54MW of hyperscale capacity, per CPP Investments' own newsroom and Globe and Mail reporting — capacity updated to 54MW on that basis. The JV developing the site is Related Digital + Ascent + TowerBrook Capital Partners: \"Ascent\" is a co-developer of this specific facility, not the unrelated \"Ascent TOR1\" facility elsewhere in the Cambridge/Kitchener-Waterloo corridor (operated separately by Ascent Data Centers) — the two remain distinct sites, but the JV-partner overlap is worth noting. Coordinates are a Cambridge, ON city-center approximation."
   },
   {
     id: "coreweave-northlanarkshire",
