@@ -515,13 +515,15 @@ var SITES = [
     lat: 55.7803,
     lon: -3.9917,
     status: "Under construction",
-    capacityMW: null,
-    lastUpdated: "2026-08-23",
+    capacityMW: 80,
+    lastUpdated: "2026-09-02",
     sources: [
       { label: "Data Center Dynamics — \"DataVita secures £300m debt facility to expand North Lanarkshire data center campus\"", url: "https://www.datacenterdynamics.com/en/news/datavita-secures-300m-debt-facility-to-expand-north-lanarkshire-data-center-campus/" },
-      { label: "Data Centre Magazine — \"Behind DataVita's £300m AI Data Centre Expansion in Scotland\"", url: "https://datacentremagazine.com/news/inside-datavitas-300m-ai-data-centre-expansion-in-scotland" }
+      { label: "Data Centre Magazine — \"Behind DataVita's £300m AI Data Centre Expansion in Scotland\"", url: "https://datacentremagazine.com/news/inside-datavitas-300m-ai-data-centre-expansion-in-scotland" },
+      { label: "Scottish Construction Now — \"DataVita secures £300m backing for North Lanarkshire data centre projects\"", url: "https://www.scottishconstructionnow.com/articles/datavita-secures-ps300m-backing-for-north-lanarkshire-data-centre-projects" },
+      { label: "Dataconomy — \"DataVita secures $300 million AI expansion, Lanarkshire\"", url: "https://dataconomy.com/2026/08/19/datavita-secures-300-million-ai-expansion-lanarkshire/" }
     ],
-    notes: "CoreWeave has contracted capacity at both DataVita's DV1 (existing facility, being expanded) and DV3 (new-build) under a 15-year lease, backed by a £300M debt facility (ING, ABN AMRO, Santander, SNIB, Siemens Financial Services) plus a £202M UK National Wealth Fund guarantee, part of North Lanarkshire's AI Growth Zone. No CoreWeave-specific MW figure disclosed — left null rather than guessed. Coordinates are a North Lanarkshire regional approximation (council HQ, Motherwell) — DataVita's exact site address wasn't confirmed in research; re-geocode once located."
+    notes: "CoreWeave has contracted capacity at both DataVita's DV1 (existing facility, being expanded, 40MW) and DV3 (new-build, 40MW) under a 15-year lease, backed by a £300M debt facility (ING, ABN AMRO, Santander, SNIB, Siemens Financial Services) plus a £202M UK National Wealth Fund guarantee, part of North Lanarkshire's AI Growth Zone. Combined 80MW CoreWeave-specific figure confirmed Aug 2026 across four independent trade outlets. Coordinates are a North Lanarkshire regional approximation (council HQ, Motherwell; DataVita's campus is in Airdrie) — DataVita's exact site address wasn't confirmed in research; re-geocode once located."
   },
   {
     id: "coreweave-hillsboro",
