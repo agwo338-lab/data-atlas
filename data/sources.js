@@ -621,6 +621,36 @@ function scoreSite(site, today){
   return { level: lowest || "unverified", fields: perField };
 }
 
+// ---- What would raise this score? -----------------------------------------
+//
+// The most useful thing to say about a Medium is what specific evidence would
+// turn it into a High. Kept here rather than in the page, so the research
+// agents and the UI give the same answer to the same question.
+function liftAdvice(score, field, status){
+  if (!score) return "";
+  if (score.level === "high") return "Nothing needed — corroborated across independent classes, and current.";
+
+  var missingIndependent = SOURCE_CLASS_ORDER.filter(function(c){
+    return SOURCE_CLASSES[c].independent && score.classes.indexOf(c) === -1;
+  }).map(function(c){
+    return SOURCE_CLASSES[c].code + " (" + SOURCE_CLASSES[c].short.toLowerCase() + ")";
+  }).join(", ");
+
+  if (score.classes.length === 0) {
+    return "Any two sources in different classes, at least one of them regulatory, network, or observed.";
+  }
+  if (score.stale) {
+    return "Re-verify. The freshest evidence is " +
+      (score.ageDays == null ? "undated" : score.ageDays + " days old") +
+      ", past the " + stalenessWindow(field, status) + "-day window for this field.";
+  }
+  if (!score.hasIndependent) {
+    return "Add one independent class — " + missingIndependent +
+      ". Another trade or corporate source cannot move this, however good it is.";
+  }
+  return "Corroborate with a second, different class. One source is one source, whatever its grade.";
+}
+
 // `basis` distinguishes a number the operator published from one worked out
 // here (e.g. generator nameplate kW from an air permit, derated). A derived
 // figure is legitimate; rendering it as though it were disclosed is not, so

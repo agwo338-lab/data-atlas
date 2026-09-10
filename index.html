@@ -781,16 +781,116 @@
   }
 
   /* ---- Confidence badges & source-class chips -------------------------- */
+  /* A confidence badge rests as a bare coloured pip and only says its name on
+     hover or focus. Three of them on one card, each shouting a word, drowned
+     out the data they were annotating. Add .conf-open where the label is the
+     point rather than an annotation. */
   .conf-badge{
-    display:inline-flex; align-items:center; gap:0.35rem;
-    padding:0.14rem 0.5rem; border-radius:999px;
-    font-size:0.7rem; font-weight:600; letter-spacing:0.02em;
-    white-space:nowrap; cursor:help;
-    background:var(--conf-bg); color:var(--conf-fg);
-    border:1px solid var(--conf-bd);
+    display:inline-flex; align-items:center;
+    height:15px; padding:0 3px; border-radius:999px;
+    vertical-align:middle; cursor:help;
+    background:transparent; border:1px solid transparent;
+    color:var(--conf-fg);
+    transition:background 0.16s ease, border-color 0.16s ease, padding 0.16s ease;
   }
-  .conf-badge::before{ content:""; width:5px; height:5px; border-radius:50%; background:currentColor; flex-shrink:0; }
-  .conf-badge.conf-sm{ font-size:0.64rem; padding:0.08rem 0.4rem; }
+  .conf-badge::before{
+    content:""; width:8px; height:8px; border-radius:50%;
+    background:currentColor; flex:0 0 auto;
+  }
+  .conf-badge .conf-label{
+    max-width:0; opacity:0; margin-left:0; overflow:hidden; white-space:nowrap;
+    font-size:0.66rem; font-weight:600; letter-spacing:0.02em;
+    transition:max-width 0.18s ease, opacity 0.14s ease, margin-left 0.18s ease;
+  }
+  .conf-badge:hover, .conf-badge:focus-visible, .conf-badge.conf-open{
+    background:var(--conf-bg); border-color:var(--conf-bd);
+    padding:0 0.5rem 0 0.35rem;
+  }
+  .conf-badge:hover .conf-label,
+  .conf-badge:focus-visible .conf-label,
+  .conf-badge.conf-open .conf-label{
+    max-width:7rem; opacity:1; margin-left:0.32rem;
+  }
+  .conf-badge:focus-visible{ outline:1px solid var(--conf-bd); outline-offset:2px; }
+
+  /* ---- Site page (one facility, all its evidence) ----------------------- */
+  .site-page-head{ display:flex; align-items:flex-start; gap:1rem; margin:0 0 0.35rem; }
+  .site-page-head h1{ margin:0; font-size:1.5rem; font-weight:600; letter-spacing:-0.02em; }
+  .site-page-sub{ margin:0.2rem 0 0; color:var(--accent); font-family:var(--font-mono); font-size:0.82rem; }
+  .site-page-head .provider-tag{ margin-left:auto; flex-shrink:0; }
+
+  .site-page-stats{
+    display:flex; flex-wrap:wrap; gap:0.5rem 2.25rem;
+    margin:1rem 0 1.5rem; padding:0.9rem 1.1rem;
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+  }
+  .site-page-stats > div{ min-width:7rem; }
+  .site-stat-label{ font-size:0.66rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--ink-soft); }
+  .site-stat-value{ margin-top:0.2rem; font-family:var(--font-mono); font-size:0.92rem; display:flex; align-items:center; gap:0.4rem; }
+
+  .site-page-body{ display:grid; grid-template-columns:minmax(0,1.55fr) minmax(280px,1fr); gap:1.75rem; align-items:start; }
+  @media (max-width:1000px){ .site-page-body{ grid-template-columns:1fr; } }
+  .site-page-body h2{ margin:0 0 0.3rem; font-size:0.95rem; font-weight:600; }
+  .site-page-body > section > p.sub{ margin:0 0 0.9rem; color:var(--ink-soft); font-size:0.8rem; line-height:1.55; max-width:64ch; }
+
+  .field-card{
+    background:var(--surface); border:1px solid var(--border);
+    border-left:3px solid var(--fld-color);
+    border-radius:8px; padding:0.9rem 1rem; margin-bottom:0.9rem;
+  }
+  .field-card-head{ display:flex; align-items:baseline; gap:0.55rem; flex-wrap:wrap; }
+  .field-name{ font-size:0.66rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--ink-soft); }
+  .field-value{ font-family:var(--font-mono); font-size:1rem; font-weight:600; }
+  .field-card-head .conf-badge{ margin-left:auto; }
+  .field-reason{ margin:0.55rem 0 0; font-size:0.79rem; line-height:1.55; color:var(--ink-soft); }
+  .field-lift{
+    margin:0.6rem 0 0; padding:0.5rem 0.65rem;
+    background:var(--surface-2); border-radius:6px;
+    font-size:0.75rem; line-height:1.5; color:var(--ink-soft);
+  }
+  .field-lift strong{ color:var(--ink); font-weight:600; }
+
+  .class-strip{ display:flex; align-items:center; gap:0.28rem; margin-top:0.7rem; flex-wrap:wrap; }
+  .class-strip-label{ font-size:0.66rem; color:var(--ink-soft); margin-right:0.2rem; }
+  .cls-chip.cls-absent{ opacity:0.26; }
+
+  .evidence-list{ list-style:none; margin:0.75rem 0 0; padding:0; display:flex; flex-direction:column; gap:0.5rem; }
+  .evidence-list li{
+    display:grid; grid-template-columns:1.15rem 1fr; gap:0.55rem;
+    padding-top:0.5rem; border-top:1px solid var(--border);
+  }
+  .evidence-src{ font-size:0.79rem; line-height:1.45; }
+  .evidence-meta{ margin-top:0.15rem; font-family:var(--font-mono); font-size:0.68rem; color:var(--ink-soft); }
+  .evidence-note{ margin:0.25rem 0 0; font-size:0.74rem; line-height:1.5; color:var(--ink-soft); font-style:italic; }
+  .evidence-empty{ font-size:0.78rem; color:var(--ink-soft); margin:0.7rem 0 0; }
+
+  .site-source-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:0.6rem; }
+  .site-source-list li{
+    display:grid; grid-template-columns:1.15rem 1fr; gap:0.55rem;
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:8px; padding:0.6rem 0.7rem;
+    font-size:0.78rem; line-height:1.45;
+  }
+  .site-source-host{ margin-top:0.2rem; font-family:var(--font-mono); font-size:0.66rem; color:var(--ink-soft); }
+  .site-source-used{ margin-top:0.25rem; font-size:0.68rem; color:var(--ink-soft); }
+
+  .prov-flag{
+    margin:0 0 1.1rem; padding:0.65rem 0.8rem; border-radius:8px;
+    font-size:0.78rem; line-height:1.55;
+    background:rgba(251,191,36,0.06); border:1px solid rgba(251,191,36,0.28); color:var(--ink-soft);
+  }
+  .prov-flag.prov-explicit{ background:rgba(74,222,128,0.06); border-color:rgba(74,222,128,0.28); }
+
+  .detail-title-link{
+    background:none; border:0; padding:0; margin:0; cursor:pointer;
+    font:inherit; color:inherit; text-align:left;
+    display:inline-flex; align-items:center; gap:0.4rem;
+  }
+  .detail-title-link:hover h2{ color:var(--accent); }
+  .detail-title-link h2{ transition:color 0.14s ease; }
+  .detail-title-link .go-arrow{ color:var(--ink-soft); font-size:0.85rem; transition:color 0.14s ease, transform 0.14s ease; }
+  .detail-title-link:hover .go-arrow{ color:var(--accent); transform:translateX(2px); }
+  .detail-open-hint{ margin:0.1rem 0 0; font-size:0.68rem; color:var(--ink-soft); }
 
   .cls-chip{
     display:inline-flex; align-items:center; justify-content:center;
@@ -938,6 +1038,37 @@
           <ul class="headline-list" id="providerPageHeadlines"></ul>
           <a class="provider-page-search-link" id="providerPageSearchLink" target="_blank" rel="noopener">Search for more coverage →</a>
         </section>
+      </div>
+    </div>
+
+    <div id="siteTabPanel" hidden>
+      <button class="back-link" id="siteBack">← Back to full list</button>
+      <div class="site-page-head">
+        <div>
+          <h1 id="sitePageCity"></h1>
+          <p class="site-page-sub" id="sitePageName"></p>
+        </div>
+        <span class="provider-tag" id="sitePageProvider"></span>
+      </div>
+      <div class="site-page-stats" id="sitePageStats"></div>
+      <div class="site-page-body">
+        <section>
+          <h2>Evidence, field by field</h2>
+          <p class="sub">Each field is scored on its own evidence, and the site takes the level of its weakest field. This is where you see which field is holding it back, and what specifically would fix it.</p>
+          <div id="sitePageProvFlag"></div>
+          <div id="sitePageFields"></div>
+        </section>
+        <aside>
+          <section>
+            <h2>Every source on this entry</h2>
+            <p class="sub">The class each one counts as, and which fields it currently backs.</p>
+            <ul class="site-source-list" id="sitePageSources"></ul>
+          </section>
+          <section style="margin-top:1.75rem">
+            <h2>Notes</h2>
+            <div class="notes-box" id="sitePageNotes"></div>
+          </section>
+        </aside>
       </div>
     </div>
 
@@ -1250,13 +1381,18 @@
   }
 
   // score: the object returned by scoreEvidence/scoreSiteField/scoreSite.
+  // Renders as a bare coloured dot; the label is revealed on hover or focus.
+  // Pass {open:true} where the word itself is the content rather than an
+  // annotation on something else.
   function confBadge(score, opts){
     opts = opts || {};
     var lvl = CONFIDENCE_LEVELS[score.level] || CONFIDENCE_LEVELS.unverified;
     var title = opts.title || score.reason || "";
-    return '<span class="conf-badge' + (opts.small ? ' conf-sm' : '') + '"' +
+    return '<span class="conf-badge' + (opts.open ? ' conf-open' : '') + '"' +
+      ' tabindex="0" role="img" aria-label="' + lvl.label + ' confidence' + (title ? '. ' + esc(title) : '') + '"' +
       ' style="--conf-fg:' + lvl.color + ';--conf-bg:' + hexToRgba(lvl.color, 0.12) + ';--conf-bd:' + hexToRgba(lvl.color, 0.3) + '"' +
-      (title ? ' title="' + esc(title) + '"' : '') + '>' + lvl.label + '</span>';
+      (title ? ' title="' + esc(title) + '"' : '') +
+      '><span class="conf-label">' + lvl.label + '</span></span>';
   }
 
   function classChip(code){
@@ -1281,7 +1417,7 @@
     var basisHtml = (basis && basis !== "disclosed")
       ? '<span class="basis-tag basis-' + basis + '" title="This value was not disclosed by the operator — it was ' + basis + ' from the evidence.">' + (BASIS_LABELS[basis] || basis) + '</span>'
       : '';
-    return { score: score, html: confBadge(score, { small: true }) + basisHtml };
+    return { score: score, html: confBadge(score) + basisHtml };
   }
   function statusSlug(status){ return (status||"").toLowerCase().replace(/[^a-z]+/g,"-").replace(/(^-|-$)/g,""); }
 
@@ -1580,7 +1716,13 @@
 
     detailPanelBody.innerHTML =
       '<div class="detail-head">' +
-        '<div><h2>' + site.city + '</h2><p class="region-code">' + (site.site || site.country) + '</p></div>' +
+        '<div>' +
+          '<button class="detail-title-link" id="detailTitleLink" type="button" title="Open the full evidence page for this site">' +
+            '<h2>' + site.city + '</h2><span class="go-arrow">→</span>' +
+          '</button>' +
+          '<p class="region-code">' + (site.site || site.country) + '</p>' +
+          '<p class="detail-open-hint">Click the name for every source behind this entry</p>' +
+        '</div>' +
         '<span class="provider-tag" style="background:' + color + '">' + site.provider + '</span>' +
       '</div>' +
       '<div class="detail-conf">' +
@@ -1598,6 +1740,10 @@
       '</p>' +
       '<div class="notes-box">' + (site.notes && site.notes.length ? site.notes : "No notes yet — add one in data/sites.js.") + '</div>' +
       '<p class="source-line">Updated ' + (site.lastUpdated || '—') + (sourcesHtml ? '<br>' + sourcesHtml : '') + '</p>';
+
+    document.getElementById("detailTitleLink").addEventListener("click", function(){
+      openSitePage(site.id);
+    });
   }
 
   // ---- Sources tab --------------------------------------------------------
@@ -1832,6 +1978,9 @@
 
   function expandProvider(p){
     if (expandedProvider === p) { collapseProviderPanel(); return; }
+    // The provider panel and the single-site page both replace the table, so
+    // opening one closes the other.
+    closeSitePage();
     expandedProvider = p;
     renderProviderPage(p);
     Object.keys(providerCardEls).forEach(function(name){
@@ -1854,6 +2003,162 @@
   }
 
   document.getElementById("providerBack").addEventListener("click", collapseProviderPanel);
+
+  // ---- Site page (one facility, all of its evidence) ---------------------
+  // Opened by clicking the site name in the map's detail panel. The detail
+  // panel is a summary sized for a map overlay; this is the place to actually
+  // study an entry — which source backs which field, what class each one
+  // counts as, and what is missing.
+  var siteTabPanel = document.getElementById("siteTabPanel");
+  var openSiteId = null;
+
+  function renderSitePage(site){
+    var color = colorFor(site.provider);
+    var overall = scoreSite(site, TODAY);
+
+    document.getElementById("sitePageCity").textContent = site.city;
+    document.getElementById("sitePageName").textContent = site.site || site.country;
+    var tag = document.getElementById("sitePageProvider");
+    tag.textContent = site.provider;
+    tag.style.background = color;
+
+    // ---- Header stats
+    var capBasis = site.capacityMW != null ? siteFieldBasis(site, "capacityMW") : null;
+    document.getElementById("sitePageStats").innerHTML =
+      stat("Status", '<span class="status-pill status-' + statusSlug(site.status) + '">' + site.status + '</span>') +
+      stat("Capacity", site.capacityMW != null
+        ? site.capacityMW + ' MW' + (capBasis && capBasis !== "disclosed"
+            ? '<span class="basis-tag basis-' + capBasis + '">' + (BASIS_LABELS[capBasis] || capBasis) + '</span>' : '')
+        : 'Not disclosed') +
+      stat("Coordinates", site.lat.toFixed(4) + ', ' + site.lon.toFixed(4)) +
+      stat("Country", esc(site.country)) +
+      stat("Last verified", site.lastUpdated || '—') +
+      stat("Site confidence", confBadge(overall, { open: true, title: "A site takes the level of its weakest scored field." }));
+
+    // ---- Is this entry running on real provenance, or the fallback?
+    var explicitFields = PROVENANCE_FIELDS.filter(function(f){ return siteFieldHasProvenance(site, f); });
+    var flag = document.getElementById("sitePageProvFlag");
+    if (explicitFields.length === PROVENANCE_FIELDS.length) {
+      flag.innerHTML = '<p class="prov-flag prov-explicit">Every field on this entry carries its own recorded evidence, so the scores below reflect what actually backs each specific claim.</p>';
+    } else if (explicitFields.length) {
+      flag.innerHTML = '<p class="prov-flag">Partial provenance: ' + explicitFields.map(function(f){ return FIELD_LABELS[f].toLowerCase(); }).join(' and ') +
+        ' carry recorded per-field evidence. The rest fall back to counting every source on the entry toward the field.</p>';
+    } else {
+      flag.innerHTML = '<p class="prov-flag">No per-field provenance recorded yet, so every source on this entry is counted toward every field — the generous assumption the atlas ran on before provenance existed. Real scores here are likely <em>lower</em> than shown, not higher.</p>';
+    }
+
+    // ---- One card per scored field
+    var fieldsEl = document.getElementById("sitePageFields");
+    fieldsEl.innerHTML = PROVENANCE_FIELDS.map(function(field){
+      if (field === "capacityMW" && site.capacityMW == null) {
+        return '<div class="field-card" style="--fld-color:var(--border)">' +
+          '<div class="field-card-head"><span class="field-name">Capacity</span>' +
+          '<span class="field-value" style="color:var(--ink-soft)">Not disclosed</span></div>' +
+          '<p class="field-reason">No capacity figure is claimed for this site, so there is nothing to verify. That is an honest gap, not a low score.</p>' +
+        '</div>';
+      }
+
+      var score = scoreSiteField(site, field, TODAY);
+      var lvl = CONFIDENCE_LEVELS[score.level];
+      var basis = siteFieldBasis(site, field);
+      var evidence = siteEvidenceFor(site, field);
+
+      var value;
+      if (field === "capacityMW") value = site.capacityMW + ' MW';
+      else if (field === "status") value = '<span class="status-pill status-' + statusSlug(site.status) + '">' + site.status + '</span>';
+      else value = site.lat.toFixed(4) + ', ' + site.lon.toFixed(4);
+
+      // Classes present, then the ones that are absent — seeing the gap is
+      // the point, so the missing classes are shown dimmed rather than
+      // omitted.
+      var present = score.classes;
+      var absent = SOURCE_CLASS_ORDER.filter(function(c){
+        return present.indexOf(c) === -1 && SOURCE_CLASSES[c].weight > 0;
+      });
+
+      var evHtml = evidence.length
+        ? '<ul class="evidence-list">' + evidence.map(function(ev){
+            var src = ev.source || {};
+            var cls = SOURCE_CLASSES[ev.cls] || SOURCE_CLASSES.U;
+            var counts = cls.weight > 0;
+            return '<li>' + classChip(ev.cls) + '<div>' +
+              '<div class="evidence-src">' + (src.url
+                ? '<a href="' + src.url + '" target="_blank" rel="noopener">' + esc(src.label || src.url) + '</a>'
+                : esc(src.label || 'Unlabelled source')) + '</div>' +
+              '<div class="evidence-meta">' + esc(cls.label) + ' · ' + (ev.asOf || 'undated') +
+                (counts ? '' : ' · does not count toward corroboration') + '</div>' +
+              (ev.note ? '<p class="evidence-note">' + esc(ev.note) + '</p>' : '') +
+            '</div></li>';
+          }).join('') + '</ul>'
+        : '<p class="evidence-empty">No evidence recorded for this field.</p>';
+
+      return '<div class="field-card" style="--fld-color:' + lvl.color + '">' +
+        '<div class="field-card-head">' +
+          '<span class="field-name">' + FIELD_LABELS[field] + '</span>' +
+          '<span class="field-value">' + value + '</span>' +
+          (basis && basis !== "disclosed"
+            ? '<span class="basis-tag basis-' + basis + '" title="Not disclosed by the operator — ' + basis + ' from the evidence below.">' + (BASIS_LABELS[basis] || basis) + '</span>'
+            : '') +
+          confBadge(score, { open: true }) +
+        '</div>' +
+        '<p class="field-reason">' + esc(score.reason) + '</p>' +
+        '<div class="class-strip"><span class="class-strip-label">Classes backing this:</span>' +
+          (present.length ? present.map(classChip).join('') : '<span class="class-strip-label">none</span>') +
+          (absent.length ? '<span class="class-strip-label" style="margin-left:0.5rem">missing:</span>' +
+            absent.map(function(c){ return classChip(c).replace('class="cls-chip"', 'class="cls-chip cls-absent"'); }).join('') : '') +
+        '</div>' +
+        evHtml +
+        '<p class="field-lift"><strong>To lift this:</strong> ' + esc(liftAdvice(score, field, site.status)) + '</p>' +
+      '</div>';
+    }).join('');
+
+    // ---- Every source on the entry, with what it currently backs
+    var srcEl = document.getElementById("sitePageSources");
+    var sources = site.sources || [];
+    srcEl.innerHTML = sources.length
+      ? sources.map(function(src, i){
+          var cls = classifySource(src, site.provider);
+          var backing = PROVENANCE_FIELDS.filter(function(f){
+            if (f === "capacityMW" && site.capacityMW == null) return false;
+            return siteEvidenceFor(site, f).some(function(ev){ return ev.source === src; });
+          }).map(function(f){ return FIELD_LABELS[f].toLowerCase(); });
+          return '<li>' + classChip(cls) + '<div>' +
+            '<a href="' + src.url + '" target="_blank" rel="noopener">' + esc(src.label) + '</a>' +
+            '<div class="site-source-host">' + esc(hostOf(src.url) || 'no url') + '</div>' +
+            '<div class="site-source-used">' + (backing.length ? 'Backs: ' + backing.join(', ') : 'Not attached to any field') + '</div>' +
+          '</div></li>';
+        }).join('')
+      : '<li><div>No sources logged for this entry.</div></li>';
+
+    document.getElementById("sitePageNotes").textContent =
+      site.notes && site.notes.length ? site.notes : "No notes yet — add one in data/sites.js.";
+  }
+
+  function stat(label, value){
+    return '<div><div class="site-stat-label">' + label + '</div><div class="site-stat-value">' + value + '</div></div>';
+  }
+
+  function openSitePage(id){
+    var site = SITES.filter(function(s){ return s.id === id; })[0];
+    if (!site) return;
+    openSiteId = id;
+    // Mutually exclusive with the provider panel — both replace the table.
+    collapseProviderPanel();
+    renderSitePage(site);
+    tableSection.hidden = true;
+    siteTabPanel.hidden = false;
+    closeDetailPanel();
+    siteTabPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function closeSitePage(){
+    openSiteId = null;
+    siteTabPanel.hidden = true;
+    tableSection.hidden = false;
+  }
+
+  document.getElementById("siteBack").addEventListener("click", closeSitePage);
+
 
   // ---- Tabs ---------------------------------------------------------------
   // Three tabs now, so drive them from a table rather than toggling each
