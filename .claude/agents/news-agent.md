@@ -55,6 +55,23 @@ worse than no headline, so re-verify anything that reads as a specific,
 checkable claim (a dollar figure, a contract size, a date) before including
 it, the same way research-agent's second skeptical pass works.
 
+## A note on source classes
+
+`data/sources.js` defines the source-class scheme the rest of the project
+now runs on (R regulatory, N network, O observed, P corporate, T trade,
+G general, D directory, U unattributed). It governs *fact verification*,
+and it does not change your bar — a notable story from a single trade
+outlet is still a legitimate headline, where a single trade outlet is not
+enough to call a capacity figure confirmed.
+
+Two things do carry over. Tag each headline with its class, so a reader can
+see at a glance whether they are looking at a filing or a press release. And
+treat the regulatory classes as a beat: an 8-K, a rezoning fight in a county
+docket, or a large-load queue entry that nobody has written up yet is often
+the *best* item you can bring back, precisely because it has not been
+announced. Those are worth surfacing even though a trade-press search would
+never surface them.
+
 ## Source bar
 
 Prefer named, dated, reputable outlets — trade press (Data Center

@@ -9,7 +9,8 @@ capacity. Built as a single static site with no backend and no build step.
 - `index.html` — the entire app: markup, CSS, and JS in one file. Renders a
   world map (MapLibre GL JS + CARTO's Dark Matter vector basemap, both from
   a public CDN, no API key currently required), a provider dashboard, a
-  detail panel, a site table, and a Sources tab. Site markers are plain DOM
+  detail panel, a site table, a Sources tab, and a Method tab (the evidence
+  pipeline diagram and the live confidence tally). Site markers are plain DOM
   elements handed to MapLibre — it repositions them on pan/zoom itself, so
   there's no custom per-frame transform code to maintain. (Previously a
   hand-rolled D3 + SVG + topojson map; replaced because SVG's per-frame
@@ -18,9 +19,18 @@ capacity. Built as a single static site with no backend and no build step.
   tile basemap solves that class of problem architecturally instead.)
 - `data/sites.js` — all site data, loaded by `index.html` as a plain script.
   This is the file that needs the most regular edits. Its header comment
-  documents the field schema and the sourcing standard (how sources are
-  tiered, what needs verification, when to recheck). Follow that standard
-  whenever adding or updating an entry.
+  documents the field schema, the optional per-field `provenance` block, and
+  the sourcing standard (how sources are classed, what needs verification,
+  when to recheck). Follow that standard whenever adding or updating an
+  entry. See `aws-santaclara` for a worked provenance example.
+- `data/sources.js` — the source-class registry, the channel catalog, and
+  the confidence engine. Defines the eight source classes (R regulatory,
+  N network, O observed, P corporate, T trade, G general, D directory,
+  U unattributed), maps a citation's URL host to a class, holds the
+  per-field staleness windows, and computes each entry's confidence. A plain
+  script tag like the other data files — no build step. The Method tab
+  renders its class cards, channel table, and tally directly from this file,
+  so the published explanation of the rules cannot drift from the rules.
 - `data/providers.js` — one entry per operator, for anything that's about
   the *company* rather than one specific site: a pinned display color
   (dashboard card, map pins, table dot, provider page) and its disclosed
@@ -64,6 +74,42 @@ capacity. Built as a single static site with no backend and no build step.
 
 ## Data quality
 
+**Source-class independence (Sep 2026, Stage 1).** The old bar for High
+confidence was "2+ independent Tier 1/Tier 2 sources agree." That test was
+broken: trade press is not independent of the operator, so an operator's
+press release written up by DCD and Data Center Frontier scored as two
+confirmations when it was one claim republished twice. Corroboration is now
+counted across **source classes**, and High additionally requires at least
+one *independent* class — R (regulatory), N (network telemetry), or
+O (direct observation) — plus recency inside the field's staleness window.
+P (corporate), T (trade) and G (general press) are promotional or
+derivative and can never, on their own, produce a High.
+
+Two consequences worth knowing before anything looks alarming:
+
+1. **Most existing entries now read Medium, and several read Low.** As of
+   the migration: 4 High, 29 Medium, 8 Low out of 41. Nothing about the data
+   got worse — the atlas is built almost entirely on trade press restating
+   operator announcements, and it now says so. The Sources tab sorts
+   weakest-first precisely so this is a worklist.
+2. **The auto-apply gate therefore tightened.** It still keys off High, but
+   High is harder to reach, so more findings route to the review path. That
+   is intended: the gate was previously reachable by a single press release
+   with extra steps.
+
+Confidence is computed **per field** (`capacityMW`, `status`, `location`)
+and a site scores as its weakest field — a trustworthy address does not
+rescue a fabricated capacity number. Entries can carry an optional
+`provenance` block attaching evidence to individual fields; entries without
+one fall back to treating every source as evidence for every field, which is
+what the atlas implicitly assumed before. Fill in a real block whenever an
+entry gets researched.
+
+`basis` separates a number the operator disclosed from one derived here
+(e.g. from an air permit's generator nameplate). A derived figure is a
+legitimate finding; presenting it as disclosed is not, and the map labels
+the difference.
+
 Some entries are marked for periodic re-verification rather than treated as
 permanently accurate — check individual entries' `notes` in `data/sites.js`
 for anything flagged that way before relying on a number. When adding a new
@@ -73,8 +119,13 @@ top of that file rather than re-deriving one.
 A `research-agent` subagent (`.claude/agents/research-agent.md`) handles
 research on request — vetting a new candidate, re-checking one entry or
 provider, or auditing the whole dataset — against a rigorous sourcing
-methodology (source grading, corroboration rules, conflict handling). It's
-research-only and can't edit files itself.
+methodology (source classing, cross-class corroboration, conflict handling).
+It's research-only and can't edit files itself. It reports confidence per
+field and hands back a pasteable `provenance` block, and it's expected to
+reach for a regulatory or network source — EPA ECHO, a state air permit
+docket, an ISO interconnection queue, EDGAR, PeeringDB — before concluding
+that something is unverifiable. Running the whole job on news search is the
+failure mode this stage exists to fix.
 
 A separate `news-agent` subagent (`.claude/agents/news-agent.md`) curates
 provider-level headlines (funding, expansion, partnerships, leadership,
@@ -96,8 +147,10 @@ under the hood.
 **Auto-apply policy (added Aug 2026):** all three of the above are
 research-only — none of them can edit a file themselves, by design (no
 Write/Edit tool). What changed is what happens to their report next: a
-**High-confidence** finding (research-agent's own scale — 2+ independent
-A/B sources agreeing, at least one recent) gets applied to the relevant
+**High-confidence** finding (the source-class scale in Data quality above —
+2+ distinct classes, at least one of them independent, and current, which
+as of Sep 2026 is a materially harder bar than the A/B-source rule this
+policy was originally written against) gets applied to the relevant
 data file and pushed automatically, no pause to ask first. Anything
 Medium confidence, Low confidence, conflicting, or unverifiable still gets
 surfaced for the user's own call before it's touched — that half of the
@@ -132,3 +185,28 @@ plugin) for live lookups, not just reasoning over text handed to it.
   before being trusted — treat its output as a draft, never as a finding,
   same as `research-agent.md` already instructs. Don't loosen that
   discipline just because delegation is now wired up.
+
+## Sourcing roadmap
+
+Stage 1 (Sep 2026) is done: source classes, per-field provenance, the
+confidence engine, and the Method tab. The remaining stages, in the order
+they're worth doing:
+
+- **Stage 2 — the zero-friction feeds.** Wire in the three sources that
+  need no scraping and no key: SEC EDGAR full-text search, EPA ECHO/FRS
+  under NAICS 518210, and PeeringDB. Each of these alone can move entries
+  from Medium to High, because each is a class the atlas currently has
+  almost none of.
+- **Stage 3 — queues and permits.** ERCOT and the other ISO
+  interconnection queues, state air permit dockets, county planning
+  portals, and the European TSO connection registers. This is per-
+  jurisdiction grind, so do it where the sites actually are rather than
+  trying for coverage.
+- **Stage 4 — observation.** Sentinel-2 checks on Planned and
+  Under-construction entries. The cheapest possible answer to "is this real
+  yet," and the only class that can contradict an operator outright.
+- **`monitor-agent`.** The structural payoff of stages 2 and 3: an agent
+  that diffs the structured feeds against `data/sites.js` and reports
+  deltas unprompted, rather than waiting to be asked what's new. It is
+  drawn on the Method tab's pipeline diagram as not-yet-built; remove the
+  dashed styling there when it lands.

@@ -11,8 +11,78 @@
 //   status       "Operational" | "Under construction" | "Planned"
 //   capacityMW   disclosed power capacity in megawatts, or null if not public
 //   lastUpdated  "YYYY-MM-DD" — the last time you checked this entry was still accurate
-//   sources      array of { label, url } — every claim above should trace to one of these
+//   sources      array of { label, url } — every claim above should trace to one
+//                of these. A source may optionally carry
+//                cls: "R"|"N"|"O"|"P"|"T"|"G"|"D"|"U" to pin its source class;
+//                without one, data/sources.js infers the class from the host.
 //   notes        your own free-text notes — anything you want to remember
+//   provenance   OPTIONAL. Per-field evidence — see PER-FIELD PROVENANCE below.
+//
+// ---------------------------------------------------------------------------
+// PER-FIELD PROVENANCE (added Sep 2026)
+//
+// The `sources` array above is per-ENTRY: it says "these are the citations
+// for this site" without saying which citation backs which fact. That hides
+// the thing you actually want to know — an entry can have a rock-solid
+// address and a completely speculative capacity figure, and a flat array
+// makes those two look identical.
+//
+// The optional `provenance` block fixes that by attaching evidence to
+// individual fields:
+//
+//   provenance: {
+//     capacityMW: {
+//       basis: "disclosed",        // disclosed | derived | observed | estimated
+//       asOf: "2026-08-23",        // when this field was last verified
+//       evidence: [
+//         { source: 0, cls: "G", note: "why this source supports this field" },
+//         { source: 1, cls: "T" }
+//       ],
+//       conflicting: false         // true when sources genuinely disagree
+//     },
+//     status: { ... },
+//     location: { ... }
+//   }
+//
+// `source: 0` is an index into this entry's own `sources` array, so a URL is
+// never repeated. `cls` may be omitted and will be inferred. The three fields
+// scored are `capacityMW`, `status`, and `location` (lat/lon).
+//
+// `basis` matters: a capacity figure worked out from an air permit's diesel
+// generator nameplate is a legitimate number, but it is NOT a disclosed one,
+// and the map labels it accordingly. Never mark a derived figure "disclosed".
+//
+// The block is OPTIONAL and entries without one still work — data/sources.js
+// falls back to treating every source on the entry as evidence for every
+// field, which is the assumption the atlas ran on implicitly anyway. Add a
+// real provenance block whenever an entry gets researched or re-verified.
+// See `aws-santaclara` below for a worked example.
+//
+// HOW CONFIDENCE IS COMPUTED — and why the bar moved.
+//
+// The old rule was "2+ independent Tier 1/Tier 2 sources agree." That rule
+// was broken, because trade press is not independent of the operator: DCD
+// and Data Center Frontier writing up the same press release is one source
+// counted twice. Corroboration is now measured across SOURCE CLASSES:
+//
+//   R regulatory record    permits, grid queues, SEC filings, planning dockets
+//   N network telemetry    PeeringDB, cloud region metadata, BGP, OSM
+//   O direct observation   satellite imagery, site-specific hiring signals
+//   P primary corporate    the operator's own newsroom / investor relations
+//   T trade press          DCD, DCF, Datacentre Magazine
+//   G general press        business, financial, local outlets
+//   D directory            Baxtel, datacenters.com, Wikipedia — never a number
+//   U unattributed         never a basis for anything
+//
+// R, N and O are "independent" — produced by someone with no stake in the
+// announcement. P, T and G are promotional or derivative of it. High
+// confidence now requires two distinct classes AND at least one independent
+// class AND recency. data/sources.js holds the exact rules and the per-field
+// staleness windows.
+//
+// Expect most existing entries to read Medium rather than High under this.
+// That is accurate, not a regression: the atlas is currently built almost
+// entirely on trade press restating operator announcements.
 //
 // ---------------------------------------------------------------------------
 // SOURCING STANDARDS — the checklist to follow every time a site is added
@@ -30,8 +100,9 @@
 //      Avoid  — unattributed blogs, forums, social posts, anything without
 //               a clear author, publication, and date.
 // 2. Every entry needs at least one source. Any disclosed hard number
-//    (MW, $ investment, a date) should trace to Tier 1 or Tier 2 — use two
-//    independent sources if the number is large or newsworthy.
+//    (MW, $ investment, a date) should trace to Tier 1 or Tier 2. For
+//    "independent," use the source-class test above, not the tier: two
+//    outlets covering the same press release are one source, not two.
 // 3. Set lastUpdated to the day you actually verified the fact, not just
 //    when you typed the entry.
 // 4. "Planned" and "Under construction" entries change fastest — re-check
@@ -627,6 +698,35 @@ var SITES = [
       { label: "Data Center Dynamics — Silicon Valley Power to build 60kV substation for AWS Santa Clara", url: "https://www.datacenterdynamics.com/en/news/silicon-valley-power-to-build-60kv-substation-for-amazon-web-services-data-center-in-santa-clara/" },
       { label: "California Energy Commission — Mission College Data Center backup generation filing", url: "https://www.energy.ca.gov/powerplant/backup-generating-system/mission-college-data-center" }
     ],
+    // WORKED EXAMPLE of the per-field provenance block documented at the top
+    // of this file. This entry is a good one to learn from because its three
+    // facts have genuinely different evidentiary strength, which the flat
+    // `sources` array above cannot express.
+    provenance: {
+      capacityMW: {
+        basis: "disclosed",
+        asOf: "2026-08-23",
+        evidence: [
+          { source: 0, cls: "G", note: "Reports the 15-year SVP power agreement securing 20MW of contracted grid capacity — the basis for this figure." },
+          { source: 1, cls: "T", note: "Trade-press coverage of the same utility deal and the 60kV substation built for it." }
+        ]
+      },
+      status: {
+        basis: "disclosed",
+        asOf: "2026-08-23",
+        evidence: [
+          { source: 2, cls: "R", note: "CEC backup-generation filing — a regulatory record confirming an active, permitted build rather than an announced intention." },
+          { source: 1, cls: "T", note: "Substation still under construction as of mid-2026." }
+        ]
+      },
+      location: {
+        basis: "estimated",
+        asOf: "2026-08-23",
+        evidence: [
+          { source: 2, cls: "R", note: "Filing names the Mission College Blvd address, but the stored lat/lon is a block-level approximation, not geocoded to the parcel — hence basis 'estimated'. Replace with an OSM or PeeringDB footprint (class N) to lift this." }
+        ]
+      }
+    },
     notes: "2305 Mission College Blvd. Silicon Valley Power (the city's municipal utility) signed a 15-year power agreement with AWS in Jul 2024 securing 20MW of contracted grid capacity for this site (with SVP authorized to secure up to 80MW more for other customers) — 20MW used here as the disclosed contracted-capacity figure. A separate California Energy Commission filing discloses 78.1MW of on-site backup diesel generation (43 x 2.5MW + 2 x 600kW gensets) — that's backup power, not IT load, so not used as capacityMW. SVP is building a new 60kV \"Freedom Circle Junction\" substation specifically for this site ($5.39M cost billed to Amazon, ~26-month build), still under construction as of mid-2026; developer of record is Oppidan Investment Company, building on AWS's behalf. Originally acquired for $101.4M in Dec 2019 (former PGIM Real Estate property); industry sources describe this as anchoring AWS's us-west-1 (N. California) region, though that specific framing is inferred, not AWS-confirmed. Coordinates are a Mission College Blvd-area approximation, not geocoded to the exact parcel."
   },
   {

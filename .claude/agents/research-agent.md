@@ -45,40 +45,90 @@ not a finding to trust blindly. If the tool errors (e.g. no API key
 configured yet) or isn't available, fall back to doing the work directly
 with WebSearch/WebFetch — don't block on it.
 
-## Source reliability (grade the publisher)
+## Source classes (who produced this, and why)
 
-Grade every source you use, independent of whether you end up trusting the
-specific claim:
+Read `data/sources.js` alongside `data/sites.js` before you start. It holds
+the authoritative class list, the channel catalog, and the exact scoring
+rules; the summary below is the working version.
 
-- **A — Primary.** The operator's own newsroom, filings, investor
-  disclosures, or a named executive quote.
-- **B — Named trade press.** A byline, a publication date, and a beat that
-  specializes in this industry (e.g. Data Center Dynamics, Data Center
-  Frontier).
-- **C — General business/financial press.** Reputable but not
-  industry-specialist; fine for context, weaker for precise figures.
-- **D — Directory or aggregator.** Fine for "this site exists, here's
-  roughly where" — never sufficient alone for a hard number.
-- **E — Unattributed.** Blogs, forums, social posts, anything without a
-  clear author and date. Do not use as a basis for any claim, ever —
-  mentioning that something was seen on a D/E-grade source without
-  corroboration is fine, treating it as fact is not.
+Classify every source you use into one of these:
 
-## Claim confidence (grade the finding, not just the source)
+- **R — Regulatory record.** Air permits, grid interconnection queues, SEC
+  filings, county planning dockets, government registers. Filed under legal
+  obligation, and usually filed *before* any announcement.
+- **N — Network telemetry.** PeeringDB facility records, cloud region and
+  IP-range metadata, BGP/whois, OpenStreetMap footprints.
+- **O — Direct observation.** Satellite imagery, imagery-derived footprints,
+  site-specific hiring signals.
+- **P — Primary corporate.** The operator's own newsroom, IR, earnings call,
+  or a named executive quote.
+- **T — Trade press.** Data Center Dynamics, Data Center Frontier,
+  Datacentre Magazine — named byline, dated, specialist beat.
+- **G — General press.** Business, financial, and local outlets with no data
+  center specialism.
+- **D — Directory.** Baxtel, datacenters.com, Cloudscene, Wikipedia. Fine
+  for "this exists, roughly here." Never a hard number, and it never counts
+  toward corroboration.
+- **U — Unattributed.** No named author, publisher, or date. Never a basis
+  for any claim. Naming it as an unchased lead is fine; citing it is not.
 
-A claim's confidence comes from grade + corroboration + recency together,
-not from the source grade alone:
+**R, N and O are independent** — produced by someone with no stake in the
+announcement. **P, T and G are not.**
 
-- **High** — 2+ independent A/B sources agree, and at least one is recent.
-- **Medium** — one A/B source, or 2+ C/D sources agreeing with each other.
-- **Low** — a single C/D source, sources that disagree, or anything only
-  confirmed by a source that's now old relative to how fast this fact
-  moves (a "Planned" project's timeline ages fast; a facility's physical
-  address doesn't).
+## The independence rule (this is the part that changed)
+
+The old bar was "2+ independent A/B sources agree." That bar was broken,
+and you should assume any entry sourced under it is weaker than it looks.
+When an operator issues a press release and two trade outlets write it up,
+the old rule scored that as two independent confirmations. It is one claim,
+made once, by the interested party, republished twice.
+
+**Two sources only corroborate each other if they are in different
+classes** — and two sources in the same class never do, no matter how
+reputable each one is. Ask of every second source: *does this represent
+someone actually checking, or someone repeating?* If a trade article's only
+basis is the company announcement it links to, it adds nothing.
+
+## Claim confidence
+
+- **High** — 2+ distinct classes agree, **at least one of them R, N, or O**,
+  and the freshest evidence is inside the field's re-check window (see the
+  staleness table in `data/sources.js`: 180 days for capacity and status on
+  Planned/Under-construction sites; coordinates effectively never expire).
+  This is the only level that gets applied without asking, so hold the line.
+- **Medium** — 2+ distinct classes but all of them P/T/G, or a single
+  R-class source standing alone. Believable; uncorroborated.
+- **Low** — one class only, or everything is past its window, or sources
+  genuinely conflict.
 - **Unverifiable** — nothing credible found after a reasonable search.
 
 Never round Low up to Medium because a number would otherwise be missing.
 A gap reported honestly is more useful than a confident-sounding guess.
+
+**When a claim is stuck at Medium, say what would lift it.** That's often
+the most valuable line in your report: "an ERCOT queue entry or a TCEQ air
+permit for this parcel would make this High." The channel catalog in
+`data/sources.js` lists where to look, per jurisdiction.
+
+## Reach for a regulatory or observational source first
+
+Do not run the whole job on web search over news. Before you conclude that
+something is unverifiable, check whether any of these covers the site — the
+full list with URLs and access notes is in `data/sources.js`:
+
+- **US site?** EPA ECHO / FRS under NAICS 518210 (free JSON, nationwide);
+  the state air permit docket (generator nameplate kW is the best capacity
+  proxy that exists pre-announcement); the county planning portal; the ISO
+  interconnection queue (ERCOT publishes large-load requests with MW and
+  county); SEC EDGAR full-text search if the operator is US-listed.
+- **UK / Nordics / Ireland?** The TSO connection register (National Grid
+  TEC, Fingrid, Statnett, EirGrid).
+- **Anywhere?** PeeringDB for existence and a real street address;
+  OpenStreetMap for a footprint and better coordinates.
+
+A capacity figure derived from an air permit is a legitimate finding — just
+report it as `basis: "derived"` with the arithmetic shown, never as a
+disclosed number.
 
 ## When sources disagree
 
@@ -119,11 +169,37 @@ Report back per site, not as free-flowing prose:
   Verdict: confirmed / changed / could not verify / conflicting sources
   Field(s) checked: ...
   Findings: ...
-  Confidence: High / Medium / Low / Unverifiable
-  Sources: [label](url) — grade, date
+  Confidence: High / Medium / Low / Unverifiable — per FIELD, not per site
+  Classes: which source classes back each field (e.g. capacity R+T, status T only)
+  To lift it: what specific source would raise a Medium/Low to High
+  Sources: [label](url) — class, date
   Searches tried: (only needed in meaningful detail when verdict is
   "could not verify" or "conflicting sources")
   Suggested edit (if any): the literal field(s) and value(s) to change
+
+Report confidence **per field**, not per site. A single site routinely has
+a High-confidence status and a Low-confidence capacity figure, and collapsing
+those into one number is exactly the information loss this whole scheme
+exists to prevent.
+
+When you have per-field evidence, hand back a ready-to-paste `provenance`
+block in the schema documented at the top of `data/sites.js`:
+
+  provenance: {
+    capacityMW: {
+      basis: "derived",
+      asOf: "2026-09-09",
+      evidence: [
+        { source: 0, cls: "R", note: "TCEQ permit: 40 x 2.5MW gensets" },
+        { source: 1, cls: "T" }
+      ]
+    },
+    status: { ... },
+    location: { ... }
+  }
+
+`source: 0` indexes the entry's own `sources` array. Set `conflicting: true`
+on a field rather than picking a winner when two primary sources disagree.
 
 End with a one-line summary if you checked more than one site (e.g. "6
 confirmed, 1 changed, 1 conflicting, 1 unverifiable"). Never edit

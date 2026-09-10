@@ -7,6 +7,7 @@
 <script src="data/sites.js"></script>
 <script src="data/providers.js"></script>
 <script src="data/news.js"></script>
+<script src="data/sources.js"></script>
 
 <style>
   /* Committed dark theme — this page always renders dark, regardless of OS/browser setting */
@@ -779,6 +780,108 @@
     padding-top:0.5rem;
   }
 
+  /* ---- Confidence badges & source-class chips -------------------------- */
+  .conf-badge{
+    display:inline-flex; align-items:center; gap:0.35rem;
+    padding:0.14rem 0.5rem; border-radius:999px;
+    font-size:0.7rem; font-weight:600; letter-spacing:0.02em;
+    white-space:nowrap; cursor:help;
+    background:var(--conf-bg); color:var(--conf-fg);
+    border:1px solid var(--conf-bd);
+  }
+  .conf-badge::before{ content:""; width:5px; height:5px; border-radius:50%; background:currentColor; flex-shrink:0; }
+  .conf-badge.conf-sm{ font-size:0.64rem; padding:0.08rem 0.4rem; }
+
+  .cls-chip{
+    display:inline-flex; align-items:center; justify-content:center;
+    width:1.15rem; height:1.15rem; border-radius:4px;
+    font-family:var(--font-mono); font-size:0.66rem; font-weight:600;
+    background:var(--chip-bg); color:var(--chip-fg);
+    border:1px solid var(--chip-bd);
+    cursor:help; flex-shrink:0;
+  }
+  .cls-chip-row{ display:inline-flex; gap:0.22rem; vertical-align:middle; }
+
+  .basis-tag{
+    font-family:var(--font-mono); font-size:0.62rem; text-transform:uppercase;
+    letter-spacing:0.06em; color:var(--ink-soft); margin-left:0.4rem;
+  }
+  .basis-tag.basis-derived,
+  .basis-tag.basis-estimated{ color:#FBBF24; }
+
+  .kv dd .conf-badge{ margin-left:0.45rem; }
+  .detail-conf{
+    display:flex; align-items:center; gap:0.5rem;
+    margin:0.15rem 0 0.65rem; padding-top:0.6rem;
+    border-top:1px solid var(--border);
+    font-size:0.72rem; color:var(--ink-soft);
+  }
+  .conf-why{
+    margin:0.5rem 0 0; padding:0.55rem 0.7rem;
+    background:var(--surface-2); border-left:2px solid var(--border);
+    border-radius:0 6px 6px 0;
+    font-size:0.72rem; line-height:1.5; color:var(--ink-soft);
+  }
+
+  /* ---- Method page ------------------------------------------------------ */
+  .method-wrap{ display:flex; flex-direction:column; gap:2.5rem; }
+  .method-section > h2{
+    margin:0 0 0.4rem; font-size:1.05rem; font-weight:600; letter-spacing:-0.01em;
+  }
+  .method-section > p.method-lede{
+    margin:0 0 1.1rem; max-width:76ch; color:var(--ink-soft);
+    font-size:0.9rem; line-height:1.6;
+  }
+  .method-figure{
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:var(--radius); padding:1.25rem; overflow-x:auto;
+  }
+  .method-figure svg{ display:block; min-width:940px; width:100%; height:auto; }
+
+  .class-grid{
+    display:grid; gap:0.75rem;
+    grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));
+  }
+  .class-card{
+    background:var(--surface); border:1px solid var(--border);
+    border-left:3px solid var(--cls-color);
+    border-radius:8px; padding:0.85rem 0.95rem;
+  }
+  .class-card-head{ display:flex; align-items:center; gap:0.5rem; margin-bottom:0.4rem; }
+  .class-card-name{ font-weight:600; font-size:0.87rem; }
+  .class-card-tag{
+    margin-left:auto; font-size:0.62rem; text-transform:uppercase;
+    letter-spacing:0.07em; padding:0.1rem 0.4rem; border-radius:4px;
+  }
+  .class-card-tag.indep{ background:rgba(74,222,128,0.13); color:#4ADE80; }
+  .class-card-tag.dep{ background:rgba(224,112,138,0.13); color:#E0708A; }
+  .class-card-tag.none{ background:var(--surface-2); color:var(--ink-soft); }
+  .class-card p{ margin:0 0 0.4rem; font-size:0.78rem; line-height:1.55; color:var(--ink); }
+  .class-card p.why{ margin:0; color:var(--ink-soft); font-size:0.75rem; }
+
+  .channel-table td{ vertical-align:top; }
+  .channel-table .ch-name{ font-weight:500; }
+  .channel-table .ch-gives{ color:var(--ink-soft); font-size:0.78rem; line-height:1.5; max-width:52ch; }
+  .channel-table .ch-meta{ font-family:var(--font-mono); font-size:0.7rem; color:var(--ink-soft); white-space:nowrap; }
+
+  .rule-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:0.6rem; }
+  .rule-list li{
+    display:grid; grid-template-columns:5.5rem 1fr; gap:0.9rem; align-items:baseline;
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:8px; padding:0.7rem 0.9rem;
+    font-size:0.8rem; line-height:1.55; color:var(--ink-soft);
+  }
+  .rule-list li strong{ color:var(--ink); }
+
+  .tally-row{ display:flex; flex-wrap:wrap; gap:0.75rem; margin:1rem 0 0; }
+  .tally-card{
+    background:var(--surface); border:1px solid var(--border);
+    border-top:2px solid var(--tally-color);
+    border-radius:8px; padding:0.7rem 1rem; min-width:8.5rem;
+  }
+  .tally-value{ font-family:var(--font-mono); font-size:1.5rem; font-weight:600; color:var(--tally-color); }
+  .tally-label{ font-size:0.72rem; color:var(--ink-soft); margin-top:0.15rem; }
+
   @media (prefers-reduced-motion: reduce){
     *{ transition:none !important; }
   }
@@ -789,6 +892,7 @@
   <div class="tabs" role="tablist">
     <button class="tab-btn active" id="tabBtnMap" role="tab" aria-selected="true">Map</button>
     <button class="tab-btn" id="tabBtnSources" role="tab" aria-selected="false">Sources</button>
+    <button class="tab-btn" id="tabBtnMethod" role="tab" aria-selected="false">Method</button>
   </div>
 
   <div id="mapTabPanel">
@@ -865,13 +969,14 @@
   </div>
 
   <div id="sourcesTabPanel" hidden>
-    <p class="subtitle">Every fact on this map traced back to where it came from — check here before relying on anything.</p>
+    <p class="subtitle">Every fact on this map traced back to where it came from — check here before relying on anything. Weakest-confidence entries are listed first, since those are the ones needing a second, independent source class. Letters are source classes; see the <strong>Method</strong> tab for what each one means.</p>
     <section class="table-section">
       <div class="table-scroll">
         <table>
           <thead>
             <tr>
               <th>Site</th>
+              <th>Confidence</th>
               <th class="mono">Last updated</th>
               <th>Sources</th>
             </tr>
@@ -880,6 +985,248 @@
         </table>
       </div>
     </section>
+  </div>
+
+  <div id="methodTabPanel" hidden>
+    <p class="subtitle">How a fact gets from a filing, a satellite pass, or a press release into a pin on the map — and what has to be true before this atlas calls anything confident.</p>
+
+    <div class="method-wrap">
+
+      <section class="method-section">
+        <h2>The pipeline</h2>
+        <p class="method-lede">Evidence is gathered by class, attached to individual fields rather than to whole entries, scored on how many <em>independent</em> classes agree, and only then allowed through the gate that decides whether a change lands automatically or waits for a human.</p>
+        <div class="method-figure">
+          <svg viewBox="0 0 1280 496" role="img" aria-labelledby="pipelineTitle pipelineDesc">
+            <title id="pipelineTitle">Site Atlas evidence pipeline</title>
+            <desc id="pipelineDesc">Five stages: source classes are gathered by collector agents into per-field evidence records, scored by the confidence engine, and routed by the auto-apply gate into the data files that render the map.</desc>
+
+            <defs>
+              <marker id="arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="#4b5f59"/>
+              </marker>
+            </defs>
+
+            <style>
+              .col-h{ font:600 10px var(--font-mono); fill:#5f746d; letter-spacing:0.12em; text-transform:uppercase; }
+              .grp{ font:600 9px var(--font-mono); fill:#5f746d; letter-spacing:0.09em; text-transform:uppercase; }
+              .bx{ fill:var(--surface-2); stroke:var(--border); }
+              .nm{ font:600 12px var(--font-sans); fill:var(--ink); }
+              .sb{ font:400 10px var(--font-sans); fill:var(--ink-soft); }
+              .mn{ font:500 10px var(--font-mono); fill:var(--ink-soft); }
+              .cn{ stroke:#4b5f59; stroke-width:1.4; fill:none; }
+              .lbl{ font:500 9px var(--font-mono); fill:#5f746d; letter-spacing:0.06em; }
+            </style>
+
+            <!-- ============ 1 · SOURCE CLASSES ============ -->
+            <text class="col-h" x="16" y="18">1 · Source classes</text>
+
+            <text class="grp" x="16" y="44">Independent</text>
+            <rect class="bx" x="16" y="52" width="208" height="38" rx="6" stroke-width="1"/>
+            <rect x="16" y="52" width="3" height="38" rx="1.5" fill="#4ADE80"/>
+            <text class="nm" x="32" y="70">R · Regulatory</text>
+            <text class="sb" x="32" y="83">Permits, grid queues, filings</text>
+
+            <rect class="bx" x="16" y="96" width="208" height="38" rx="6" stroke-width="1"/>
+            <rect x="16" y="96" width="3" height="38" rx="1.5" fill="#5B9BE0"/>
+            <text class="nm" x="32" y="114">N · Network</text>
+            <text class="sb" x="32" y="127">PeeringDB, cloud regions, OSM</text>
+
+            <rect class="bx" x="16" y="140" width="208" height="38" rx="6" stroke-width="1"/>
+            <rect x="16" y="140" width="3" height="38" rx="1.5" fill="#C97AD1"/>
+            <text class="nm" x="32" y="158">O · Observed</text>
+            <text class="sb" x="32" y="171">Satellite, site-level hiring</text>
+
+            <text class="grp" x="16" y="204">Promotional or derivative</text>
+            <rect class="bx" x="16" y="212" width="208" height="38" rx="6" stroke-width="1"/>
+            <rect x="16" y="212" width="3" height="38" rx="1.5" fill="#E39149"/>
+            <text class="nm" x="32" y="230">P · Corporate</text>
+            <text class="sb" x="32" y="243">Operator newsroom, IR</text>
+
+            <rect class="bx" x="16" y="256" width="208" height="38" rx="6" stroke-width="1"/>
+            <rect x="16" y="256" width="3" height="38" rx="1.5" fill="#D9C24E"/>
+            <text class="nm" x="32" y="274">T · Trade press</text>
+            <text class="sb" x="32" y="287">DCD, DCF, Datacentre Mag.</text>
+
+            <rect class="bx" x="16" y="300" width="208" height="38" rx="6" stroke-width="1"/>
+            <rect x="16" y="300" width="3" height="38" rx="1.5" fill="#E0708A"/>
+            <text class="nm" x="32" y="318">G · General press</text>
+            <text class="sb" x="32" y="331">Business, financial, local</text>
+
+            <text class="grp" x="16" y="364">Never corroborating</text>
+            <rect class="bx" x="16" y="372" width="208" height="38" rx="6" stroke-width="1" stroke-dasharray="3 3"/>
+            <text class="nm" x="32" y="390" fill="#8FA39C">D · Directory</text>
+            <text class="sb" x="32" y="403">Cited, but never counted</text>
+
+            <rect class="bx" x="16" y="416" width="208" height="38" rx="6" stroke-width="1" stroke-dasharray="3 3"/>
+            <text class="nm" x="32" y="434" fill="#8FA39C">U · Unattributed</text>
+            <text class="sb" x="32" y="447">Never a basis for anything</text>
+
+            <!-- 1 -> 2 -->
+            <path class="cn" d="M 230 253 L 282 253" marker-end="url(#arw)"/>
+            <text class="lbl" x="232" y="245">gathers</text>
+
+            <!-- ============ 2 · COLLECTORS ============ -->
+            <text class="col-h" x="288" y="18">2 · Collectors</text>
+
+            <rect class="bx" x="288" y="68" width="192" height="72" rx="6" stroke-width="1"/>
+            <text class="nm" x="302" y="88">research-agent</text>
+            <text class="sb" x="302" y="103">Vets a claim against the</text>
+            <text class="sb" x="302" y="116">class rules. Grades and</text>
+            <text class="sb" x="302" y="129">corroborates. Cannot write.</text>
+
+            <rect class="bx" x="288" y="152" width="192" height="58" rx="6" stroke-width="1"/>
+            <text class="nm" x="302" y="172">news-agent</text>
+            <text class="sb" x="302" y="187">Company-level headlines.</text>
+            <text class="sb" x="302" y="200">Recency, not verification.</text>
+
+            <rect class="bx" x="288" y="222" width="192" height="58" rx="6" stroke-width="1"/>
+            <text class="nm" x="302" y="242">/reconcile</text>
+            <text class="sb" x="302" y="257">Re-checks claims already</text>
+            <text class="sb" x="302" y="270">recorded. Catches drift.</text>
+
+            <rect class="bx" x="288" y="292" width="192" height="72" rx="6" stroke-width="1" stroke-dasharray="4 3"/>
+            <text class="nm" x="302" y="312" fill="#8FA39C">monitor-agent</text>
+            <text class="sb" x="302" y="327">Diffs structured feeds and</text>
+            <text class="sb" x="302" y="340">reports deltas, unprompted.</text>
+            <text class="mn" x="302" y="356" fill="#5f746d">not built yet</text>
+
+            <!-- 2 -> 3 -->
+            <path class="cn" d="M 486 216 L 538 216" marker-end="url(#arw)"/>
+            <text class="lbl" x="488" y="208">records</text>
+
+            <!-- ============ 3 · EVIDENCE RECORD ============ -->
+            <text class="col-h" x="544" y="18">3 · Evidence record</text>
+
+            <rect class="bx" x="544" y="96" width="192" height="240" rx="6" stroke-width="1"/>
+            <text class="mn" x="558" y="118" fill="var(--accent)">provenance</text>
+            <text class="sb" x="558" y="134">Evidence attaches to a</text>
+            <text class="sb" x="558" y="147">field, not to the entry.</text>
+
+            <line x1="558" y1="160" x2="722" y2="160" stroke="var(--border)" stroke-width="1"/>
+
+            <text class="nm" x="558" y="182">capacityMW</text>
+            <text class="sb" x="558" y="196">basis · asOf · evidence[]</text>
+
+            <text class="nm" x="558" y="228">status</text>
+            <text class="sb" x="558" y="242">basis · asOf · evidence[]</text>
+
+            <text class="nm" x="558" y="274">location</text>
+            <text class="sb" x="558" y="288">basis · asOf · evidence[]</text>
+
+            <line x1="558" y1="302" x2="722" y2="302" stroke="var(--border)" stroke-width="1"/>
+            <text class="sb" x="558" y="322">basis says disclosed vs.</text>
+            <text class="sb" x="558" y="333">derived — never blurred.</text>
+
+            <!-- 3 -> 4 -->
+            <path class="cn" d="M 742 216 L 794 216" marker-end="url(#arw)"/>
+            <text class="lbl" x="748" y="208">scores</text>
+
+            <!-- ============ 4 · CONFIDENCE ENGINE ============ -->
+            <text class="col-h" x="800" y="18">4 · Confidence engine</text>
+
+            <rect class="bx" x="800" y="96" width="192" height="264" rx="6" stroke-width="1"/>
+            <text class="sb" x="814" y="118">Per field, ask three things:</text>
+
+            <circle cx="820" cy="140" r="3" fill="#4ADE80"/>
+            <text class="nm" x="832" y="144">Class diversity</text>
+            <text class="sb" x="814" y="158">2+ distinct classes agree?</text>
+
+            <circle cx="820" cy="184" r="3" fill="#4ADE80"/>
+            <text class="nm" x="832" y="188">Independence</text>
+            <text class="sb" x="814" y="202">At least one of R, N, O?</text>
+            <text class="sb" x="814" y="215">Two outlets on one press</text>
+            <text class="sb" x="814" y="228">release count as one.</text>
+
+            <circle cx="820" cy="254" r="3" fill="#4ADE80"/>
+            <text class="nm" x="832" y="258">Recency</text>
+            <text class="sb" x="814" y="272">Inside this field's window?</text>
+            <text class="sb" x="814" y="285">Planned sites age fastest.</text>
+
+            <line x1="814" y1="298" x2="978" y2="298" stroke="var(--border)" stroke-width="1"/>
+            <text class="sb" x="814" y="318">Site score = weakest field.</text>
+            <text class="sb" x="814" y="330">A good address cannot</text>
+
+            <!-- 4 -> 5 (two branches) -->
+            <path class="cn" d="M 1000 160 C 1024 160 1024 136 1048 136" marker-end="url(#arw)"/>
+            <path class="cn" d="M 1000 260 C 1024 260 1024 246 1048 246" marker-end="url(#arw)"/>
+
+            <!-- ============ 5 · GATE & OUTPUT ============ -->
+            <text class="col-h" x="1056" y="18">5 · Gate &amp; output</text>
+
+            <rect class="bx" x="1056" y="96" width="208" height="80" rx="6" stroke-width="1" stroke-opacity="0"/>
+            <rect x="1056" y="96" width="208" height="80" rx="6" fill="rgba(74,222,128,0.07)" stroke="rgba(74,222,128,0.35)" stroke-width="1"/>
+            <text class="nm" x="1070" y="118" fill="#4ADE80">High confidence</text>
+            <text class="sb" x="1070" y="134">Applied to the data file</text>
+            <text class="sb" x="1070" y="147">and pushed automatically.</text>
+            <text class="sb" x="1070" y="164">No pause to ask.</text>
+
+            <rect x="1056" y="196" width="208" height="94" rx="6" fill="rgba(251,191,36,0.06)" stroke="rgba(251,191,36,0.32)" stroke-width="1"/>
+            <text class="nm" x="1070" y="218" fill="#FBBF24">Anything less</text>
+            <text class="sb" x="1070" y="234">Medium, Low, conflicting,</text>
+            <text class="sb" x="1070" y="247">unverifiable — surfaced</text>
+            <text class="sb" x="1070" y="260">for a human call before</text>
+            <text class="sb" x="1070" y="273">anything is touched.</text>
+
+            <path class="cn" d="M 1160 176 L 1160 190" marker-end="url(#arw)" stroke-dasharray="3 3"/>
+            <path class="cn" d="M 1160 290 L 1160 316" marker-end="url(#arw)"/>
+
+            <rect class="bx" x="1056" y="322" width="208" height="52" rx="6" stroke-width="1"/>
+            <text class="mn" x="1070" y="343" fill="var(--accent)">data/sites.js</text>
+            <text class="sb" x="1070" y="360">providers.js · news.js</text>
+
+            <path class="cn" d="M 1160 374 L 1160 396" marker-end="url(#arw)"/>
+
+            <rect class="bx" x="1056" y="402" width="208" height="52" rx="6" stroke-width="1"/>
+            <text class="nm" x="1070" y="423">Map, tables, badges</text>
+            <text class="sb" x="1070" y="440">Every pin carries its score</text>
+
+            <text class="sb" x="814" y="342">rescue a fabricated number.</text>
+          </svg>
+        </div>
+      </section>
+
+      <section class="method-section">
+        <h2>Why classes, not tiers</h2>
+        <p class="method-lede">The atlas used to call a claim confident when two reputable sources agreed. That test quietly failed on the most common case in this industry: an operator issues a press release, two trade outlets write it up, and the claim collects two ticks without anything ever having checked it. Both outlets are downstream of the same interested party. Independence has to be measured by <em>who produced the evidence and why</em> — which is what these classes encode.</p>
+        <div class="class-grid" id="classGrid"></div>
+      </section>
+
+      <section class="method-section">
+        <h2>Where evidence comes from</h2>
+        <p class="method-lede">The working catalogue of channels. Regulatory and network sources are the ones worth the effort: they are filed or observed independently of any announcement, and most of them are diffable on a schedule rather than read once.</p>
+        <div class="table-section">
+          <div class="table-scroll">
+            <table class="channel-table">
+              <thead>
+                <tr>
+                  <th>Class</th>
+                  <th>Channel</th>
+                  <th>What it gives you</th>
+                  <th>Coverage</th>
+                  <th>Cadence</th>
+                  <th>Access</th>
+                </tr>
+              </thead>
+              <tbody id="channelBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="method-section">
+        <h2>The confidence rules</h2>
+        <ul class="rule-list">
+          <li><strong>High</strong><span>Two or more distinct classes agree, at least one of them independent (regulatory, network, or observed), and the freshest evidence is inside this field's re-check window. This is the only level that gets applied and pushed without asking.</span></li>
+          <li><strong>Medium</strong><span>Two or more classes agree but all of them are the operator or outlets restating the operator — or a single regulatory record standing alone. Believable, uncorroborated.</span></li>
+          <li><strong>Low</strong><span>One class only, or every source is past its window, or sources genuinely conflict. Conflicts are never silently resolved.</span></li>
+          <li><strong>Unverified</strong><span>Nothing usable. Directory and unattributed sources are still cited on the entry, but they cannot lift a claim to any level above this.</span></li>
+        </ul>
+        <p class="method-lede" style="margin-top:1.1rem">Where the current dataset actually stands under these rules — computed live from <span class="mono">data/sites.js</span>, not written down:</p>
+        <div class="tally-row" id="tallyRow"></div>
+        <p class="method-lede" style="margin-top:1rem">If most entries read Medium, that is the point. The atlas is currently built almost entirely on trade press restating operator announcements, and this page is the first thing that says so out loud.</p>
+      </section>
+
+    </div>
   </div>
 
   <footer class="foot">Status and capacity figures reflect public reporting as of when each entry was added — verify before relying on them. Basemap © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors, © <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>.</footer>
@@ -910,6 +1257,57 @@
     });
   })();
   function colorFor(provider){ return providerColor[provider] || "#5EEAD4"; }
+
+  // ---- Confidence rendering ----------------------------------------------
+  // The scoring itself lives in data/sources.js; everything here is display.
+  var TODAY = new Date().toISOString().slice(0, 10);
+
+  function esc(s){
+    return String(s == null ? "" : s)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function hexToRgba(hex, a){
+    var h = hex.replace("#", "");
+    var n = parseInt(h, 16);
+    return "rgba(" + ((n >> 16) & 255) + "," + ((n >> 8) & 255) + "," + (n & 255) + "," + a + ")";
+  }
+
+  // score: the object returned by scoreEvidence/scoreSiteField/scoreSite.
+  function confBadge(score, opts){
+    opts = opts || {};
+    var lvl = CONFIDENCE_LEVELS[score.level] || CONFIDENCE_LEVELS.unverified;
+    var title = opts.title || score.reason || "";
+    return '<span class="conf-badge' + (opts.small ? ' conf-sm' : '') + '"' +
+      ' style="--conf-fg:' + lvl.color + ';--conf-bg:' + hexToRgba(lvl.color, 0.12) + ';--conf-bd:' + hexToRgba(lvl.color, 0.3) + '"' +
+      (title ? ' title="' + esc(title) + '"' : '') + '>' + lvl.label + '</span>';
+  }
+
+  function classChip(code){
+    var c = SOURCE_CLASSES[code];
+    if (!c) return "";
+    return '<span class="cls-chip" style="--chip-fg:' + c.color + ';--chip-bg:' + hexToRgba(c.color, 0.12) +
+      ';--chip-bd:' + hexToRgba(c.color, 0.3) + '" title="' + esc(c.label + " — " + c.blurb) + '">' + c.code + '</span>';
+  }
+
+  function classChips(codes){
+    if (!codes || !codes.length) return "";
+    // Sorted into the canonical class order so a row always reads the same way.
+    var ordered = SOURCE_CLASS_ORDER.filter(function(c){ return codes.indexOf(c) !== -1; });
+    return '<span class="cls-chip-row">' + ordered.map(classChip).join("") + '</span>';
+  }
+
+  // One field's badge, with the derived/estimated marker when the value
+  // wasn't disclosed by anyone but worked out here.
+  function fieldConf(site, field){
+    var score = scoreSiteField(site, field, TODAY);
+    var basis = siteFieldBasis(site, field);
+    var basisHtml = (basis && basis !== "disclosed")
+      ? '<span class="basis-tag basis-' + basis + '" title="This value was not disclosed by the operator — it was ' + basis + ' from the evidence.">' + (BASIS_LABELS[basis] || basis) + '</span>'
+      : '';
+    return { score: score, html: confBadge(score, { small: true }) + basisHtml };
+  }
   function statusSlug(status){ return (status||"").toLowerCase().replace(/[^a-z]+/g,"-").replace(/(^-|-$)/g,""); }
 
   // Table row order: grouped by provider (first-appearance order, same as
@@ -1187,43 +1585,135 @@
     detailPanel.classList.add("open");
 
     var color = colorFor(site.provider);
+    // Each source now carries its class chip, so it's visible at a glance
+    // whether a citation is a filing or an outlet restating a press release.
     var sourcesHtml = (site.sources || []).map(function(s){
-      return '<a href="' + s.url + '" target="_blank" rel="noopener">' + s.label + '</a>';
-    }).join(', ');
+      return classChip(classifySource(s, site.provider)) + ' <a href="' + s.url + '" target="_blank" rel="noopener">' + s.label + '</a>';
+    }).join('<br>');
+
+    var overall = scoreSite(site, TODAY);
+    var locConf = fieldConf(site, "location");
+    var statusConf = fieldConf(site, "status");
+    var capConf = site.capacityMW != null ? fieldConf(site, "capacityMW") : null;
+
+    // The weakest field is what set the site's headline score — say which,
+    // rather than leaving the reader to work it out from three badges.
+    var weakest = null;
+    Object.keys(overall.fields).forEach(function(f){
+      if (overall.fields[f].level === overall.level && !weakest) weakest = f;
+    });
 
     detailPanelBody.innerHTML =
       '<div class="detail-head">' +
         '<div><h2>' + site.city + '</h2><p class="region-code">' + (site.site || site.country) + '</p></div>' +
         '<span class="provider-tag" style="background:' + color + '">' + site.provider + '</span>' +
       '</div>' +
+      '<div class="detail-conf">' +
+        '<span>Confidence</span>' + confBadge(overall, { title: "A site scores as its weakest field." }) +
+        (weakest ? '<span>set by ' + (FIELD_LABELS[weakest] || weakest).toLowerCase() + '</span>' : '') +
+      '</div>' +
       '<dl class="kv">' +
         '<dt>Country</dt><dd>' + site.country + '</dd>' +
-        '<dt>Coordinates</dt><dd>' + site.lat.toFixed(4) + ', ' + site.lon.toFixed(4) + '</dd>' +
-        '<dt>Status</dt><dd><span class="status-pill status-' + statusSlug(site.status) + '">' + site.status + '</span></dd>' +
-        '<dt>Capacity</dt><dd>' + (site.capacityMW != null ? site.capacityMW + ' MW' : 'Not disclosed') + '</dd>' +
+        '<dt>Coordinates</dt><dd>' + site.lat.toFixed(4) + ', ' + site.lon.toFixed(4) + locConf.html + '</dd>' +
+        '<dt>Status</dt><dd><span class="status-pill status-' + statusSlug(site.status) + '">' + site.status + '</span>' + statusConf.html + '</dd>' +
+        '<dt>Capacity</dt><dd>' + (site.capacityMW != null ? site.capacityMW + ' MW' + capConf.html : 'Not disclosed') + '</dd>' +
       '</dl>' +
+      '<p class="conf-why">' + esc(overall.fields[weakest] ? overall.fields[weakest].reason : "No fields scored.") +
+        (siteFieldHasProvenance(site, weakest || "status") ? '' : ' <em>No per-field provenance recorded yet, so every source on this entry is being counted toward every field.</em>') +
+      '</p>' +
       '<div class="notes-box">' + (site.notes && site.notes.length ? site.notes : "No notes yet — add one in data/sites.js.") + '</div>' +
-      '<p class="source-line">Updated ' + (site.lastUpdated || '—') + (sourcesHtml ? ' · Source: ' + sourcesHtml : '') + '</p>';
+      '<p class="source-line">Updated ' + (site.lastUpdated || '—') + (sourcesHtml ? '<br>' + sourcesHtml : '') + '</p>';
   }
 
   // ---- Sources tab --------------------------------------------------------
   function renderSourcesTab(){
     var body = document.getElementById("sourcesBody");
     body.innerHTML = "";
-    SITES.forEach(function(site){
+    // Weakest-confidence entries first — this table is for finding what needs
+    // work, so sorting by "most in need of a second source class" is more
+    // useful than sorting by provider.
+    var ordered = SITES.slice().sort(function(a, b){
+      var ra = CONFIDENCE_LEVELS[scoreSite(a, TODAY).level].rank;
+      var rb = CONFIDENCE_LEVELS[scoreSite(b, TODAY).level].rank;
+      return ra !== rb ? ra - rb : tableSortCompare(a, b);
+    });
+    ordered.forEach(function(site){
       var tr = document.createElement("tr");
+      var overall = scoreSite(site, TODAY);
       var links = (site.sources || []).map(function(s){
-        return '<a href="' + s.url + '" target="_blank" rel="noopener">' + s.label + '</a>';
+        return classChip(classifySource(s, site.provider)) + ' <a href="' + s.url + '" target="_blank" rel="noopener">' + s.label + '</a>';
       }).join('<br>');
+      var classes = [];
+      (site.sources || []).forEach(function(s){
+        var c = classifySource(s, site.provider);
+        if (classes.indexOf(c) === -1) classes.push(c);
+      });
       tr.innerHTML =
         '<td><span class="provider-dot" style="background:' + colorFor(site.provider) + '"></span>' +
           site.provider + ' — ' + site.city + (site.site ? ' <span class="region-code">(' + site.site + ')</span>' : '') + '</td>' +
+        '<td>' + confBadge(overall, { title: "A site scores as its weakest field." }) +
+          '<div style="margin-top:0.3rem">' + classChips(classes) + '</div></td>' +
         '<td class="mono">' + (site.lastUpdated || '—') + '</td>' +
         '<td>' + (links || '<span class="detail-empty" style="margin:0">No sources logged</span>') + '</td>';
       body.appendChild(tr);
     });
   }
   renderSourcesTab();
+
+  // ---- Method tab ---------------------------------------------------------
+  // Rendered from data/sources.js rather than hand-written, so the page can't
+  // drift out of sync with the rules it's describing.
+  function renderMethodTab(){
+    var grid = document.getElementById("classGrid");
+    grid.innerHTML = SOURCE_CLASS_ORDER.map(function(code){
+      var c = SOURCE_CLASSES[code];
+      var tag = c.weight === 0
+        ? '<span class="class-card-tag none">not counted</span>'
+        : (c.independent
+            ? '<span class="class-card-tag indep">independent</span>'
+            : '<span class="class-card-tag dep">derivative</span>');
+      return '<div class="class-card" style="--cls-color:' + c.color + '">' +
+        '<div class="class-card-head">' + classChip(code) +
+          '<span class="class-card-name">' + esc(c.label) + '</span>' + tag + '</div>' +
+        '<p>' + esc(c.blurb) + '</p>' +
+        '<p class="why">' + esc(c.why) + '</p>' +
+      '</div>';
+    }).join('');
+
+    var chBody = document.getElementById("channelBody");
+    chBody.innerHTML = SOURCE_CHANNELS.map(function(ch){
+      var name = ch.url
+        ? '<a href="' + ch.url + '" target="_blank" rel="noopener">' + esc(ch.name) + '</a>'
+        : esc(ch.name);
+      return '<tr>' +
+        '<td>' + classChip(ch.cls) + '</td>' +
+        '<td class="ch-name">' + name + '</td>' +
+        '<td class="ch-gives">' + esc(ch.gives) + '</td>' +
+        '<td class="ch-meta">' + esc(ch.scope) + '</td>' +
+        '<td class="ch-meta">' + esc(ch.cadence) + '</td>' +
+        '<td class="ch-meta">' + esc(ch.access) + '</td>' +
+      '</tr>';
+    }).join('');
+
+    var tally = {};
+    SITES.forEach(function(s){
+      var lvl = scoreSite(s, TODAY).level;
+      tally[lvl] = (tally[lvl] || 0) + 1;
+    });
+    var order = ["high", "medium", "low", "unverified"];
+    document.getElementById("tallyRow").innerHTML = order.map(function(k){
+      var lvl = CONFIDENCE_LEVELS[k];
+      return '<div class="tally-card" style="--tally-color:' + lvl.color + '">' +
+        '<div class="tally-value">' + (tally[k] || 0) + '</div>' +
+        '<div class="tally-label">' + lvl.label + ' confidence</div>' +
+      '</div>';
+    }).join('') +
+      '<div class="tally-card" style="--tally-color:var(--accent)">' +
+        '<div class="tally-value">' + SITES.length + '</div>' +
+        '<div class="tally-label">sites tracked</div>' +
+      '</div>';
+  }
+  renderMethodTab();
 
   // ---- Provider page (opened by clicking a dashboard card) --------------
   var providerTabPanel = document.getElementById("providerTabPanel");
@@ -1391,23 +1881,26 @@
   document.getElementById("providerBack").addEventListener("click", collapseProviderPanel);
 
   // ---- Tabs ---------------------------------------------------------------
-  var tabBtnMap = document.getElementById("tabBtnMap");
-  var tabBtnSources = document.getElementById("tabBtnSources");
-  var mapTabPanel = document.getElementById("mapTabPanel");
-  var sourcesTabPanel = document.getElementById("sourcesTabPanel");
-
-  function switchToMapTab(){
-    tabBtnMap.classList.add("active"); tabBtnMap.setAttribute("aria-selected","true");
-    tabBtnSources.classList.remove("active"); tabBtnSources.setAttribute("aria-selected","false");
-    mapTabPanel.hidden = false; sourcesTabPanel.hidden = true;
+  // Three tabs now, so drive them from a table rather than toggling each
+  // pair by hand — adding a fourth shouldn't mean rewriting the switcher.
+  var TABS = [
+    { btn: "tabBtnMap",     panel: "mapTabPanel" },
+    { btn: "tabBtnSources", panel: "sourcesTabPanel" },
+    { btn: "tabBtnMethod",  panel: "methodTabPanel" }
+  ];
+  function switchToTab(btnId){
+    TABS.forEach(function(t){
+      var on = t.btn === btnId;
+      var btn = document.getElementById(t.btn);
+      btn.classList.toggle("active", on);
+      btn.setAttribute("aria-selected", on ? "true" : "false");
+      document.getElementById(t.panel).hidden = !on;
+    });
   }
-  function switchToSourcesTab(){
-    tabBtnSources.classList.add("active"); tabBtnSources.setAttribute("aria-selected","true");
-    tabBtnMap.classList.remove("active"); tabBtnMap.setAttribute("aria-selected","false");
-    sourcesTabPanel.hidden = false; mapTabPanel.hidden = true;
-  }
-  tabBtnMap.addEventListener("click", switchToMapTab);
-  tabBtnSources.addEventListener("click", switchToSourcesTab);
+  TABS.forEach(function(t){
+    document.getElementById(t.btn).addEventListener("click", function(){ switchToTab(t.btn); });
+  });
+  function switchToMapTab(){ switchToTab("tabBtnMap"); }
 
 })();
 </script>
