@@ -208,11 +208,41 @@ var SITES = [
     lon: 0.0917,
     status: "Under construction",
     capacityMW: 22,
-    lastUpdated: "2026-08-21",
+    lastUpdated: "2026-09-09",
     sources: [
       { label: "Data Center Dynamics — \"Nebius signs 22MW capacity agreement with Kao Data in the UK\"", url: "https://www.datacenterdynamics.com/en/news/nebius-signs-22mw-capacity-agreement-with-kao-data-in-the-uk/" },
-      { label: "Kao Data newsroom", url: "https://kaodata.com/discover/news/nebius-chooses-kao-datas-harlow-campus-for-major-ai-infrastructure-deployment/" }
+      { label: "Kao Data newsroom", url: "https://kaodata.com/discover/news/nebius-chooses-kao-datas-harlow-campus-for-major-ai-infrastructure-deployment/" },
+      { label: "PeeringDB facility 7042 — Kao Data Campus, London Road, Harlow", url: "https://www.peeringdb.com/fac/7042", cls: "N" }
     ],
+    provenance: {
+      // PeeringDB independently records the campus and its street address, so
+      // location no longer rests on the operators' own descriptions. It says
+      // nothing about power, so the 22MW figure is unaffected.
+      capacityMW: {
+        basis: "disclosed",
+        asOf: "2026-09-09",
+        evidence: [
+          { source: 0, cls: "T", asOf: "2026-08-21", note: "22MW capacity agreement, as announced." },
+          { source: 1, cls: "G", asOf: "2026-08-21", note: "Kao Data's own announcement of the same deal — the counterparty, not an independent check." }
+        ]
+      },
+      status: {
+        basis: "disclosed",
+        asOf: "2026-09-09",
+        evidence: [
+          { source: 0, cls: "T", asOf: "2026-08-21" },
+          { source: 1, cls: "G", asOf: "2026-08-21" }
+        ]
+      },
+      location: {
+        basis: "disclosed",
+        asOf: "2026-09-09",
+        evidence: [
+          { source: 2, cls: "N", asOf: "2026-09-09", note: "PeeringDB facility 7042, \"Kao Data Campus\", London Road, Harlow, GB — an independent industry record of the campus. PeeringDB holds no coordinates for it, so the stored lat/lon is still uncorroborated at parcel precision." },
+          { source: 1, cls: "G", asOf: "2026-08-21" }
+        ]
+      }
+    },
     notes: "22MW, 10-year deal, part of a wider £1.7B UK investment pledge, alongside new Nvidia infrastructure deployments. Previous source citation (a Mäntsälä/Estonia roundup article that never mentions Harlow or Kao Data) was a copy-paste error — corrected."
   },
   {
@@ -242,12 +272,44 @@ var SITES = [
     lon: -75.0257,
     status: "Under construction",
     capacityMW: 300,
-    lastUpdated: "2026-08-21",
+    lastUpdated: "2026-09-09",
     sources: [
       { label: "Nebius/Businesswire, Mar 2025 — \"adding up to 300 MW capacity\"", url: "https://www.businesswire.com/news/home/20250305405030/en/Nebius-accelerates-US-expansion-adding-up-to-300-MW-capacity-at-new-data-center-in-New-Jersey" },
       { label: "Data Centre Magazine", url: "https://datacentremagazine.com/articles/dataone-and-nebius-partner-for-new-300mw-ai-data-centre" },
-      { label: "WHYY, Aug 2026 — Vineland planning board approves Phase 2", url: "https://whyy.org/articles/vineland-planning-board-approves-data-center-plan/" }
+      { label: "WHYY, Aug 2026 — Vineland planning board approves Phase 2", url: "https://whyy.org/articles/vineland-planning-board-approves-data-center-plan/" },
+      { label: "Nebius Group SEC Form 6-K, 8 Sep 2025 — Microsoft GPU capacity agreement", url: "https://www.sec.gov/Archives/edgar/data/1513845/000110465925088312/tm2525580d1_6k.htm", cls: "R" }
     ],
+    provenance: {
+      // The SEC filing is the first source on this entry that isn't Nebius or
+      // someone reporting Nebius. It names the site — it does NOT state a
+      // megawatt figure, so it lifts location and status and deliberately
+      // leaves capacity where it was.
+      capacityMW: {
+        basis: "disclosed",
+        asOf: "2026-09-09",
+        evidence: [
+          { source: 0, cls: "P", asOf: "2025-03-05", note: "The 300MW figure originates here, in Nebius's own release. No independent record has confirmed it." },
+          { source: 1, cls: "T", asOf: "2026-08-21", note: "Restates the same 300MW figure." }
+        ]
+      },
+      status: {
+        basis: "disclosed",
+        asOf: "2026-09-09",
+        evidence: [
+          { source: 3, cls: "R", asOf: "2025-09-08", note: "Form 6-K describes Vineland as \"its new data center\" and commits it to a five-year Microsoft agreement worth about $17.4bn through 2031 — a filed, legally consequential statement that the project is real and proceeding." },
+          { source: 2, cls: "G", asOf: "2026-08-18", note: "Planning board approval of Phase 2, reported locally." },
+          { source: 0, cls: "P", asOf: "2025-03-05" }
+        ]
+      },
+      location: {
+        basis: "disclosed",
+        asOf: "2026-09-09",
+        evidence: [
+          { source: 3, cls: "R", asOf: "2025-09-08", note: "Names Vineland, New Jersey in an SEC filing. Confirms the municipality, not the parcel — the stored coordinates are still uncorroborated at that precision." },
+          { source: 0, cls: "P", asOf: "2025-03-05" }
+        ]
+      }
+    },
     notes: "300MW was the primary-source figure from the original Mar 2025 Nebius/Businesswire release; the dataset previously used a more conservative 100MW \"installed by end-2025\" milestone, but that undersold the disclosed total. Phase 1 is under construction targeting full operation in 2026; Phase 2 (~600,000 sq ft addition) was approved by the Vineland Planning Board on Aug 18, 2026. Some secondary press floats a further expansion toward 350MW — not yet confirmed by a primary Nebius source, so not used here. Site is reportedly part of fulfilling Nebius's ~$17.4B Microsoft compute deal."
   },
   {
