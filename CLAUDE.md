@@ -47,10 +47,27 @@ capacity. Built as a single static site with no backend and no build step.
   field — see its own header comment for the schema and how it relates to
   `news-agent` below. A provider with no entry here falls back to a list
   built from its sites' `sources` instead.
+- `tools/atlas.js` — a read-only CLI over the data files, for research runs.
+  No dependencies; it evaluates the same `data/sources.js` the browser loads,
+  so its scores can't drift from the page's.
+    - `index` — one terse line per site with a per-field verdict. **Use this
+      instead of reading `data/sites.js`**: the full file is ~17k tokens at
+      41 sites and would be ~210k at 500, roughly 63% of it `notes` prose and
+      URLs that are irrelevant to deciding what to look at. The index is
+      about 20× smaller.
+    - `due` — the audit queue, split into overdue re-checks and fields never
+      independently verified.
+    - `show <id>` — full detail for named entries only.
+    - `stats`, `sources` — dataset tally and the channel catalog.
+  Neither subagent has a Bash tool, so neither can run this; the caller runs
+  it and passes the relevant slice into the agent's prompt. That is
+  deliberate — a shell would hand them a write path through redirection and
+  quietly undo the guarantee that research can't modify a data file. Don't
+  add Bash to those agents to make the CLI more convenient.
 - The site itself (`index.html`, `data/sites.js`) has no package manager, no
-  build step, no framework — keep it that way. The one exception is
-  `.claude/mcp/openrouter/`, a small local tool with its own `package.json`;
-  that's internal tooling, not part of the deployed site.
+  build step, no framework — keep it that way. The two exceptions are
+  `.claude/mcp/openrouter/` and `tools/`, both internal tooling rather than
+  part of the deployed site.
 
 ## Workflow
 
@@ -96,6 +113,21 @@ Two consequences worth knowing before anything looks alarming:
    High is harder to reach, so more findings route to the review path. That
    is intended: the gate was previously reachable by a single press release
    with extra steps.
+
+**Lead with the verdict, not the arithmetic.** The four-level scale is a
+useful sort key, but the thing a reader actually needs is close to binary:
+does this figure trace back to anyone other than the company announcing it?
+So every field carries a **verdict** — *Independently verified*, *Operator's
+word*, or *Unsourced* — stated in words, with the graded level demoted to a
+hover-revealed dot beside it. As of Sep 2026, 92 of 108 scored fields across
+the dataset are "operator's word." That single number is the state of the
+atlas, and it is the one worth watching.
+
+Related: trade and general press are classed as derivative *by default*
+because that is usually what they are. But a reporter who sat in a planning
+meeting or read a permit did independent work, and the record they used is
+the thing worth citing. In that case add the underlying record as its own
+source with `cls: "R"` — do not upgrade the article.
 
 Confidence is computed **per field** (`capacityMW`, `status`, `location`)
 and a site scores as its weakest field — a trustworthy address does not

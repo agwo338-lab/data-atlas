@@ -29,9 +29,28 @@ Argument passed: $ARGUMENTS
 
 ## Steps
 
-1. Read the data file(s) the resolved scope points to, to gather the
-   exact existing claims to check — current value, `since`/`lastUpdated`
-   date, and the sources already on file for each.
+1. Gather the exact existing claims to check — current value,
+   `since`/`lastUpdated` date, and the sources already on file for each.
+
+   For site scopes, use the CLI rather than reading `data/sites.js` whole:
+
+   - `node tools/atlas.js due` — the audit queue, split into **overdue
+     re-checks** (evidence aged past its window) and **never independently
+     verified** (operator's word only, which more press will never fix).
+     Default to working this list rather than the whole dataset: auditing
+     everything is what makes cost scale with the site count instead of
+     with actual drift.
+   - `node tools/atlas.js index [--provider X]` — one terse line per site
+     with a per-field verdict, for settling what's in scope.
+   - `node tools/atlas.js show <id> …` — full detail, every piece of
+     evidence, for just the entries you settled on.
+
+   Pass the relevant slice of that output to `research-agent` in its prompt.
+   It has no Bash tool and cannot run the CLI itself — deliberately, since a
+   shell would give it a write path — so it depends on you for the index.
+
+   For `data/providers.js` partner scopes, read that file directly; it's
+   small.
 2. Dispatch to the `research-agent` subagent (not `news-agent` — this is
    per-claim fact verification against research-agent's tiered-sourcing
    and corroboration methodology, not headline curation). Hand it the

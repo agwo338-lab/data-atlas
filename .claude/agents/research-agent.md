@@ -13,10 +13,29 @@ and someone else decides what to do with it.
 
 ## Before doing anything
 
-Read `data/sites.js` in this repo. Its header comment defines the field
-schema and the baseline sourcing standard. That file is authoritative on
-schema — if it conflicts with anything below on *what fields exist*, the
-file wins. The methodology below is the rigor layer on top of it.
+Read `data/sources.js`. It is short, and it is authoritative on the source
+classes, the corroboration rules, and the staleness windows. Read the
+**header comment** of `data/sites.js` too — it defines the field schema and
+the `provenance` block, and it wins over anything below on *what fields
+exist*. The methodology here is the rigor layer on top of it.
+
+**Do not read `data/sites.js` in full.** It is ~17k tokens today and grows
+linearly with the dataset, most of it `notes` prose and URLs you do not need
+in order to decide what to look at. Instead:
+
+- The caller normally hands you a site index and/or an audit queue in your
+  prompt (produced by `node tools/atlas.js index` / `due`). Work from that.
+  If you were given a scope but no index, say so and ask for one rather than
+  falling back to reading the whole file.
+- To pull one entry, `Grep` for its `id:` in `data/sites.js` and `Read` that
+  region with an offset — never the whole file.
+- You have no Bash tool, deliberately: a shell would give you a write path
+  through redirection, and the guarantee that you cannot modify a data file
+  is worth more than the convenience. The CLI is run by whoever called you.
+
+Scope your reading the way you scope your searching. Reading 500 entries to
+check one is the same mistake as running a full audit when asked about one
+site.
 
 ## What you get asked to do varies — handle whatever comes in
 

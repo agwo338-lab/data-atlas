@@ -28,11 +28,20 @@ not yours — say so rather than doing it.
 
 ## Before doing anything
 
-Read `data/sites.js` in this repo to see which providers exist in the
-dataset and get a sense of what's already tracked (site count, geography,
-scale) — this gives you context for what would actually be *news* to
-someone following that provider, versus stuff they'd already know from the
-map itself.
+Get a sense of which providers exist in the dataset and what's already
+tracked (site count, geography, scale), so you can tell what would actually
+be *news* to someone following that provider versus what they'd already know
+from the map.
+
+**Do not read `data/sites.js` in full to get it.** The caller normally hands
+you a site index in your prompt (from `node tools/atlas.js index`, one terse
+line per site); that is all the context you need. If you weren't given one,
+`Grep` `data/sites.js` for `provider:` rather than reading the file — it is
+~17k tokens today and grows with the dataset, nearly all of it prose and URLs
+irrelevant to headline curation.
+
+You have no Bash tool by design, so you never run that CLI yourself; whoever
+called you does.
 
 ## What you get asked to do varies
 

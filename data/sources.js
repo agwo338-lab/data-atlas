@@ -621,6 +621,67 @@ function scoreSite(site, today){
   return { level: lowest || "unverified", fields: perField };
 }
 
+// ---- The question that actually matters -----------------------------------
+//
+// The four-level confidence scale is a useful sort key, but it buries the one
+// thing a reader needs: does this figure trace back to anybody other than the
+// company announcing it? That is close to binary, and it should be said
+// first, in words, before any arithmetic.
+var VERDICTS = {
+  independent: {
+    key: "independent",
+    label: "Independently verified",
+    short: "Independent",
+    color: "#4ADE80",
+    blurb: "At least one source here is not the operator, and is not repeating the operator."
+  },
+  operator: {
+    key: "operator",
+    label: "Operator's word",
+    short: "Operator's word",
+    color: "#FBBF24",
+    blurb: "Every source here traces back to the operator's own statement. However many outlets carried it, nobody independent has confirmed it."
+  },
+  unsourced: {
+    key: "unsourced",
+    label: "Unsourced",
+    short: "Unsourced",
+    color: "#8FA39C",
+    blurb: "Nothing usable is recorded for this field — only directory or unattributed material, or nothing at all."
+  }
+};
+
+function verdictFor(score){
+  if (!score || !score.classes.length) return VERDICTS.unsourced;
+  return score.hasIndependent ? VERDICTS.independent : VERDICTS.operator;
+}
+
+// Plain-language role for one source, replacing the class name in contexts
+// where "Primary corporate · 2026-08-21" is less use than saying what the
+// source actually is relative to the claim.
+var CLASS_ROLES = {
+  R: "Independent — a regulatory record",
+  N: "Independent — network telemetry",
+  O: "Independent — direct observation",
+  P: "The operator itself",
+  T: "Trade press — treated as repeating the operator",
+  G: "General press — treated as repeating the operator",
+  D: "A directory — does not count toward verification",
+  U: "Unattributed — does not count toward verification"
+};
+
+// T and G are classed as derivative by default because that is what they
+// usually are. But a reporter who sat in a planning meeting or read a permit
+// is doing independent work, and the record they used is the thing worth
+// citing. Where that is the case, add the underlying record as its own source
+// with cls: "R" rather than upgrading the article.
+function derivativeHint(score){
+  if (!score || score.hasIndependent) return "";
+  var hasPress = score.classes.indexOf("T") !== -1 || score.classes.indexOf("G") !== -1;
+  if (!hasPress) return "";
+  return "If one of these articles was written from a public record — a permit, a filing, a council or planning agenda — then that record is the source worth citing. Add it as its own entry with cls: \"R\"; do not upgrade the article.";
+}
+
 // ---- What would raise this score? -----------------------------------------
 //
 // The most useful thing to say about a Medium is what specific evidence would
@@ -628,27 +689,19 @@ function scoreSite(site, today){
 // agents and the UI give the same answer to the same question.
 function liftAdvice(score, field, status){
   if (!score) return "";
-  if (score.level === "high") return "Nothing needed — corroborated across independent classes, and current.";
-
-  var missingIndependent = SOURCE_CLASS_ORDER.filter(function(c){
-    return SOURCE_CLASSES[c].independent && score.classes.indexOf(c) === -1;
-  }).map(function(c){
-    return SOURCE_CLASSES[c].code + " (" + SOURCE_CLASSES[c].short.toLowerCase() + ")";
-  }).join(", ");
-
-  if (score.classes.length === 0) {
-    return "Any two sources in different classes, at least one of them regulatory, network, or observed.";
+  if (score.level === "high") return "Nothing needed. Independently confirmed and current.";
+  if (!score.classes.length) {
+    return "Anything credible at all — a permit, a filing, a planning record, or a facility listing.";
   }
   if (score.stale) {
-    return "Re-verify. The freshest evidence is " +
+    return "Re-check it. The most recent evidence is " +
       (score.ageDays == null ? "undated" : score.ageDays + " days old") +
-      ", past the " + stalenessWindow(field, status) + "-day window for this field.";
+      ", past the " + stalenessWindow(field, status) + "-day limit for this field.";
   }
   if (!score.hasIndependent) {
-    return "Add one independent class — " + missingIndependent +
-      ". Another trade or corporate source cannot move this, however good it is.";
+    return "One source that isn't the operator: an air or planning permit, a grid interconnection queue, an SEC filing, a facility listing, or a satellite check. More press coverage will not change this.";
   }
-  return "Corroborate with a second, different class. One source is one source, whatever its grade.";
+  return "A second, different kind of source. One record on its own is still one record.";
 }
 
 // `basis` distinguishes a number the operator published from one worked out
