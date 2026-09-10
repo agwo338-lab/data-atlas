@@ -31,6 +31,9 @@
   }
 
   *{ box-sizing:border-box; }
+  /* A panel with its own display value outranks the UA [hidden] rule, so
+     toggling el.hidden on one would otherwise do nothing. */
+  [hidden]{ display:none !important; }
   body{
     margin:0;
     background:var(--bg);
@@ -813,108 +816,82 @@
   }
   .conf-badge:focus-visible{ outline:1px solid var(--conf-bd); outline-offset:2px; }
 
-  /* ---- Site page (one facility, all its evidence) ----------------------- */
-  .site-page-head{ display:flex; align-items:flex-start; gap:1rem; margin:0 0 0.35rem; }
-  .site-page-head h1{ margin:0; font-size:1.5rem; font-weight:600; letter-spacing:-0.02em; }
-  .site-page-sub{ margin:0.2rem 0 0; color:var(--accent); font-family:var(--font-mono); font-size:0.82rem; }
+  /* ---- Site page --------------------------------------------------------
+     One column, capped at a readable measure. The earlier two-column version
+     listed the same sources twice and led with sourcing commentary; this one
+     leads with the facility and folds the methodology into a disclosure. */
+  .site-page{ max-width:62rem; }
+
+  .site-page-head{ display:flex; align-items:flex-start; gap:1rem; margin:0 0 1.1rem; }
+  .site-page-head h1{ margin:0; font-size:1.6rem; font-weight:600; letter-spacing:-0.02em; }
+  .site-page-sub{ margin:0.25rem 0 0; color:var(--accent); font-family:var(--font-mono); font-size:0.84rem; }
   .site-page-head .provider-tag{ margin-left:auto; flex-shrink:0; }
 
-  .site-page-stats{
-    display:flex; flex-wrap:wrap; gap:0.5rem 2.25rem;
-    margin:1rem 0 1.5rem; padding:0.9rem 1.1rem;
+  .site-facts{
+    display:flex; flex-wrap:wrap; gap:1rem 2.5rem;
+    padding:1rem 1.15rem; margin-bottom:1.9rem;
     background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
   }
-  .site-page-stats > div{ min-width:7rem; }
-  .site-stat-label{ font-size:0.66rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--ink-soft); }
-  .site-stat-value{ margin-top:0.2rem; font-family:var(--font-mono); font-size:0.92rem; display:flex; align-items:center; gap:0.4rem; }
+  .fact-label{ font-size:0.64rem; text-transform:uppercase; letter-spacing:0.09em; color:var(--ink-soft); }
+  .fact-value{ margin-top:0.3rem; font-family:var(--font-mono); font-size:0.92rem; }
+  .fact-muted{ color:var(--ink-soft); }
 
-  .site-page-body{ display:grid; grid-template-columns:minmax(0,1.55fr) minmax(280px,1fr); gap:1.75rem; align-items:start; }
-  @media (max-width:1000px){ .site-page-body{ grid-template-columns:1fr; } }
-  .site-page-body h2{ margin:0 0 0.3rem; font-size:0.95rem; font-weight:600; }
-  .site-page-body > section > p.sub{ margin:0 0 0.9rem; color:var(--ink-soft); font-size:0.8rem; line-height:1.55; max-width:64ch; }
+  .verdict-inline{
+    display:inline-flex; align-items:center; gap:0.35rem;
+    font-family:var(--font-sans); font-size:0.78rem; font-weight:600;
+  }
+  .verdict-inline::before{ content:""; width:7px; height:7px; border-radius:50%; background:currentColor; flex-shrink:0; }
+  .verdict-independent{ color:#4ADE80; }
+  .verdict-operator{ color:#FBBF24; }
+  .verdict-unsourced{ color:#8FA39C; }
 
-  .field-card{
-    background:var(--surface); border:1px solid var(--border);
-    border-left:3px solid var(--fld-color);
-    border-radius:8px; padding:0.9rem 1rem; margin-bottom:0.9rem;
+  .site-block{ margin-bottom:1.9rem; }
+  .site-block h2{ margin:0 0 0.7rem; font-size:0.95rem; font-weight:600; }
+  .site-prose{
+    max-width:70ch; font-size:0.88rem; line-height:1.68; color:var(--ink);
+    white-space:pre-line;
   }
-  .field-card-head{ display:flex; align-items:baseline; gap:0.55rem; flex-wrap:wrap; }
-  .field-name{ font-size:0.66rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--ink-soft); }
-  .field-value{ font-family:var(--font-mono); font-size:1rem; font-weight:600; }
-  .field-card-head .conf-badge{ margin-left:auto; }
-  .field-reason{ margin:0.55rem 0 0; font-size:0.79rem; line-height:1.55; color:var(--ink-soft); }
-  .field-lift{
-    margin:0.6rem 0 0; padding:0.5rem 0.65rem;
-    background:var(--surface-2); border-radius:6px;
-    font-size:0.75rem; line-height:1.5; color:var(--ink-soft);
-  }
-  .field-lift strong{ color:var(--ink); font-weight:600; }
 
-  /* The verdict is the headline: is this the operator's own word, or did
-     somebody independent confirm it. The numeric confidence stays available
-     as a dot, but it no longer competes with the sentence. */
-  .verdict{
-    display:flex; align-items:baseline; gap:0.55rem; flex-wrap:wrap;
-    margin:0.15rem 0 0.85rem;
+  .src-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; }
+  .src-list li{
+    display:grid; grid-template-columns:1.15rem 1fr; gap:0.6rem; align-items:start;
+    padding:0.6rem 0; border-bottom:1px solid var(--border);
+    font-size:0.84rem; line-height:1.45;
   }
-  .verdict-label{ font-size:0.9rem; font-weight:600; letter-spacing:-0.01em; }
-  .verdict-independent .verdict-label{ color:#4ADE80; }
-  .verdict-operator .verdict-label{ color:#FBBF24; }
-  .verdict-unsourced .verdict-label{ color:#8FA39C; }
-  .verdict-blurb{ flex:1 1 22ch; min-width:0; font-size:0.78rem; line-height:1.5; color:var(--ink-soft); }
-  .verdict .conf-badge{ flex:0 0 auto; }
+  .src-list li:first-child{ border-top:1px solid var(--border); }
+  .src-meta{ margin-top:0.2rem; font-family:var(--font-mono); font-size:0.68rem; color:var(--ink-soft); }
 
-  .field-card-shared .shared-note{
-    margin:0 0 0.85rem; font-size:0.78rem; line-height:1.55; color:var(--ink-soft);
+  /* The whole sourcing apparatus, collapsed. Available to anyone who wants
+     it, invisible to everyone who does not. */
+  .site-disclosure{
+    border:1px solid var(--border); border-radius:var(--radius);
+    background:var(--surface); max-width:62rem;
   }
-  .shared-values{
-    display:flex; flex-wrap:wrap; gap:0.6rem 2rem;
-    padding:0.7rem 0.85rem; margin-bottom:0.4rem;
-    background:var(--surface-2); border-radius:6px;
+  .site-disclosure > summary{
+    display:flex; align-items:center; gap:0.5rem;
+    padding:0.8rem 1rem; cursor:pointer; list-style:none;
+    font-size:0.86rem; font-weight:600; color:var(--ink);
   }
-  .shared-values .field-value{ margin-top:0.15rem; }
-  .field-card-muted{ border-left-color:var(--border); opacity:0.75; }
+  .site-disclosure > summary::-webkit-details-marker{ display:none; }
+  .site-disclosure > summary:hover{ color:var(--accent); }
+  .disc-chevron{ color:var(--ink-soft); transition:transform 0.16s ease; display:inline-block; }
+  .site-disclosure[open] .disc-chevron{ transform:rotate(90deg); }
+  .disc-body{ padding:0 1rem 0.4rem; border-top:1px solid var(--border); }
 
-  .ev-pip{
-    width:7px; height:7px; border-radius:50%; margin-top:0.42rem;
-    justify-self:center; flex-shrink:0;
-  }
-  .field-hint{
-    margin:0.6rem 0 0; padding:0.5rem 0.65rem;
-    border-left:2px solid rgba(53,214,184,0.35); background:rgba(53,214,184,0.05);
+  .disc-block{ padding:0.9rem 0; border-bottom:1px solid var(--border); }
+  .disc-block:last-child{ border-bottom:0; }
+  .disc-head{ display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap; }
+  .disc-field{ font-size:0.66rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--ink-soft); min-width:5rem; }
+  .disc-blurb{ margin:0.45rem 0 0; font-size:0.8rem; line-height:1.55; color:var(--ink-soft); max-width:70ch; }
+  .disc-lift{ margin:0.5rem 0 0; font-size:0.79rem; line-height:1.55; color:var(--ink-soft); max-width:70ch; }
+  .disc-lift strong{ color:var(--ink); font-weight:600; }
+  .disc-hint{
+    margin:0.55rem 0 0; padding:0.5rem 0.65rem;
+    border-left:2px solid rgba(53,214,184,0.3); background:rgba(53,214,184,0.045);
     border-radius:0 6px 6px 0;
-    font-size:0.74rem; line-height:1.5; color:var(--ink-soft);
+    font-size:0.75rem; line-height:1.5; color:var(--ink-soft); max-width:70ch;
   }
-  .class-strip{ display:flex; align-items:center; gap:0.28rem; margin-top:0.7rem; flex-wrap:wrap; }
-  .class-strip-label{ font-size:0.66rem; color:var(--ink-soft); margin-right:0.2rem; }
-  .cls-chip.cls-absent{ opacity:0.26; }
-
-  .evidence-list{ list-style:none; margin:0.75rem 0 0; padding:0; display:flex; flex-direction:column; gap:0.5rem; }
-  .evidence-list li{
-    display:grid; grid-template-columns:1.15rem 1fr; gap:0.55rem;
-    padding-top:0.5rem; border-top:1px solid var(--border);
-  }
-  .evidence-src{ font-size:0.79rem; line-height:1.45; }
-  .evidence-meta{ margin-top:0.15rem; font-family:var(--font-mono); font-size:0.68rem; color:var(--ink-soft); }
-  .evidence-note{ margin:0.25rem 0 0; font-size:0.74rem; line-height:1.5; color:var(--ink-soft); font-style:italic; }
-  .evidence-empty{ font-size:0.78rem; color:var(--ink-soft); margin:0.7rem 0 0; }
-
-  .site-source-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:0.6rem; }
-  .site-source-list li{
-    display:grid; grid-template-columns:1.15rem 1fr; gap:0.55rem;
-    background:var(--surface); border:1px solid var(--border);
-    border-radius:8px; padding:0.6rem 0.7rem;
-    font-size:0.78rem; line-height:1.45;
-  }
-  .site-source-host{ margin-top:0.2rem; font-family:var(--font-mono); font-size:0.66rem; color:var(--ink-soft); }
-  .site-source-used{ margin-top:0.25rem; font-size:0.68rem; color:var(--ink-soft); }
-
-  .prov-flag{
-    margin:0 0 1.1rem; padding:0.65rem 0.8rem; border-radius:8px;
-    font-size:0.78rem; line-height:1.55;
-    background:rgba(251,191,36,0.06); border:1px solid rgba(251,191,36,0.28); color:var(--ink-soft);
-  }
-  .prov-flag.prov-explicit{ background:rgba(74,222,128,0.06); border-color:rgba(74,222,128,0.28); }
+  .disc-note{ margin:0.9rem 0 1rem; font-size:0.78rem; line-height:1.55; color:var(--ink-soft); max-width:70ch; }
 
   .detail-title-link{
     background:none; border:0; padding:0; margin:0; cursor:pointer;
@@ -1078,32 +1055,34 @@
 
     <div id="siteTabPanel" hidden>
       <button class="back-link" id="siteBack">← Back to full list</button>
-      <div class="site-page-head">
-        <div>
-          <h1 id="sitePageCity"></h1>
-          <p class="site-page-sub" id="sitePageName"></p>
+      <div class="site-page">
+        <div class="site-page-head">
+          <div>
+            <h1 id="sitePageCity"></h1>
+            <p class="site-page-sub" id="sitePageName"></p>
+          </div>
+          <span class="provider-tag" id="sitePageProvider"></span>
         </div>
-        <span class="provider-tag" id="sitePageProvider"></span>
-      </div>
-      <div class="site-page-stats" id="sitePageStats"></div>
-      <div class="site-page-body">
-        <section>
-          <h2>Evidence, field by field</h2>
-          <p class="sub">The question that matters is whether a figure traces back to anyone other than the operator. That is answered first, in words; the graded confidence level stays available as a dot.</p>
-          <div id="sitePageProvFlag"></div>
-          <div id="sitePageFields"></div>
+
+        <div class="site-facts" id="sitePageFacts"></div>
+
+        <section class="site-block" id="sitePageNotesBlock">
+          <h2>What we know</h2>
+          <div class="site-prose" id="sitePageNotes"></div>
         </section>
-        <aside>
-          <section>
-            <h2>Every source on this entry</h2>
-            <p class="sub">What each one counts as, and which fields it currently backs.</p>
-            <ul class="site-source-list" id="sitePageSources"></ul>
-          </section>
-          <section style="margin-top:1.75rem">
-            <h2>Notes</h2>
-            <div class="notes-box" id="sitePageNotes"></div>
-          </section>
-        </aside>
+
+        <section class="site-block">
+          <h2 id="sitePageSourcesHeading">Sources</h2>
+          <ul class="src-list" id="sitePageSources"></ul>
+        </section>
+
+        <details class="site-disclosure" id="sitePageDisclosure">
+          <summary>
+            <span class="disc-chevron" aria-hidden="true">›</span>
+            <span id="discSummary">How solid is this?</span>
+          </summary>
+          <div class="disc-body" id="sitePageFields"></div>
+        </details>
       </div>
     </div>
 
@@ -2047,37 +2026,11 @@
   var siteTabPanel = document.getElementById("siteTabPanel");
   var openSiteId = null;
 
-  // Renders the list of source rows for one field. Each row leads with what
-  // the source *is* relative to the claim ("The operator itself", "Trade
-  // press — treated as repeating the operator") rather than its class code,
-  // because that phrasing is the answer and the code is only shorthand for it.
-  function evidenceRows(evidence){
-    if (!evidence.length) return '<p class="evidence-empty">Nothing recorded for this field.</p>';
-    return '<ul class="evidence-list">' + evidence.map(function(ev){
-      var src = ev.source || {};
-      var cls = SOURCE_CLASSES[ev.cls] || SOURCE_CLASSES.U;
-      var independent = cls.independent;
-      return '<li>' +
-        '<span class="ev-pip" style="background:' + (independent ? "#4ADE80" : (cls.weight ? "#FBBF24" : "#5f746d")) + '"></span>' +
-        '<div>' +
-          '<div class="evidence-src">' + (src.url
-            ? '<a href="' + src.url + '" target="_blank" rel="noopener">' + esc(src.label || src.url) + '</a>'
-            : esc(src.label || 'Unlabelled source')) + '</div>' +
-          '<div class="evidence-meta">' + esc(CLASS_ROLES[ev.cls] || cls.label) + ' · ' + (ev.asOf || 'undated') + '</div>' +
-          (ev.note ? '<p class="evidence-note">' + esc(ev.note) + '</p>' : '') +
-        '</div>' +
-      '</li>';
-    }).join('') + '</ul>';
-  }
-
-  function verdictLine(score){
-    var v = verdictFor(score);
-    return '<div class="verdict verdict-' + v.key + '">' +
-      '<span class="verdict-label">' + v.label + '</span>' +
-      '<span class="verdict-blurb">' + esc(v.blurb) + '</span>' +
-      confBadge(score, { title: score.reason }) +
-    '</div>';
-  }
+  // ---- Site page ---------------------------------------------------------
+  // A page about a data center, not about how the atlas sources data centers.
+  // The sourcing apparatus is real and stays available, but it lives behind
+  // one disclosure at the bottom — an earlier version led with it, and the
+  // result read as a methodology essay with a facility attached.
 
   function fieldValueHtml(site, field){
     if (field === "capacityMW") return site.capacityMW + ' MW';
@@ -2088,7 +2041,7 @@
   function basisHtml(site, field){
     var basis = siteFieldBasis(site, field);
     return (basis && basis !== "disclosed")
-      ? '<span class="basis-tag basis-' + basis + '" title="Not disclosed by the operator — ' + basis + ' from the evidence below.">' + (BASIS_LABELS[basis] || basis) + '</span>'
+      ? '<span class="basis-tag basis-' + basis + '" title="Not disclosed by the operator — ' + basis + ' from the sources listed.">' + (BASIS_LABELS[basis] || basis) + '</span>'
       : '';
   }
 
@@ -2098,65 +2051,28 @@
     });
   }
 
-  function renderFieldSection(site){
+  // The site's single headline verdict: has anything other than the operator
+  // confirmed any of this. Weakest-link, same as the confidence level.
+  function siteVerdict(site){
     var fields = scoredFields(site);
-    var hasProv = fields.some(function(f){ return siteFieldHasProvenance(site, f); });
+    if (!fields.length) return VERDICTS.unsourced;
+    var anyOperator = false, anyUnsourced = false;
+    fields.forEach(function(f){
+      var v = verdictFor(scoreSiteField(site, f, TODAY));
+      if (v.key === "operator") anyOperator = true;
+      if (v.key === "unsourced") anyUnsourced = true;
+    });
+    if (anyUnsourced) return VERDICTS.unsourced;
+    return anyOperator ? VERDICTS.operator : VERDICTS.independent;
+  }
 
-    // Without per-field provenance every field is scored on the identical set
-    // of sources, so three separate cards would print the same three rows
-    // three times and imply a distinction that isn't there. Say it once.
-    if (!hasProv) {
-      var score = scoreSiteField(site, fields[0] || "status", TODAY);
-      var v = verdictFor(score);
-      var hint = derivativeHint(score);
-      return '<div class="field-card field-card-shared" style="--fld-color:' + v.color + '">' +
-        verdictLine(score) +
-        '<p class="shared-note">No evidence has been attached to individual fields on this entry, so all of it counts toward all of them. Capacity, status and location below rest on exactly the same sources — nothing here distinguishes which one supports which.</p>' +
-        '<div class="shared-values">' + fields.map(function(f){
-          return '<div><div class="field-name">' + FIELD_LABELS[f] + '</div>' +
-            '<div class="field-value">' + fieldValueHtml(site, f) + basisHtml(site, f) + '</div></div>';
-        }).join('') + '</div>' +
-        evidenceRows(siteEvidenceFor(site, fields[0] || "status")) +
-        (hint ? '<p class="field-hint">' + esc(hint) + '</p>' : '') +
-        '<p class="field-lift"><strong>To verify these independently:</strong> ' +
-          esc(liftAdvice(score, fields[0] || "status", site.status)) + '</p>' +
-      '</div>' +
-      (site.capacityMW == null
-        ? '<div class="field-card field-card-muted"><div class="field-card-head">' +
-          '<span class="field-name">Capacity</span><span class="field-value" style="color:var(--ink-soft)">Not disclosed</span></div>' +
-          '<p class="field-reason">No capacity figure is claimed, so there is nothing to verify. An honest gap, not a weak score.</p></div>'
-        : '');
-    }
-
-    // With provenance, the fields genuinely differ — one card each.
-    return PROVENANCE_FIELDS.map(function(field){
-      if (field === "capacityMW" && site.capacityMW == null) {
-        return '<div class="field-card field-card-muted">' +
-          '<div class="field-card-head"><span class="field-name">Capacity</span>' +
-          '<span class="field-value" style="color:var(--ink-soft)">Not disclosed</span></div>' +
-          '<p class="field-reason">No capacity figure is claimed, so there is nothing to verify. An honest gap, not a weak score.</p>' +
-        '</div>';
-      }
-      var score = scoreSiteField(site, field, TODAY);
-      var v = verdictFor(score);
-      var hint = derivativeHint(score);
-      return '<div class="field-card" style="--fld-color:' + v.color + '">' +
-        '<div class="field-card-head">' +
-          '<span class="field-name">' + FIELD_LABELS[field] + '</span>' +
-          '<span class="field-value">' + fieldValueHtml(site, field) + '</span>' +
-          basisHtml(site, field) +
-        '</div>' +
-        verdictLine(score) +
-        evidenceRows(siteEvidenceFor(site, field)) +
-        (hint ? '<p class="field-hint">' + esc(hint) + '</p>' : '') +
-        '<p class="field-lift"><strong>To verify independently:</strong> ' + esc(liftAdvice(score, field, site.status)) + '</p>' +
-      '</div>';
-    }).join('');
+  function fact(label, value){
+    return '<div class="fact"><div class="fact-label">' + label + '</div>' +
+      '<div class="fact-value">' + value + '</div></div>';
   }
 
   function renderSitePage(site){
     var color = colorFor(site.provider);
-    var overall = scoreSite(site, TODAY);
 
     document.getElementById("sitePageCity").textContent = site.city;
     document.getElementById("sitePageName").textContent = site.site || site.country;
@@ -2164,60 +2080,90 @@
     tag.textContent = site.provider;
     tag.style.background = color;
 
-    // ---- Header stats
-    var capBasis = site.capacityMW != null ? siteFieldBasis(site, "capacityMW") : null;
-    document.getElementById("sitePageStats").innerHTML =
-      stat("Status", '<span class="status-pill status-' + statusSlug(site.status) + '">' + site.status + '</span>') +
-      stat("Capacity", site.capacityMW != null
-        ? site.capacityMW + ' MW' + (capBasis && capBasis !== "disclosed"
-            ? '<span class="basis-tag basis-' + capBasis + '">' + (BASIS_LABELS[capBasis] || capBasis) + '</span>' : '')
-        : 'Not disclosed') +
-      stat("Coordinates", site.lat.toFixed(4) + ', ' + site.lon.toFixed(4)) +
-      stat("Country", esc(site.country)) +
-      stat("Last verified", site.lastUpdated || '—') +
-      stat("Site confidence", confBadge(overall, { open: true, title: "A site takes the level of its weakest scored field." }));
+    // ---- Facts. What the thing is. No duplication anywhere else on the page.
+    var v = siteVerdict(site);
+    document.getElementById("sitePageFacts").innerHTML =
+      fact("Capacity", site.capacityMW != null
+        ? site.capacityMW + ' MW' + basisHtml(site, "capacityMW")
+        : '<span class="fact-muted">Not disclosed</span>') +
+      fact("Status", '<span class="status-pill status-' + statusSlug(site.status) + '">' + site.status + '</span>') +
+      fact("Location", esc(site.city) + ', ' + esc(site.country)) +
+      fact("Coordinates", site.lat.toFixed(4) + ', ' + site.lon.toFixed(4)) +
+      fact("Last checked", site.lastUpdated || '—') +
+      fact("Sourcing", '<span class="verdict-inline verdict-' + v.key + '">' + v.short + '</span>');
 
-    // ---- Is this entry running on real provenance, or the fallback?
-    var explicitFields = PROVENANCE_FIELDS.filter(function(f){ return siteFieldHasProvenance(site, f); });
-    var flag = document.getElementById("sitePageProvFlag");
-    if (explicitFields.length === PROVENANCE_FIELDS.length) {
-      flag.innerHTML = '<p class="prov-flag prov-explicit">Every field on this entry carries its own recorded evidence, so the scores below reflect what actually backs each specific claim.</p>';
-    } else if (explicitFields.length) {
-      flag.innerHTML = '<p class="prov-flag">Partial provenance: ' + explicitFields.map(function(f){ return FIELD_LABELS[f].toLowerCase(); }).join(' and ') +
-        ' carry recorded per-field evidence. The rest fall back to counting every source on the entry toward the field.</p>';
+    // ---- What we know. The notes were the most informative thing on the
+    // page and were buried in a sidebar; they lead now.
+    var notesBlock = document.getElementById("sitePageNotesBlock");
+    if (site.notes && site.notes.length) {
+      document.getElementById("sitePageNotes").textContent = site.notes;
+      notesBlock.hidden = false;
     } else {
-      // The shared field card below already states this, in more useful
-      // words. Repeating it here was just noise above the thing it described.
-      flag.innerHTML = '';
+      notesBlock.hidden = true;
     }
 
-    // ---- Field evidence (built in renderFieldSection above)
-    document.getElementById("sitePageFields").innerHTML = renderFieldSection(site);
-
-    // ---- Every source on the entry, with what it currently backs
-    var srcEl = document.getElementById("sitePageSources");
+    // ---- Sources. One list, one line each. "Backs: …" only appears where
+    // the entry actually distinguishes fields — otherwise it repeated the
+    // same three words on every row and said nothing.
     var sources = site.sources || [];
-    srcEl.innerHTML = sources.length
-      ? sources.map(function(src, i){
+    var perField = scoredFields(site).some(function(f){ return siteFieldHasProvenance(site, f); });
+    document.getElementById("sitePageSourcesHeading").textContent =
+      "Sources" + (sources.length ? " (" + sources.length + ")" : "");
+
+    document.getElementById("sitePageSources").innerHTML = sources.length
+      ? sources.map(function(src){
           var cls = classifySource(src, site.provider);
-          var backing = PROVENANCE_FIELDS.filter(function(f){
-            if (f === "capacityMW" && site.capacityMW == null) return false;
+          var backing = perField ? scoredFields(site).filter(function(f){
             return siteEvidenceFor(site, f).some(function(ev){ return ev.source === src; });
-          }).map(function(f){ return FIELD_LABELS[f].toLowerCase(); });
+          }).map(function(f){ return FIELD_LABELS[f].toLowerCase(); }) : [];
           return '<li>' + classChip(cls) + '<div>' +
             '<a href="' + src.url + '" target="_blank" rel="noopener">' + esc(src.label) + '</a>' +
-            '<div class="site-source-host">' + esc(hostOf(src.url) || 'no url') + '</div>' +
-            '<div class="site-source-used">' + (backing.length ? 'Backs: ' + backing.join(', ') : 'Not attached to any field') + '</div>' +
+            '<div class="src-meta">' + esc(hostOf(src.url) || 'no url') +
+              (backing.length ? ' · backs ' + backing.join(', ') : '') + '</div>' +
           '</div></li>';
         }).join('')
-      : '<li><div>No sources logged for this entry.</div></li>';
+      : '<li><div class="fact-muted">No sources logged for this entry.</div></li>';
 
-    document.getElementById("sitePageNotes").textContent =
-      site.notes && site.notes.length ? site.notes : "No notes yet — add one in data/sites.js.";
+    // ---- The disclosure. Everything methodological, folded away.
+    document.getElementById("discSummary").innerHTML =
+      'How solid is this? <span class="verdict-inline verdict-' + v.key + '">' + v.short + '</span>';
+    document.getElementById("sitePageFields").innerHTML = renderDisclosure(site);
+    document.getElementById("sitePageDisclosure").open = false;
   }
 
-  function stat(label, value){
-    return '<div><div class="site-stat-label">' + label + '</div><div class="site-stat-value">' + value + '</div></div>';
+  // Everything below here only renders inside the collapsed disclosure.
+  function renderDisclosure(site){
+    var fields = scoredFields(site);
+    var hasProv = fields.some(function(f){ return siteFieldHasProvenance(site, f); });
+    var out = "";
+
+    if (!hasProv) {
+      // Without per-field provenance every field scores on the same sources,
+      // so one statement covers all of them.
+      var score = scoreSiteField(site, fields[0] || "status", TODAY);
+      out += discBlock("All fields", score, site, fields[0] || "status");
+      out += '<p class="disc-note">Sources on this entry are not yet tied to individual facts, so each of them counts toward capacity, status and location alike.</p>';
+    } else {
+      out += fields.map(function(f){
+        return discBlock(FIELD_LABELS[f], scoreSiteField(site, f, TODAY), site, f);
+      }).join('');
+    }
+    return out;
+  }
+
+  function discBlock(label, score, site, field){
+    var v = verdictFor(score);
+    var hint = derivativeHint(score);
+    return '<div class="disc-block">' +
+      '<div class="disc-head">' +
+        '<span class="disc-field">' + esc(label) + '</span>' +
+        '<span class="verdict-inline verdict-' + v.key + '">' + v.short + '</span>' +
+        confBadge(score, { title: score.reason }) +
+      '</div>' +
+      '<p class="disc-blurb">' + esc(v.blurb) + '</p>' +
+      '<p class="disc-lift"><strong>What would confirm it:</strong> ' + esc(liftAdvice(score, field, site.status)) + '</p>' +
+      (hint ? '<p class="disc-hint">' + esc(hint) + '</p>' : '') +
+    '</div>';
   }
 
   function openSitePage(id){
@@ -2229,14 +2175,19 @@
     renderSitePage(site);
     tableSection.hidden = true;
     siteTabPanel.hidden = false;
+    dashboardEl.hidden = true;
+    mapPanelEl.classList.add("compact");
     closeDetailPanel();
-    siteTabPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function closeSitePage(){
+    if (siteTabPanel.hidden) return;
     openSiteId = null;
     siteTabPanel.hidden = true;
     tableSection.hidden = false;
+    dashboardEl.hidden = false;
+    mapPanelEl.classList.remove("compact");
   }
 
   document.getElementById("siteBack").addEventListener("click", closeSitePage);

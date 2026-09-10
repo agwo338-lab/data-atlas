@@ -633,21 +633,21 @@ var VERDICTS = {
     label: "Independently verified",
     short: "Independent",
     color: "#4ADE80",
-    blurb: "At least one source here is not the operator, and is not repeating the operator."
+    blurb: "At least one source is a public record or an independent observation, rather than the company's own announcement."
   },
   operator: {
     key: "operator",
     label: "Operator's word",
     short: "Operator's word",
     color: "#FBBF24",
-    blurb: "Every source here traces back to the operator's own statement. However many outlets carried it, nobody independent has confirmed it."
+    blurb: "Everything here comes from the company, or from coverage of the company's announcement. No independent record confirms it yet."
   },
   unsourced: {
     key: "unsourced",
     label: "Unsourced",
     short: "Unsourced",
     color: "#8FA39C",
-    blurb: "Nothing usable is recorded for this field — only directory or unattributed material, or nothing at all."
+    blurb: "Nothing usable is on file — only directory listings or unattributed material, or nothing at all."
   }
 };
 
@@ -679,7 +679,7 @@ function derivativeHint(score){
   if (!score || score.hasIndependent) return "";
   var hasPress = score.classes.indexOf("T") !== -1 || score.classes.indexOf("G") !== -1;
   if (!hasPress) return "";
-  return "If one of these articles was written from a public record — a permit, a filing, a council or planning agenda — then that record is the source worth citing. Add it as its own entry with cls: \"R\"; do not upgrade the article.";
+  return "Where one of these articles was written from a public document — a permit, a filing, a council or planning agenda — that document is the stronger source, and worth adding in its own right.";
 }
 
 // ---- What would raise this score? -----------------------------------------
@@ -691,7 +691,7 @@ function liftAdvice(score, field, status){
   if (!score) return "";
   if (score.level === "high") return "Nothing needed. Independently confirmed and current.";
   if (!score.classes.length) {
-    return "Anything credible at all — a permit, a filing, a planning record, or a facility listing.";
+    return "Anything credible — a permit, a filing, a planning record, or a facility listing.";
   }
   if (score.stale) {
     return "Re-check it. The most recent evidence is " +
@@ -699,9 +699,9 @@ function liftAdvice(score, field, status){
       ", past the " + stalenessWindow(field, status) + "-day limit for this field.";
   }
   if (!score.hasIndependent) {
-    return "One source that isn't the operator: an air or planning permit, a grid interconnection queue, an SEC filing, a facility listing, or a satellite check. More press coverage will not change this.";
+    return "A public record — a permit, a grid connection filing, a planning decision, an SEC filing — or a satellite check.";
   }
-  return "A second, different kind of source. One record on its own is still one record.";
+  return "A second source of a different kind.";
 }
 
 // `basis` distinguishes a number the operator published from one worked out
