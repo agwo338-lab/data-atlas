@@ -246,6 +246,46 @@ posture, not a free upgrade. The user's remaining oversight is aggregate,
 not per-item: `node tools/atlas.js due` and the Sources tab show the shape
 of the dataset without reviewing anything case by case.
 
+## The research desk
+
+Subagent activity is invisible to the user — an agent runs, a report is
+produced, findings land in `data/`, and the only surviving trace is a
+commit message written by the same process that decided what to apply.
+Since Sep 2026 there is no human review gate either, so nothing else
+records what was actually claimed versus what was written.
+
+`research-log/` is that record. It is **gitignored on purpose** — a local
+desk, not a published artifact.
+
+- Filed automatically by a `SubagentStop` hook (`.claude/settings.json`)
+  that runs `node tools/desk.js capture`. It fires for `research-agent`
+  and `news-agent` only; other subagents are plumbing and would bury the
+  signal.
+- `research-log/INDEX.md` — newest first, one short brief per run: topic,
+  and a mechanical tally of the report's `Apply:`, `Confidence:` and
+  `Verdict:` lines. Read it with `node tools/desk.js list`.
+- `research-log/runs/` — the agent's **final message, verbatim**. This is
+  the part worth having: it lets the report be compared against what was
+  actually written to `data/`, which is the one check the auto-apply
+  policy no longer performs anywhere else.
+- `node tools/desk.js backfill` recovers past runs from the older
+  `.claude/agent-trace.jsonl` if that hook is ever re-enabled.
+
+**Why a hook rather than the agent or the caller.** The agents have no
+Write/Edit/Bash tool and must not get one — that separation is the whole
+prompt-injection guard described above, and a logging convenience is not
+worth reopening it. The caller *could* write the log, but a caller-written
+log is a self-report: the process that chose what to apply also chooses
+what to record about it. The harness runs the hook regardless, so the
+report is captured whether or not anyone wants it captured.
+
+The brief is derived by regex from the report's documented output format.
+If an agent drifts from that format the tallies read `no per-field lines
+found in report` — that is deliberate, and it is a signal about the agent,
+not a bug in the desk. Likewise the hook complains on stderr rather than
+failing silently: an empty desk must never be ambiguous between "no
+research ran" and "the log broke."
+
 ## Research cost
 
 `.mcp.json` registers a small local MCP server (`.claude/mcp/openrouter/`)
