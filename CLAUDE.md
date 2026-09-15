@@ -119,7 +119,7 @@ useful sort key, but the thing a reader actually needs is close to binary:
 does this figure trace back to anyone other than the company announcing it?
 So every field carries a **verdict** — *Independently verified*, *Operator's
 word*, or *Unsourced* — stated in words, with the graded level demoted to a
-hover-revealed dot beside it. As of Sep 2026, 92 of 108 scored fields across
+hover-revealed dot beside it. As of Sep 2026, 86 of 108 scored fields across
 the dataset are "operator's word." That single number is the state of the
 atlas, and it is the one worth watching.
 
@@ -195,13 +195,36 @@ and why, same as any other data edit.
 ## Research cost
 
 `.mcp.json` registers a small local MCP server (`.claude/mcp/openrouter/`)
-that exposes an `openrouter_ask` tool, letting research delegate its
-token-heavy legwork to a cheap model via OpenRouter instead of running
-everything on the main model. Needs an `OPENROUTER_API_KEY` in a local
-`.env` (see `.env.example`) — never commit that key. Adding or changing
-this MCP server requires restarting the Claude Code session before it
-takes effect. `openrouter_ask` supports a `search` param (OpenRouter's web
-plugin) for live lookups, not just reasoning over text handed to it.
+holding two different kinds of research tool. Adding or changing this
+server requires restarting the Claude Code session before it takes effect.
+
+**`openrouter_ask`** delegates token-heavy legwork to a cheap model via
+OpenRouter instead of running everything on the main model. Needs an
+`OPENROUTER_API_KEY` in a local `.env` (see `.env.example`) — never commit
+that key. It supports a `search` param (OpenRouter's web plugin) for live
+lookups, not just reasoning over text handed to it. Model selection has
+three levels: the per-call `model` param, then `OPENROUTER_DEFAULT_MODEL`
+in `.env`, then a hardcoded fallback. Note that nothing currently passes
+the per-call param, so the adversarial second pass described under Open
+concerns is at present re-asking *the same model that made the error* —
+pass a different `model` explicitly when re-checking a hard number.
+
+**The structured feeds** (`edgar_search`, `peeringdb_facility`,
+`epa_echo_facilities`) are the opposite kind of tool: no model is involved
+at all, so a figure sourced through them cannot be fabricated. All three
+are public, keyless, and read live — nothing is cached or stored. Prefer
+them over `openrouter_ask` for anything a public record can settle. SEC
+asks automated callers to identify themselves; set `SEC_USER_AGENT` in
+`.env` to a real name and email.
+
+Two behaviours of EPA ECHO worth knowing, both found by testing rather
+than from their docs: its `p_naics` filter is effectively ignored
+server-side (a 518210 query for North Dakota returns all 1,887 air
+facilities in the state, so the tool filters again client-side), and
+`get_qid` caps a page at 5,000 rows — Virginia has 10,268, so an
+unpaginated call silently drops 39% of the state. The tool paginates and
+states its coverage in the output; if that line says INCOMPLETE, treat a
+negative result as inconclusive rather than as absence.
 
 ## Open concerns
 
@@ -224,11 +247,15 @@ Stage 1 (Sep 2026) is done: source classes, per-field provenance, the
 confidence engine, and the Method tab. The remaining stages, in the order
 they're worth doing:
 
-- **Stage 2 — the zero-friction feeds.** Wire in the three sources that
-  need no scraping and no key: SEC EDGAR full-text search, EPA ECHO/FRS
-  under NAICS 518210, and PeeringDB. Each of these alone can move entries
-  from Medium to High, because each is a class the atlas currently has
-  almost none of.
+- **Stage 2 — the zero-friction feeds. Wired in Sep 2026, not yet used.**
+  SEC EDGAR full-text search, EPA ECHO under NAICS 518210, and PeeringDB
+  are now MCP tools (see Research cost above). Each alone can move entries
+  from Medium to High, because each is a class the atlas has almost none
+  of — as of this writing R=11, N=1, O=0 against T=44, G=26, P=16.
+  The remaining work is the audit itself: 86 fields sit in
+  `atlas.js due` under "never independently verified," and these tools are
+  what that queue was waiting on. Note the agents can only reach them once
+  their `tools:` frontmatter lists them.
 - **Stage 3 — queues and permits.** ERCOT and the other ISO
   interconnection queues, state air permit dockets, county planning
   portals, and the European TSO connection registers. This is per-
