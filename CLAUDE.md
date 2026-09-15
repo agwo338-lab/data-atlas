@@ -303,6 +303,10 @@ as one product; that palette is a *copy*, not an import, so a change to
 cd tools/desk-app && npm install && npm start
 ```
 
+For a desktop launcher, `npm run shortcut` puts a "Research Desk"
+shortcut on the Desktop pointing straight at the bundled `electron.exe` (no
+console window). It breaks if `node_modules` is reinstalled; re-run it then.
+
 Electron is a dev dependency of that folder only — the deployed site still
 has no package manager and no build step, and this does not change that.
 `tools/desk-app/` can also be served as a plain static folder to check the
