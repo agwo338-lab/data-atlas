@@ -83,11 +83,12 @@ capacity. Built as a single static site with no backend and no build step.
   complete and locally verified (served and checked, not just written),
   commit and push to `main` immediately rather than pausing to ask "should
   I push?" — that question isn't useful to someone who can't evaluate the
-  code anyway. This extends to research findings too, with one condition:
-  see the auto-apply policy in Data quality below — High-confidence
-  findings from research-agent, news-agent, or `/reconcile` get applied
-  and pushed automatically; anything less than High confidence still
-  needs the user's call before it's touched.
+  code anyway. This extends to research findings without exception as of
+  Sep 2026: findings from research-agent, news-agent, or `/reconcile` are
+  applied and pushed automatically, graded by the confidence they carry
+  rather than routed past the user for approval. See the auto-apply policy
+  in Data quality below for how each confidence level is applied — and for
+  why a review gate the user cannot actually evaluate was worse than none.
 
 ## Data quality
 
@@ -176,21 +177,74 @@ third research task, distinct from both agents above: re-checking claims
 job) or "what's new" (news-agent's job). It dispatches to research-agent
 under the hood.
 
-**Auto-apply policy (added Aug 2026):** all three of the above are
-research-only — none of them can edit a file themselves, by design (no
-Write/Edit tool). What changed is what happens to their report next: a
-**High-confidence** finding (the source-class scale in Data quality above —
-2+ distinct classes, at least one of them independent, and current, which
-as of Sep 2026 is a materially harder bar than the A/B-source rule this
-policy was originally written against) gets applied to the relevant
-data file and pushed automatically, no pause to ask first. Anything
-Medium confidence, Low confidence, conflicting, or unverifiable still gets
-surfaced for the user's own call before it's touched — that half of the
-review gate stays in place, specifically because it's what caught two
-fabricated/overstated claims in the `openrouter_ask` incident below. When
-auto-applying, still update `lastUpdated`/`since` and `sources` to reflect
-the re-verification, and write a commit message describing what changed
-and why, same as any other data edit.
+**Auto-apply policy (rewritten Sep 2026 — no human review gate).**
+
+The old policy auto-applied High findings and routed everything else to
+the user. That gate is gone. The reason it's gone is worth stating, since
+it reads like a loosening and isn't: the user has no independent access to
+the evidence, so asking them to adjudicate a Medium finding or a
+model-vs-model disagreement produced a coin flip with a delay in front of
+it, not a review. A gate where the reviewer cannot evaluate the thing is
+theater, and theater that slows the work down.
+
+What replaces it is the confidence system doing the job it was built for.
+The old gate dates from when a value was either in the file or not, so a
+human had to decide. Stage 1 removed that constraint — every field now
+carries a verdict the site renders honestly. **Doubt goes into the data,
+not into the user's inbox.**
+
+Apply findings mechanically, by what the evidence supports:
+
+- **High** → write the value. Verdict renders *Independently verified*.
+- **Medium** → write the value. Verdict renders *Operator's word*. This is
+  the big change from the old policy, and it covers most findings. The
+  label already tells the truth about them; publishing one is the system
+  working, not a risk being taken.
+- **Low** → write the value **only if the field is currently empty**.
+  Otherwise leave the existing value alone and record the lead in `notes`.
+- **Conflicting** → **write no value at all.** Record both claims with
+  dates and sources in `notes`, leave the field untouched. Do not pick a
+  winner. "We don't know" is the honest state and the only resolution that
+  requires no judgment.
+- **Unverifiable** → write nothing. Record what was searched in `notes`,
+  so it isn't re-searched from scratch next time.
+
+Nobody adjudicates anywhere in that list. Conflicts resolve by declining
+to claim.
+
+**The one hard guard: a finding may never lower a field's verdict.** The
+real failure mode here is not conflict, it's silent regression — a weakly
+sourced finding overwriting a well-sourced value with nobody watching. So
+upgrades apply freely; if incoming evidence is *weaker* than what's on
+file, the field does not move and the new claim goes in `notes` as
+contested. This is mechanical, not a judgment call.
+
+**Who may write.** The agents remain research-only and keep no Write,
+Edit or Bash tool — that has not changed and should not. They read
+arbitrary web pages, and an agent that both reads untrusted content and
+writes to `data/sites.js` is a prompt-injection path straight into a file
+`index.html` loads as a plain script, where a syntax error takes the whole
+map down silently in production. The *caller* applies the finding. That
+gives up nothing: the user is equally out of the loop either way, because
+the gate being removed is the user's, not the agent's.
+
+When applying: update `lastUpdated`/`since` and `sources` to reflect the
+re-verification, fill in a real `provenance` block, run
+`node tools/atlas.js index` to confirm the file still parses and the
+verdict moved as expected, and write a commit message describing what
+changed and why. Everything lands in git with the changelog in the commit
+message, so a bad auto-apply is one `git revert` away — a better safety
+property than an approval from someone who couldn't evaluate it.
+
+**What this gives up, plainly.** The old gate is credited below with
+catching two fabricated claims in the `openrouter_ask` incident. Removing
+it removes that catch. The replacements are earlier and better targeted —
+the adversarial second pass in `research-agent.md` kills fabrications
+before they reach a report, and the structured feeds check claims against
+records rather than against plausibility — but this is a real change in
+posture, not a free upgrade. The user's remaining oversight is aggregate,
+not per-item: `node tools/atlas.js due` and the Sources tab show the shape
+of the dataset without reviewing anything case by case.
 
 ## Research cost
 

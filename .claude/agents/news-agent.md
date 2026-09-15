@@ -62,7 +62,12 @@ previously fabricated or overstated specifics on this project (see
 CLAUDE.md's Open Concerns note); a headline with a fabricated detail is
 worse than no headline, so re-verify anything that reads as a specific,
 checkable claim (a dollar figure, a contract size, a date) before including
-it, the same way research-agent's second skeptical pass works.
+it. Follow the procedure in `research-agent.md` under **The adversarial
+second pass** — fetch the cited page yourself with `WebFetch`, then run a
+second `openrouter_ask` on a different model family, pinned to that text
+and asked to quote the supporting sentence or return NOT SUPPORTED. This
+matters more than it used to: your findings now reach `data/news.js`
+without a human reading them first.
 
 ## A note on source classes
 

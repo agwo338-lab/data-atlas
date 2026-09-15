@@ -1,5 +1,5 @@
 ---
-description: Re-verify existing Site Atlas claims against current public sources via research-agent, to catch drift/staleness. High-confidence findings are applied and pushed automatically; anything less needs the user's call.
+description: Re-verify existing Site Atlas claims against current public sources via research-agent, to catch drift/staleness. Findings are applied and pushed automatically per each field's Apply verdict — no human review gate.
 argument-hint: [scope] — e.g. "partnerships", "CoreWeave partnerships", "sites", a provider name. Defaults to every partner entry in data/providers.js.
 ---
 
@@ -62,14 +62,26 @@ Argument passed: $ARGUMENTS
 3. research-agent reports back per claim: confirmed / changed / could not
    verify / conflicting sources, with confidence and sources, same format
    it already uses.
-4. Split the findings by confidence (per CLAUDE.md's auto-apply policy):
-   - **High confidence** (confirmed or changed) → apply directly: edit
-     `data/providers.js` (or `data/sites.js`), update `lastUpdated`/
-     `since` and `sources` to reflect the re-verification, commit with a
-     message describing what changed and why, and push — no pause to ask
-     first.
-   - **Medium, Low, conflicting, or unverifiable** → do not touch the
-     data file. Present these to the user plainly and wait for their call
-     on which (if any) to apply.
-5. Summarize what happened either way: what was auto-applied and pushed,
-   and what's still waiting on a decision.
+4. Apply the findings mechanically from each field's `Apply:` line — there
+   is no human review gate any more, so nothing waits on a decision. Per
+   CLAUDE.md's auto-apply policy:
+   - `APPLY` (High or Medium) → write the value to `data/providers.js` or
+     `data/sites.js`.
+   - `APPLY-IF-EMPTY` (Low) → write only if the field has no value today;
+     otherwise record the lead in `notes` and leave the field alone.
+   - `NO-VALUE` (conflicting) → write no value. Record both claims with
+     dates and sources in `notes`. Do not pick a winner.
+   - `NONE` → nothing to do beyond any `notes` the report supplies.
+
+   Never let a finding lower a field's existing verdict: if the incoming
+   evidence is weaker than what's on file, the field doesn't move and the
+   claim goes in `notes` as contested.
+
+   In every case update `lastUpdated`/`since` and `sources` to reflect the
+   re-verification, fill in a real `provenance` block, then run
+   `node tools/atlas.js index` to confirm the file still parses and the
+   verdicts moved as expected. Commit with a message describing what
+   changed and why, and push.
+5. Summarize what was applied and pushed — per field, with the verdict each
+   one now carries, and anything deliberately left unwritten (conflicts,
+   unverifiables) so the gaps are visible without reading the diff.

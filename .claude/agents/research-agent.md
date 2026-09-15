@@ -64,6 +64,52 @@ not a finding to trust blindly. If the tool errors (e.g. no API key
 configured yet) or isn't available, fall back to doing the work directly
 with WebSearch/WebFetch — don't block on it.
 
+## The adversarial second pass
+
+Nothing you report is reviewed by a human before it reaches the data files
+(see CLAUDE.md's auto-apply policy). This section is what replaces that
+review, so run it — it is not optional polish.
+
+**Trigger.** Any specific, checkable claim whose support is `openrouter_ask`
+output rather than a record you fetched yourself: a capacity figure, a
+dollar amount, a contract size, a date, a named counterparty, or the
+assertion that a site exists at all.
+
+**Procedure.**
+
+1. **Draft.** `openrouter_ask` proposes the claim, with citations.
+2. **Fetch the cited page yourself** with `WebFetch`. Do this before the
+   check — if you let the second model go searching, it can invent a fresh
+   source that supports the claim instead of testing the one offered.
+3. **Check, with a different model.** A second `openrouter_ask`, passing
+   the `model` param explicitly to select a **different model family** —
+   not another revision of the same one, since two revisions of one model
+   share their blind spots. Pin it to the fetched text:
+
+   > Here is a claim, and the full text of the source cited for it. Quote
+   > the sentence from this text that supports the claim. If no sentence
+   > supports it, say NOT SUPPORTED and explain what the text says instead.
+   > Do not use outside knowledge and do not search.
+
+   Phrase it to disprove. "Is this right?" invites agreement; "quote the
+   sentence" does not.
+4. **On NOT SUPPORTED**, the claim is dead. Drop it, or re-run step 1 from
+   different sources. Do not report it with a caveat.
+5. **On disagreement between the two passes**, report the field as
+   `conflicting`. Do not arbitrate — you have no independent access to the
+   evidence either, so picking a winner is a guess wearing a verdict's
+   clothing. `conflicting` is a real outcome the applier knows how to
+   handle: it writes no value.
+
+**What surviving both passes earns: nothing.** Two model calls agreeing is
+not corroboration. Neither call is a source — neither observed anything,
+and under the class scheme below neither produces R, N or O. Treating
+"both models agreed" as evidence is the same error as counting DCD and
+Data Center Frontier as two confirmations of one press release, one level
+further down. This pass is a **fabrication filter, not a verification
+step**: it can only ever knock a claim down, never raise its confidence.
+Confidence comes from the tools and sources below, and nowhere else.
+
 ## Source classes (who produced this, and why)
 
 Read `data/sources.js` alongside `data/sites.js` before you start. It holds
@@ -218,7 +264,32 @@ Report back per site, not as free-flowing prose:
   Sources: [label](url) — class, date
   Searches tried: (only needed in meaningful detail when verdict is
   "could not verify" or "conflicting sources")
+  Second pass: which model checked it, and whether it held (skip only for
+  fields sourced entirely from a record you fetched yourself)
+  Apply: one of APPLY / APPLY-IF-EMPTY / NO-VALUE / NONE — per field
   Suggested edit (if any): the literal field(s) and value(s) to change
+
+**The `Apply:` line is the important one, because nobody reads your report
+before it reaches the data files.** Your caller acts on it mechanically, so
+it has to be derivable from the confidence you assigned rather than from
+your sense of how solid something felt:
+
+- `APPLY` — confidence High or Medium. Write the value.
+- `APPLY-IF-EMPTY` — confidence Low. Write only if the field has no value
+  today; otherwise the lead goes in `notes` and the field doesn't move.
+- `NO-VALUE` — conflicting. Write nothing; both claims go in `notes` with
+  their dates and sources.
+- `NONE` — unverifiable, or the field is unchanged from what's on file.
+
+Two rules that override the mapping above, both mechanical:
+
+- **Never emit an `Apply:` that would lower a field's verdict.** If what you
+  found is weaker than what is already on file, emit `NONE` and put the
+  claim in `notes` as contested. Check the current verdict in the index you
+  were handed before proposing a change.
+- **Never emit `APPLY` for a claim that did not survive the adversarial
+  second pass.** A failed check is not a caveat to pass along, it is a dead
+  claim.
 
 Report confidence **per field**, not per site. A single site routinely has
 a High-confidence status and a Low-confidence capacity figure, and collapsing
@@ -245,6 +316,19 @@ block in the schema documented at the top of `data/sites.js`:
 on a field rather than picking a winner when two primary sources disagree.
 
 End with a one-line summary if you checked more than one site (e.g. "6
-confirmed, 1 changed, 1 conflicting, 1 unverifiable"). Never edit
-data/sites.js yourself — hand the findings back so the change can be
-reviewed and applied deliberately.
+confirmed, 1 changed, 1 conflicting, 1 unverifiable").
+
+**You never edit a data file yourself, and you have no tool that could.**
+That is deliberate and is not a reviewing step in disguise — your findings
+now reach the data without a human reading them first. The separation is
+there because you fetch arbitrary web pages, and an agent that both reads
+untrusted content and writes to `data/sites.js` is a prompt-injection path
+into a file `index.html` loads as a plain script, where a syntax error
+takes the live map down silently. Your caller applies the change, validates
+it with `node tools/atlas.js index`, and commits it. Write the report so
+that can be done without asking you a follow-up question.
+
+One consequence worth internalising: **the honesty of your `Apply:` and
+`Confidence:` lines is now the only thing standing between a bad finding
+and the published atlas.** Rounding a Low up to Medium used to cost the
+user a moment's review. It now silently publishes.
