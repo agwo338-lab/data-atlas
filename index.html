@@ -1,7 +1,7 @@
 <meta charset="UTF-8">
 <title>Site Atlas</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@5/dist/maplibre-gl.css">
 <script src="https://cdn.jsdelivr.net/npm/maplibre-gl@5/dist/maplibre-gl.js"></script>
 <script src="data/sites.js"></script>
@@ -10,1359 +10,519 @@
 <script src="data/sources.js"></script>
 
 <style>
-  /* Committed dark theme — this page always renders dark, regardless of OS/browser setting */
+  /* ════════════════════════════════════════════════════════════════════
+     Nocturne tokens — this page always renders dark, regardless of OS/
+     browser setting. Values transcribed from the design system; kept
+     inline since the project has no build step (see CLAUDE.md).
+     ════════════════════════════════════════════════════════════════ */
   :root{
-    --bg:#0A0F0E;
-    --surface:#111A18;
-    --surface-2:#17211E;
-    --border:#26332F;
-    --ink:#E7F1EC;
-    --ink-soft:#8FA39C;
-    --accent:#35D6B8;
-    --accent-soft:rgba(53,214,184,0.16);
+    --color-bg:#161826;
+    --color-surface:#232532;
+    --color-text:#e9e9ed;
+    --color-accent:#9184d9;
+    --color-accent-2:#a7a1db;
+    --color-divider: color-mix(in srgb, #e9e9ed 16%, transparent);
 
-    --map-bg:#060B12;
-    --map-grid-strong:rgba(94,234,212,0.24);
-    --map-label:rgba(197,225,219,0.55);
+    --color-neutral-100:#f3f5fe; --color-neutral-200:#e4e7f5; --color-neutral-300:#cfd3e5;
+    --color-neutral-400:#b2b6ca; --color-neutral-500:#9397ab; --color-neutral-600:#75798c;
+    --color-neutral-700:#595d6c; --color-neutral-800:#3f424d; --color-neutral-900:#292b31;
 
-    --radius:12px;
-    --font-sans:"IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
-    --font-mono:"IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+    --color-accent-100:#f5f4ff; --color-accent-200:#e7e5fe; --color-accent-300:#d2cefd;
+    --color-accent-400:#b5abfc; --color-accent-500:#968ae0; --color-accent-600:#796cbf;
+    --color-accent-700:#5d5294; --color-accent-800:#423a6a; --color-accent-900:#2b2741;
+
+    --font-heading:"Inter", system-ui, sans-serif;
+    --font-body:"Inter", system-ui, sans-serif;
+
+    --space-1:2.8px; --space-2:5.6px; --space-3:8.4px; --space-4:11.2px; --space-6:16.8px; --space-8:22.4px;
+    --radius-sm:4px; --radius-md:8px; --radius-lg:14px;
+    --shadow-md:0 0 0 1px #595d6c, 0 6px 18px rgba(0,0,0,.55);
+    --shadow-lg:0 0 0 1px #9397ab, 0 16px 40px rgba(0,0,0,.65);
+
+    /* Compat aliases — the ported detail/method/provider/site component CSS
+       below (and the hand-tuned pipeline SVG's own inline <style>) was
+       written against these names. Aliasing lets that CSS keep working
+       unchanged against the new palette instead of a line-by-line port. */
+    --bg: var(--color-bg);
+    --surface: var(--color-surface);
+    --surface-2: #1c1e2b;
+    --border: var(--color-divider);
+    --ink: var(--color-text);
+    --ink-soft: var(--color-neutral-400);
+    --accent: var(--color-accent);
+    --accent-soft: color-mix(in srgb, var(--color-accent) 16%, transparent);
+    --radius: var(--radius-md);
+    --font-sans: var(--font-body);
+    --font-mono: var(--font-heading);
   }
 
-  *{ box-sizing:border-box; }
-  /* A panel with its own display value outranks the UA [hidden] rule, so
-     toggling el.hidden on one would otherwise do nothing. */
+  *, *::before, *::after{ box-sizing:border-box; }
   [hidden]{ display:none !important; }
+  html, body{ height:100%; }
   body{
-    margin:0;
-    background:var(--bg);
-    color:var(--ink);
-    font-family:var(--font-sans);
+    margin:0; overflow:hidden;
+    background:var(--color-bg); color:var(--color-text);
+    font-family:var(--font-body); font-size:15px; line-height:1.5;
     -webkit-font-smoothing:antialiased;
   }
   ::selection{ background:var(--accent-soft); color:var(--ink); }
-  a{ color:var(--accent); text-decoration-color:rgba(53,214,184,0.4); }
+  a{ color:var(--accent); text-decoration-color:color-mix(in srgb, var(--accent) 40%, transparent); }
   a:hover{ text-decoration-color:currentColor; }
+  h1,h2,h3,h4{ font-family:var(--font-heading); font-weight:500; letter-spacing:-0.015em; margin:0; }
 
-  .page{
-    max-width:1560px;
-    margin:0 auto;
-    padding:2.75rem 2rem 4.5rem;
-    display:flex;
-    flex-direction:column;
-    gap:1.75rem;
-  }
+  #shell{ position:relative; height:100vh; min-height:560px; }
 
-  .subtitle{
-    margin:0;
-    max-width:68ch;
-    color:var(--ink-soft);
-    font-size:1.05rem;
-    line-height:1.55;
-  }
-
-  .tabs{
-    margin-top:0.5rem;
-    display:flex;
-    gap:0.25rem;
-    border-bottom:1px solid var(--border);
-  }
-  .tab-btn{
-    font-family:var(--font-sans);
-    font-size:0.92rem;
-    font-weight:500;
-    color:var(--ink-soft);
-    background:none;
-    border:none;
-    border-bottom:2px solid transparent;
-    padding:0.7rem 0.9rem 0.6rem;
-    margin-bottom:-1px;
-    cursor:pointer;
-  }
-  .tab-btn:hover{ color:var(--ink); }
-  .tab-btn.active{ color:var(--ink); border-bottom-color:var(--accent); }
-
-  .count{
-    font-family:var(--font-mono);
-    font-size:0.82rem;
-    color:var(--ink-soft);
-  }
-  .count b{ color:var(--ink); font-weight:600; }
-
-  /* ---- Provider dashboard ---- */
-  .provider-dashboard{
-    display:grid;
-    grid-template-columns:repeat(auto-fit, minmax(230px, 1fr));
-    gap:1rem;
-    margin-top:1.75rem;
-  }
-  .provider-card{
-    position:relative;
-    background:var(--surface);
-    border:1px solid var(--border);
-    border-radius:var(--radius);
-    padding:1.1rem 1.2rem 1rem;
-    display:flex;
-    flex-direction:column;
-    gap:0.75rem;
-    transition:opacity 0.15s ease, border-color 0.15s ease;
-  }
-  .provider-card.inactive{ opacity:0.42; }
-  .provider-card:hover{ border-color:var(--dot); }
-  .provider-card.active{ border-color:var(--dot); }
-  .provider-card.collapsed{ padding-bottom:1.1rem; gap:0; }
-  .provider-card.collapsed .provider-card-stats,
-  .provider-card.collapsed .provider-newsfeed{
-    display:none;
-  }
-  .provider-card-head{
-    display:flex;
-    align-items:center;
-    gap:0.55rem;
-    padding-right:2.2rem;
-  }
-  .provider-card-dot{
-    width:10px; height:10px; border-radius:50%;
-    background:var(--dot);
-    box-shadow:0 0 0 3px color-mix(in srgb, var(--dot) 25%, transparent);
-    flex-shrink:0;
-  }
-  .provider-card-name{
-    font-weight:650;
-    font-size:1rem;
-    letter-spacing:-0.005em;
-  }
-  .provider-card-stats{
-    display:flex;
-    gap:1.5rem;
-  }
-  .provider-stat-value{
-    font-family:var(--font-mono);
-    font-size:1.2rem;
-    font-weight:600;
-    font-variant-numeric:tabular-nums;
-    line-height:1.1;
-  }
-  .provider-stat-label{
-    font-family:var(--font-mono);
-    font-size:0.66rem;
-    letter-spacing:0.07em;
-    text-transform:uppercase;
-    color:var(--ink-soft);
-    margin-top:0.2rem;
-  }
-  .provider-site-item{
-    display:flex;
-    align-items:center;
-    gap:0.5rem;
-    padding:0.35rem 0.15rem;
-    font-size:0.8rem;
-    cursor:pointer;
-    border-radius:4px;
-  }
-  .provider-site-item:hover{ background:var(--surface-2); }
-  .provider-site-name{
-    flex:1;
-    min-width:0;
-    overflow:hidden;
-    text-overflow:ellipsis;
-    white-space:nowrap;
-  }
-  .provider-site-loc{
-    color:var(--ink-soft);
-    font-size:0.72rem;
-    flex-shrink:0;
-  }
-  .provider-site-cap{
-    color:var(--ink-soft);
-    font-family:var(--font-mono);
-    font-size:0.72rem;
-    font-variant-numeric:tabular-nums;
-    flex-shrink:0;
-    width:4.6em;
-    text-align:right;
-  }
-  .status-dot{ width:6px; height:6px; border-radius:50%; flex-shrink:0; }
-  .status-dot.status-operational{ background:#4ADE80; }
-  .status-dot.status-under-construction{ background:#FBBF24; }
-  .status-dot.status-planned{ background:#94A3B8; }
-
-  .provider-newsfeed{
-    border-top:1px dashed var(--border);
-    padding-top:0.65rem;
-    font-size:0.8rem;
-    color:var(--ink-soft);
-    line-height:1.5;
-    font-style:italic;
-  }
-  .provider-toggle{
-    position:absolute;
-    top:0.95rem;
-    right:0.95rem;
-    width:32px;
-    height:19px;
-    border-radius:999px;
-    border:1px solid var(--border);
-    background:var(--surface-2);
-    cursor:pointer;
-    padding:0;
-    transition:border-color 0.15s ease;
-  }
-  .provider-toggle::after{
-    content:"";
-    display:block;
-    width:13px; height:13px;
-    margin:2px;
-    border-radius:50%;
-    background:var(--ink-soft);
-    transition:transform 0.15s ease, background 0.15s ease;
-  }
-  .provider-toggle[aria-pressed="true"]{ border-color:var(--dot); }
-  .provider-toggle[aria-pressed="true"]::after{
-    transform:translateX(13px);
-    background:var(--dot);
-  }
-
-  .table-toolbar{
-    display:flex;
-    justify-content:flex-end;
-    padding:0.7rem 1rem 0;
-  }
-
-  /* ---- Provider page (opened by clicking a dashboard card) ---- */
-  .provider-card{ cursor:pointer; }
-  .back-link{
-    background:none;
-    border:none;
-    color:var(--ink-soft);
-    font-family:var(--font-mono);
-    font-size:0.82rem;
-    letter-spacing:0.02em;
-    cursor:pointer;
-    padding:0.3rem 0;
-  }
-  .back-link:hover{ color:var(--accent); }
-  .provider-page-head{
-    display:flex;
-    align-items:center;
-    gap:0.75rem;
-    margin-top:0.5rem;
-  }
-  .provider-page-dot{
-    width:14px; height:14px; border-radius:50%;
-    background:var(--dot);
-    box-shadow:0 0 0 4px color-mix(in srgb, var(--dot) 25%, transparent);
-    flex-shrink:0;
-  }
-  .provider-page-head h1{
-    margin:0;
-    font-size:1.7rem;
-    font-weight:650;
-    letter-spacing:-0.01em;
-  }
-  .provider-page-stats{
-    display:flex;
-    gap:2.25rem;
-    flex-wrap:wrap;
-    padding:1.1rem 0 0.25rem;
-  }
-  .provider-page-stat-value{
-    font-family:var(--font-mono);
-    font-size:1.55rem;
-    font-weight:600;
-    font-variant-numeric:tabular-nums;
-    line-height:1.1;
-  }
-  .provider-page-stat-label{
-    font-family:var(--font-mono);
-    font-size:0.68rem;
-    letter-spacing:0.06em;
-    text-transform:uppercase;
-    color:var(--ink-soft);
-    margin-top:0.25rem;
-  }
-  .provider-page-col-left{
-    display:flex;
-    flex-direction:column;
-    gap:1.5rem;
-  }
-  .provider-page-partners{
-    background:var(--surface);
-    border:1px solid var(--border);
-    border-radius:var(--radius);
-    padding:1.1rem 1.2rem;
-  }
-  .provider-page-partners h2{
-    margin:0 0 0.75rem;
-    font-size:0.95rem;
-    font-weight:600;
-  }
-  .provider-page-partners ul{
-    list-style:none;
-    margin:0;
-    padding:0;
-    display:grid;
-    grid-template-columns:repeat(auto-fill, minmax(260px, 1fr));
-    gap:0.75rem;
-  }
-  .partner-card{
-    border:1px solid var(--border);
-    border-radius:8px;
-    padding:0.7rem 0.85rem;
-  }
-  .partner-top{
-    display:flex;
-    align-items:baseline;
-    justify-content:space-between;
-    gap:0.5rem;
-  }
-  .partner-name{ font-weight:600; font-size:0.9rem; }
-  .partner-relationship{
-    font-family:var(--font-mono);
-    font-size:0.66rem;
-    letter-spacing:0.04em;
-    text-transform:uppercase;
-    color:var(--accent);
-    white-space:nowrap;
-  }
-  .partner-detail{
-    margin:0.35rem 0 0;
-    font-size:0.8rem;
-    color:var(--ink-soft);
-    line-height:1.45;
-  }
-  .partner-meta{
-    display:block;
-    margin-top:0.4rem;
-    font-family:var(--font-mono);
-    font-size:0.68rem;
-    color:var(--ink-soft);
-  }
-  .partner-meta a{ color:var(--ink-soft); }
-  .partner-meta a:hover{ color:var(--accent); }
-  .partners-empty{
-    color:var(--ink-soft);
-    font-size:0.85rem;
-    font-style:italic;
-  }
-
-  .provider-page-body{
-    display:grid;
-    grid-template-columns:minmax(0,1fr) minmax(0,1fr);
-    gap:1.5rem;
-    margin-top:1.5rem;
-  }
-  @media (max-width:860px){ .provider-page-body{ grid-template-columns:1fr; } }
-  .provider-page-body section{
-    background:var(--surface);
-    border:1px solid var(--border);
-    border-radius:var(--radius);
-    padding:1.1rem 1.2rem;
-  }
-  .provider-page-body h2{
-    margin:0 0 0.75rem;
-    font-size:0.95rem;
-    font-weight:600;
-  }
-  .provider-page-locations ul{
-    list-style:none;
-    margin:0;
-    padding:0;
-    display:flex;
-    flex-direction:column;
-    max-height:420px;
-    overflow-y:auto;
-  }
-  .headline-list{
-    list-style:none;
-    margin:0;
-    padding:0;
-  }
-  .headline-item{
-    padding:0.65rem 0;
-    border-bottom:1px solid var(--border);
-    font-size:0.85rem;
-    line-height:1.4;
-  }
-  .headline-item:last-child{ border-bottom:none; }
-  .headline-item a{ color:var(--ink); font-weight:500; }
-  .headline-item a:hover{ color:var(--accent); }
-  .headline-top{
-    display:flex;
-    align-items:center;
-    gap:0.5rem;
-    margin-bottom:0.2rem;
-  }
-  .headline-date{
-    font-family:var(--font-mono);
-    font-size:0.68rem;
-    color:var(--ink-soft);
-    white-space:nowrap;
-  }
-  .headline-category{
-    font-family:var(--font-mono);
-    font-size:0.62rem;
-    letter-spacing:0.05em;
-    text-transform:uppercase;
-    padding:0.1rem 0.4rem;
-    border-radius:999px;
-    border:1px solid var(--border);
-    color:var(--ink-soft);
-  }
-  .headline-title{ display:block; }
-  .headline-why{
-    margin:0.25rem 0 0;
-    color:var(--ink-soft);
-    font-size:0.8rem;
-    line-height:1.45;
-  }
-  .headline-meta{
-    display:block;
-    margin-top:0.3rem;
-    font-family:var(--font-mono);
-    font-size:0.7rem;
-    color:var(--ink-soft);
-  }
-  .headline-meta a{ color:var(--ink-soft); font-weight:400; }
-  .headline-meta a:hover{ color:var(--accent); }
-  .headline-empty{
-    color:var(--ink-soft);
-    font-size:0.85rem;
-    font-style:italic;
-  }
-  .provider-page-search-link{
-    display:inline-block;
-    margin-top:0.9rem;
-    font-family:var(--font-mono);
-    font-size:0.78rem;
-  }
-
-  .map-panel{
-    background:var(--map-bg);
-    border-radius:var(--radius);
-    border:1px solid var(--border);
-    overflow:hidden;
-    position:relative;
-    min-height:760px;
-    transition:min-height 0.3s ease;
-  }
-  /* ~40% shorter while a provider panel is expanded, so the site table's
-     replacement (the provider panel) doesn't push the map far down the
-     page. */
-  .map-panel.compact{ min-height:456px; }
-  #map{ position:absolute; inset:0; }
+  /* the map is the page; everything else floats over it */
+  #mapwrap{ position:absolute; inset:0; }
+  #map{ width:100%; height:100%; display:block; background:#0e0f1a; }
   .maplibregl-ctrl-attrib{ font-size:10px !important; }
   .map-loading{
-    position:absolute; inset:0;
-    display:flex; align-items:center; justify-content:center;
-    font-family:var(--font-mono);
-    font-size:0.8rem;
-    letter-spacing:0.06em;
-    text-transform:uppercase;
-    color:var(--map-label);
-  }
-  .reset-view{
-    position:absolute;
-    right:14px; top:14px;
-    font-family:var(--font-mono);
-    font-size:0.72rem;
-    letter-spacing:0.04em;
-    color:var(--map-label);
-    background:rgba(255,255,255,0.04);
-    border:1px solid var(--map-grid-strong);
-    border-radius:6px;
-    padding:0.3rem 0.6rem;
-    cursor:pointer;
-  }
-  .reset-view:hover{ color:#5EEAD4; border-color:#5EEAD4; }
-
-  .map-caption{
-    position:absolute;
-    left:16px; bottom:14px;
-    font-family:var(--font-mono);
-    font-size:0.72rem;
-    letter-spacing:0.06em;
-    text-transform:uppercase;
-    color:var(--map-label);
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font:500 12px var(--font-heading); letter-spacing:.08em; text-transform:uppercase; color:var(--color-neutral-500);
     pointer-events:none;
   }
-  .map-caption span{ color:#5EEAD4; }
+  #rail::-webkit-scrollbar, .rows::-webkit-scrollbar{ width:6px; }
+  #rail::-webkit-scrollbar-thumb, .rows::-webkit-scrollbar-thumb{ background:var(--color-neutral-800); border-radius:3px; }
 
-  /* Pins are plain DOM elements handed to MapLibre as marker content — the
-     library positions/repositions them on pan/zoom itself (off the main
-     thread's rendering path), so unlike the old SVG version there's no
-     per-frame JS needed to keep them placed or constant-sized. */
-  .pin-marker{
-    width:30px; height:30px;
-    display:flex; align-items:center; justify-content:center;
-    /* No position here: MapLibre's own .maplibregl-marker rule sets
-       position:absolute, which it needs for its placement transform to be
-       relative to the map, not this element's normal-flow position. Setting
-       position:relative here (same specificity, later in the cascade) used
-       to silently win and break marker placement. absolute still works fine
-       as the positioning context .pin-halo/.pin-pulse/.pin-ring need. */
-    cursor:pointer;
-  }
-  .pin-marker.dim{ display:none; }
-  .pin-core{
-    width:10px; height:10px;
-    border-radius:50%;
-    background:var(--dot);
-    border:1.4px solid #060B12;
-    transition:transform 0.15s ease;
-  }
-  .pin-marker:hover .pin-core, .pin-marker:focus .pin-core, .pin-marker.active .pin-core{ transform:scale(1.4); }
-  .pin-halo{
-    position:absolute;
-    width:26px; height:26px;
-    border-radius:50%;
-    background:var(--dot);
-    opacity:0;
-    transition:opacity 0.15s ease;
-  }
-  .pin-marker:hover .pin-halo, .pin-marker:focus .pin-halo, .pin-marker.active .pin-halo{ opacity:0.35; }
-  .pin-marker:hover, .pin-marker:focus{ z-index:10; }
+  .fade-x{ background:linear-gradient(to right, transparent, var(--color-divider) 48px, var(--color-divider) calc(100% - 48px), transparent); height:1px; }
+  .hr{ height:1px; border:0; margin:var(--space-4) 0; background:linear-gradient(to right, transparent, var(--color-divider) 48px, var(--color-divider) calc(100% - 48px), transparent); }
 
-  .pin-label{
-    position:absolute;
-    bottom:calc(100% + 6px);
-    left:50%;
-    transform:translateX(-50%);
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    gap:0.1rem;
-    padding:0.35rem 0.55rem;
-    border-radius:6px;
-    background:var(--surface);
-    border:1px solid var(--border);
-    white-space:nowrap;
-    opacity:0;
-    pointer-events:none;
-    transition:opacity 0.12s ease;
+  /* ---- top bar ---- */
+  #bar{
+    position:absolute; top:0; left:0; right:0; z-index:50;
+    display:flex; align-items:baseline; gap:var(--space-8);
+    padding:var(--space-6) var(--space-8) var(--space-4);
+    background:linear-gradient(to bottom, rgba(22,24,38,.92) 0%, rgba(22,24,38,.86) 45%, rgba(22,24,38,0) 100%);
   }
-  .pin-marker:hover .pin-label, .pin-marker:focus .pin-label{ opacity:1; }
-  .pin-label-name{
-    font-size:0.76rem;
-    font-weight:600;
-    color:var(--ink);
-    line-height:1.2;
+  #bar::after{ content:""; position:absolute; left:var(--space-8); right:var(--space-8); bottom:0; height:1px;
+    background:linear-gradient(to right, transparent, var(--color-divider) 48px, var(--color-divider) calc(100% - 48px), transparent); }
+  .brand{ font-family:var(--font-heading); font-weight:500; font-size:17px; letter-spacing:-.01em; white-space:nowrap; }
+  .brand span{ color:var(--color-neutral-500); font-weight:400; }
+  nav.tabs{ display:flex; gap:var(--space-6); }
+  nav.tabs button{
+    appearance:none; background:none; border:0; cursor:pointer; padding:0 0 2px;
+    font:500 13px/1 var(--font-heading); letter-spacing:.02em;
+    color:var(--color-neutral-500); border-bottom:1px solid transparent;
   }
-  .pin-label-cap{
-    font-family:var(--font-mono);
-    font-size:0.68rem;
-    color:var(--ink-soft);
-    line-height:1.2;
+  nav.tabs button:hover{ color:var(--color-accent-300); }
+  nav.tabs button[aria-current="true"]{ color:var(--color-text); border-bottom-color:var(--color-accent); }
+  .bar-meta{ margin-left:auto; display:flex; align-items:baseline; gap:var(--space-4); font-size:11.5px; color:var(--color-neutral-500); letter-spacing:.02em; white-space:nowrap; }
+  .bar-reset{
+    appearance:none; background:none; border:0; cursor:pointer; padding:0;
+    font:500 11.5px var(--font-heading); letter-spacing:.02em; color:var(--color-neutral-500);
   }
+  .bar-reset:hover{ color:var(--color-accent-300); }
 
-  /* Operational sites pulse to read as "live"; planned/under-construction sites
-     stay static and muted, with a dashed ring standing in for "not built yet".
-     Animates transform:scale() (GPU-composited) rather than width/height, so
-     it doesn't force a layout recalculation every frame. */
-  .pin-marker.pin-status-operational .pin-core{ opacity:1; }
-  .pin-pulse{
-    position:absolute;
-    width:10px; height:10px;
-    border-radius:50%;
-    border:2px solid var(--dot);
-    opacity:0;
+  /* ---- left rail ---- */
+  #rail{
+    position:absolute; z-index:20; top:84px; bottom:222px; left:0; width:272px;
+    padding:var(--space-8); background:linear-gradient(to right, rgba(22,24,38,.94) 0%, rgba(22,24,38,.9) 62%, rgba(22,24,38,0) 100%);
+    overflow-y:auto; overflow-x:hidden;
   }
-  .pin-marker.pin-status-operational .pin-pulse{ animation:pin-pulse 2.4s cubic-bezier(0.2,0.6,0.4,1) infinite; }
-  @keyframes pin-pulse{
-    0%   { transform:scale(1); border-width:3px; opacity:0.6; }
-    100% { transform:scale(3); border-width:0.5px; opacity:0; }
-  }
-  .pin-marker.pin-status-under-construction .pin-core{ opacity:0.6; }
-  .pin-ring{
-    position:absolute;
-    width:18px; height:18px;
-    border-radius:50%;
-    border:1.2px dashed var(--dot);
-    opacity:0.7;
-  }
-  .pin-marker.pin-status-planned .pin-core{ opacity:0.4; width:8px; height:8px; }
-  .pin-marker.pin-status-planned .pin-ring{ border-style:dotted; opacity:0.55; }
+  .eyebrow{ font:500 10.5px/1 var(--font-heading); letter-spacing:.12em; text-transform:uppercase; color:var(--color-neutral-500); }
+  .stat-mw{ font:500 46px/1 var(--font-heading); letter-spacing:-.03em; margin-top:var(--space-2); }
+  .stat-mw em{ font-style:normal; font-size:17px; color:var(--color-neutral-500); margin-left:4px; }
+  .stat-sub{ font-size:12px; color:var(--color-neutral-500); margin-top:var(--space-2); }
 
-  @media (prefers-reduced-motion: reduce){
-    .pin-marker.pin-status-operational .pin-pulse{ animation:none; display:none; }
-  }
+  .prov{ display:grid; grid-template-columns:8px 1fr auto; align-items:center; gap:var(--space-2) var(--space-3);
+    padding:var(--space-2) 0; cursor:pointer; border:0; background:none; width:100%; text-align:left; color:inherit; }
+  .prov + .prov{ border-top:1px solid color-mix(in srgb, var(--color-text) 8%, transparent); }
+  .prov:hover .pname{ color:var(--color-accent-300); }
+  .prov .dot{ width:8px; height:8px; border-radius:50%; }
+  .pname{ font:500 13.5px/1.2 var(--font-heading); }
+  .pmw{ font-size:12px; color:var(--color-neutral-400); font-variant-numeric:tabular-nums; }
+  .pbar{ grid-column:2 / span 2; height:2px; background:color-mix(in srgb, var(--color-text) 10%, transparent); }
+  .pbar i{ display:block; height:2px; }
+  .pcount{ grid-column:2 / span 2; font-size:11px; color:var(--color-neutral-500); margin-top:2px; }
+  .prov[data-off="1"]{ opacity:.42; }
 
-  /* Floating overlay inside .map-panel (its positioning context), anchored
-     toward the bottom-right instead of taking a fixed column — hidden until
-     a site is selected so the map gets the full page width by default. */
-  .detail-panel{
-    position:absolute;
-    right:16px;
-    top:50%;
-    width:380px;
-    max-width:calc(100% - 32px);
-    max-height:calc(100% - 32px);
-    overflow-y:auto;
-    background:var(--surface);
-    border:1px solid var(--border);
-    border-radius:var(--radius);
-    padding:1.3rem 1.4rem;
-    display:flex;
-    flex-direction:column;
-    gap:1rem;
-    box-shadow:0 12px 34px rgba(0,0,0,0.45);
-    z-index:6;
-    opacity:0;
-    /* Two translateY()s compose: -50% centers the panel on the map's
-       vertical midpoint (relative to its own height), the fixed 10px is
-       just the open/close slide-in offset on top of that center point. */
-    transform:translateY(-50%) translateY(10px);
-    pointer-events:none;
-    transition:opacity 0.15s ease, transform 0.15s ease;
-  }
-  .detail-panel.open{
-    opacity:1;
-    transform:translateY(-50%);
-    pointer-events:auto;
-  }
-  .detail-close{
-    position:absolute;
-    top:0.7rem;
-    right:0.7rem;
-    width:24px;
-    height:24px;
-    border-radius:6px;
-    border:1px solid transparent;
-    background:none;
-    color:var(--ink-soft);
-    font-size:1.1rem;
-    line-height:1;
-    cursor:pointer;
-  }
-  .detail-close:hover{ color:var(--ink); border-color:var(--border); }
-  .detail-empty{
-    margin:auto;
-    text-align:center;
-    color:var(--ink-soft);
-    font-size:0.92rem;
-    max-width:26ch;
-    line-height:1.55;
-  }
-  .detail-head{
-    display:flex;
-    align-items:flex-start;
-    justify-content:space-between;
-    gap:0.5rem;
-  }
-  .detail-head h2{
-    margin:0;
-    font-size:1.3rem;
-    font-weight:650;
-    letter-spacing:-0.005em;
-  }
-  .provider-tag{
-    font-family:var(--font-mono);
-    font-size:0.7rem;
-    letter-spacing:0.06em;
-    text-transform:uppercase;
-    padding:0.25rem 0.55rem;
-    border-radius:5px;
-    color:#0A0F0E;
-    white-space:nowrap;
-    font-weight:600;
-  }
-  .region-code{
-    font-family:var(--font-mono);
-    font-size:0.85rem;
-    color:var(--accent);
-  }
-  .kv{
-    display:grid;
-    grid-template-columns:auto 1fr;
-    gap:0.45rem 0.9rem;
-    font-size:0.9rem;
-  }
-  .kv dt{ color:var(--ink-soft); }
-  .kv dd{ margin:0; font-family:var(--font-mono); font-variant-numeric:tabular-nums; }
+  .legend{ font-size:11.5px; color:var(--color-neutral-400); display:flex; flex-wrap:wrap; align-items:center; gap:var(--space-2) var(--space-6); }
+  .legend div{ display:flex; align-items:center; gap:var(--space-2); }
+  .lg{ width:9px; height:9px; border-radius:50%; flex:none; }
 
-  .status-pill{
-    display:inline-flex;
-    align-items:center;
-    gap:0.4rem;
-    font-family:var(--font-mono);
-    font-size:0.78rem;
-    letter-spacing:0.02em;
-    padding:0.15rem 0.6rem 0.15rem 0.5rem;
-    border-radius:999px;
+  /* ---- bottom drawer ---- */
+  #drawer{
+    position:absolute; z-index:25; left:0; right:0; bottom:0; height:218px;
+    background:linear-gradient(to top, rgba(22,24,38,.96) 0%, rgba(22,24,38,.93) 55%, rgba(22,24,38,0) 100%);
+    padding:var(--space-6) var(--space-8); display:flex; flex-direction:column;
   }
-  .status-pill::before{ content:""; width:6px; height:6px; border-radius:50%; background:currentColor; flex-shrink:0; }
-  .status-operational{ background:rgba(74,222,128,0.14); color:#4ADE80; }
-  .status-under-construction{ background:rgba(251,191,36,0.14); color:#FBBF24; }
-  .status-planned{ background:rgba(148,163,184,0.14); color:#94A3B8; }
-  .status-all{ background:var(--surface-2); color:var(--ink-soft); }
+  #drawer .head{ display:flex; align-items:baseline; flex-wrap:wrap; gap:var(--space-2) var(--space-6); padding-bottom:var(--space-3); }
+  .srch{ margin-left:auto; display:flex; gap:var(--space-4); align-items:center; }
+  .srch input{
+    background:transparent; border:0; border-bottom:1px solid var(--color-divider);
+    color:var(--color-text); font:400 12.5px var(--font-body); padding:3px 0; width:180px;
+  }
+  .srch input::placeholder{ color:var(--color-neutral-500); }
+  .srch input:focus{ outline:none; border-bottom-color:var(--color-accent); }
 
-  .status-th{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:0.6rem;
+  .seg{ display:inline-flex; overflow:hidden; border:1px solid var(--color-divider); border-radius:var(--radius-sm); }
+  .seg button{
+    appearance:none; background:none; border:0; cursor:pointer; padding:3px 10px;
+    font:500 11px var(--font-heading); letter-spacing:.03em; color:var(--color-neutral-400);
   }
-  .status-toggle{
-    font-family:var(--font-mono);
-    text-transform:none;
-    letter-spacing:0.02em;
-    border:1px solid transparent;
-    cursor:pointer;
-    transition:border-color 0.12s ease;
-  }
-  .status-toggle:hover{ border-color:currentColor; }
+  .seg button + button{ border-left:1px solid var(--color-divider); }
+  .seg button[aria-pressed="true"]{ color:var(--color-accent-300); background:color-mix(in srgb, var(--color-accent) 14%, transparent); }
+  .seg button:not([aria-pressed="true"]):hover{ color:var(--color-text); }
 
-  .source-line{
-    font-size:0.78rem;
-    color:var(--ink-soft);
-    margin:0;
+  .rows{ overflow-y:auto; margin-right:-8px; padding-right:8px; }
+  .row{
+    display:grid; grid-template-columns:10px minmax(150px,1.3fr) minmax(120px,1fr) 132px 84px minmax(150px,.9fr);
+    align-items:center; gap:var(--space-6); width:100%; text-align:left;
+    padding:7px 0; background:none; border:0; border-top:1px solid color-mix(in srgb, var(--color-text) 7%, transparent);
+    color:inherit; cursor:pointer; font:400 12.5px/1.35 var(--font-body);
   }
-  .source-line a{ color:var(--accent); }
+  .row:hover{ background:color-mix(in srgb, var(--color-accent) 9%, transparent); }
+  .row[aria-selected="true"]{ background:color-mix(in srgb, var(--color-accent) 14%, transparent); }
+  .row .name{ font-weight:500; font-family:var(--font-heading); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer; }
+  .row .name:hover{ color:var(--color-accent-300); text-decoration:underline; }
+  .row .place, .row .stat{ color:var(--color-neutral-400); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .row .cap{ text-align:right; font-variant-numeric:tabular-nums; }
+  .hrow{ border:0; color:var(--color-neutral-500); font:500 10.5px/1 var(--font-heading); letter-spacing:.1em; text-transform:uppercase; padding-bottom:5px; cursor:default; }
+  .hrow:hover{ background:none; }
 
-  .notes-box{
-    border:1px dashed var(--border);
-    border-radius:8px;
-    padding:0.75rem 0.85rem;
-    font-size:0.88rem;
-    color:var(--ink-soft);
-    font-style:italic;
-    line-height:1.5;
-  }
+  .vd{ display:inline-flex; align-items:center; gap:6px; font-size:11.5px; white-space:nowrap; }
+  .vd i{ width:3px; height:12px; flex:none; display:block; }
+  .vd.independent{ color:var(--color-accent-300); }
+  .vd.independent i{ background:var(--color-accent); }
+  .vd.operator{ color:var(--color-neutral-400); }
+  .vd.operator i{ background:var(--color-neutral-600); }
+  .vd.unsourced{ color:var(--color-neutral-500); }
+  .vd.unsourced i{ background:repeating-linear-gradient(to bottom, var(--color-neutral-700) 0 2px, transparent 2px 4px); }
 
-  section.table-section{
-    background:var(--surface);
-    border:1px solid var(--border);
-    border-radius:var(--radius);
-    overflow:hidden;
-    margin-top:1.75rem;
+  /* ---- detail panel ---- */
+  #detail{
+    position:absolute; z-index:28; top:84px; right:0; bottom:222px; width:372px;
+    padding:var(--space-8); background:linear-gradient(to left, rgba(22,24,38,.96) 0%, rgba(22,24,38,.93) 70%, rgba(22,24,38,0) 100%);
+    overflow-y:auto; display:none;
   }
-  /* ~25 rows visible before scrolling — row height (~43.6px, from tbody
-     td's padding + line-height) times 25 plus the header's own height. */
-  .table-scroll{ overflow-x:auto; overflow-y:auto; max-height:1120px; }
-  table{
-    width:100%;
-    border-collapse:collapse;
-    font-size:0.9rem;
-    min-width:640px;
-  }
-  thead th{
-    text-align:left;
-    font-family:var(--font-mono);
-    font-weight:500;
-    font-size:0.72rem;
-    letter-spacing:0.08em;
-    text-transform:uppercase;
-    color:var(--ink-soft);
-    padding:0.8rem 1rem;
-    border-bottom:1px solid var(--border);
-    background:var(--surface-2);
-    position:sticky;
-    top:0;
-    z-index:1;
-  }
-  tbody td{
-    padding:0.7rem 1rem;
-    border-bottom:1px solid var(--border);
-    vertical-align:middle;
-  }
-  tbody tr{ cursor:pointer; transition:background 0.12s ease; }
-  tbody tr:hover{ background:var(--surface-2); }
-  tbody tr.active{ background:var(--accent-soft); }
-  tbody tr:last-child td{ border-bottom:none; }
-  td.mono, th.mono{ font-family:var(--font-mono); font-variant-numeric:tabular-nums; }
-  .provider-dot{
-    display:inline-block; width:8px; height:8px; border-radius:50%;
-    margin-right:0.5rem; vertical-align:middle;
-  }
+  #detail.on{ display:block; }
+  #detail::before{ content:""; position:absolute; left:0; top:24px; bottom:24px; width:1px;
+    background:linear-gradient(to bottom, transparent, var(--color-divider) 48px, var(--color-divider) calc(100% - 48px), transparent); }
+  .dclose{ position:absolute; top:var(--space-6); right:var(--space-6); background:none; border:0; color:var(--color-neutral-500); cursor:pointer; font-size:15px; }
+  .dclose:hover{ color:var(--color-text); }
+  .d-op{ display:flex; align-items:center; gap:var(--space-3); font:500 12px var(--font-heading); letter-spacing:.04em; text-transform:uppercase; cursor:pointer; width:fit-content; }
+  .d-op:hover .d-op-name{ color:var(--color-accent-300); }
+  .d-op .dot{ width:8px; height:8px; border-radius:50%; flex:none; }
+  .d-title{ font:500 24px/1.15 var(--font-heading); letter-spacing:-.02em; margin:var(--space-3) 0 var(--space-2); cursor:pointer; }
+  .d-title:hover{ color:var(--color-accent-300); }
+  .d-place{ font-size:13px; color:var(--color-neutral-400); }
+  .fields{ margin-top:var(--space-8); display:grid; gap:var(--space-6); }
+  .field{ display:grid; gap:3px; }
+  .field .k{ font:500 10.5px/1 var(--font-heading); letter-spacing:.12em; text-transform:uppercase; color:var(--color-neutral-500); }
+  .field .v{ font:500 18px/1.25 var(--font-heading); display:flex; align-items:center; gap:var(--space-3); flex-wrap:wrap; }
+  .conf-why{ margin-top:var(--space-6); padding:var(--space-3) var(--space-4); background:color-mix(in srgb, var(--color-text) 5%, transparent); border-left:2px solid var(--color-divider); border-radius:0 6px 6px 0; font-size:12px; line-height:1.5; color:var(--color-neutral-400); }
+  .d-notes{ margin-top:var(--space-6); padding:var(--space-3) var(--space-4); border:1px dashed var(--color-divider); border-radius:8px; font-size:12.5px; font-style:italic; color:var(--color-neutral-400); line-height:1.55; }
+  .srcs{ margin-top:var(--space-8); }
+  .src{ display:grid; grid-template-columns:22px 1fr; gap:var(--space-4); padding:var(--space-3) 0; border-top:1px solid color-mix(in srgb, var(--color-text) 7%, transparent); font-size:12px; }
+  .cls{ font:500 10px/16px var(--font-heading); text-align:center; border:1px solid var(--color-neutral-700); color:var(--color-neutral-300); border-radius:3px; }
+  .cls.ind{ border-color:var(--color-accent-600); color:var(--color-accent-300); }
+  .src .sl{ color:var(--color-neutral-300); }
+  .src .sm{ color:var(--color-neutral-500); font-size:11px; }
+  .d-updated{ margin-top:var(--space-6); font-size:11px; color:var(--color-neutral-500); }
 
-  footer.foot{
-    color:var(--ink-soft);
-    font-size:0.8rem;
-    text-align:center;
-    padding-top:0.5rem;
-  }
-
-  /* ---- Confidence badges & source-class chips -------------------------- */
-  /* A confidence badge rests as a bare coloured pip and only says its name on
-     hover or focus. Three of them on one card, each shouting a word, drowned
-     out the data they were annotating. Add .conf-open where the label is the
-     point rather than an annotation. */
+  /* ---- confidence dot (hover-revealed graded level, beside the verdict) ---- */
   .conf-badge{
     display:inline-flex; align-items:center;
     height:15px; padding:0 3px; border-radius:999px;
     vertical-align:middle; cursor:help;
     background:transparent; border:1px solid transparent;
     color:var(--conf-fg);
-    transition:background 0.16s ease, border-color 0.16s ease, padding 0.16s ease;
+    transition:background .16s ease, border-color .16s ease, padding .16s ease;
   }
-  .conf-badge::before{
-    content:""; width:8px; height:8px; border-radius:50%;
-    background:currentColor; flex:0 0 auto;
-  }
-  .conf-badge .conf-label{
-    max-width:0; opacity:0; margin-left:0; overflow:hidden; white-space:nowrap;
-    font-size:0.66rem; font-weight:600; letter-spacing:0.02em;
-    transition:max-width 0.18s ease, opacity 0.14s ease, margin-left 0.18s ease;
-  }
-  .conf-badge:hover, .conf-badge:focus-visible, .conf-badge.conf-open{
-    background:var(--conf-bg); border-color:var(--conf-bd);
-    padding:0 0.5rem 0 0.35rem;
-  }
-  .conf-badge:hover .conf-label,
-  .conf-badge:focus-visible .conf-label,
-  .conf-badge.conf-open .conf-label{
-    max-width:7rem; opacity:1; margin-left:0.32rem;
-  }
+  .conf-badge::before{ content:""; width:7px; height:7px; border-radius:50%; background:currentColor; flex:0 0 auto; }
+  .conf-badge .conf-label{ max-width:0; opacity:0; margin-left:0; overflow:hidden; white-space:nowrap; font-size:.66rem; font-weight:600; letter-spacing:.02em; transition:max-width .18s ease, opacity .14s ease, margin-left .18s ease; }
+  .conf-badge:hover, .conf-badge:focus-visible{ background:var(--conf-bg); border-color:var(--conf-bd); padding:0 .5rem 0 .35rem; }
+  .conf-badge:hover .conf-label, .conf-badge:focus-visible .conf-label{ max-width:7rem; opacity:1; margin-left:.32rem; }
   .conf-badge:focus-visible{ outline:1px solid var(--conf-bd); outline-offset:2px; }
 
-  /* ---- Site page --------------------------------------------------------
-     One column, capped at a readable measure. The earlier two-column version
-     listed the same sources twice and led with sourcing commentary; this one
-     leads with the facility and folds the methodology into a disclosure. */
-  .site-page{ max-width:62rem; }
+  .basis-tag{ font:500 10px var(--font-heading); text-transform:uppercase; letter-spacing:.06em; color:var(--color-neutral-500); }
+  .basis-tag.basis-derived, .basis-tag.basis-estimated{ color:#FBBF24; }
 
-  .site-page-head{ display:flex; align-items:flex-start; gap:1rem; margin:0 0 1.1rem; }
-  .site-page-head h1{ margin:0; font-size:1.6rem; font-weight:600; letter-spacing:-0.02em; }
-  .site-page-sub{ margin:0.25rem 0 0; color:var(--accent); font-family:var(--font-mono); font-size:0.84rem; }
-  .site-page-head .provider-tag{ margin-left:auto; flex-shrink:0; }
+  .status-pill{ display:inline-flex; align-items:center; gap:.4rem; font:500 12px var(--font-heading); letter-spacing:.01em; }
+  .status-pill::before{ content:""; width:6px; height:6px; border-radius:50%; background:currentColor; flex-shrink:0; }
+  .status-operational{ color:#4ADE80; }
+  .status-under-construction{ color:#FBBF24; }
+  .status-planned{ color:#94A3B8; }
 
-  .site-facts{
-    display:flex; flex-wrap:wrap; gap:1rem 2.5rem;
-    padding:1rem 1.15rem; margin-bottom:1.9rem;
-    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
-  }
-  .fact-label{ font-size:0.64rem; text-transform:uppercase; letter-spacing:0.09em; color:var(--ink-soft); }
-  .fact-value{ margin-top:0.3rem; font-family:var(--font-mono); font-size:0.92rem; }
-  .fact-muted{ color:var(--ink-soft); }
-
-  .verdict-inline{
-    display:inline-flex; align-items:center; gap:0.35rem;
-    font-family:var(--font-sans); font-size:0.78rem; font-weight:600;
-  }
-  .verdict-inline::before{ content:""; width:7px; height:7px; border-radius:50%; background:currentColor; flex-shrink:0; }
-  .verdict-independent{ color:#4ADE80; }
-  .verdict-operator{ color:#FBBF24; }
-  .verdict-unsourced{ color:#8FA39C; }
-
-  .site-block{ margin-bottom:1.9rem; }
-  .site-block h2{ margin:0 0 0.7rem; font-size:0.95rem; font-weight:600; }
-  .site-prose{
-    max-width:70ch; font-size:0.88rem; line-height:1.68; color:var(--ink);
-    white-space:pre-line;
+  /* ---- provider tag ---- */
+  .provider-tag{
+    font:600 11px var(--font-heading); letter-spacing:.05em; text-transform:uppercase;
+    padding:.22rem .55rem; border-radius:5px; color:#131420; white-space:nowrap;
   }
 
-  .src-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; }
-  .src-list li{
-    display:grid; grid-template-columns:1.15rem 1fr; gap:0.6rem; align-items:start;
-    padding:0.6rem 0; border-bottom:1px solid var(--border);
-    font-size:0.84rem; line-height:1.45;
-  }
-  .src-list li:first-child{ border-top:1px solid var(--border); }
-  .src-meta{ margin-top:0.2rem; font-family:var(--font-mono); font-size:0.68rem; color:var(--ink-soft); }
+  /* ---- pins ---- */
+  .pin-marker{ width:44px; height:44px; display:flex; align-items:center; justify-content:center; cursor:pointer; }
+  .pin-marker.dim{ display:none; }
+  .pin-core{ border-radius:50%; transition:transform .15s ease; box-sizing:border-box; }
+  .pin-marker.pin-status-operational .pin-core{ background:var(--dot); border:1.4px solid #0e0f1a; }
+  .pin-marker.pin-status-under-construction .pin-core{ background:color-mix(in srgb, var(--dot) 22%, transparent); border:1.6px solid var(--dot); }
+  .pin-marker.pin-status-planned .pin-core{ background:transparent; border:1.3px dashed var(--dot); }
+  .pin-marker:hover .pin-core, .pin-marker:focus .pin-core, .pin-marker.active .pin-core{ transform:scale(1.22); }
+  .pin-halo{ position:absolute; width:100%; height:100%; border-radius:50%; background:var(--dot); opacity:0; transition:opacity .15s ease; pointer-events:none; }
+  .pin-marker:hover .pin-halo, .pin-marker:focus .pin-halo, .pin-marker.active .pin-halo{ opacity:.24; }
+  .pin-marker:hover, .pin-marker:focus{ z-index:10; }
+  .pin-pulse{ position:absolute; border-radius:50%; border:2px solid var(--dot); opacity:0; pointer-events:none; }
+  .pin-marker.pin-status-operational .pin-pulse{ animation:pin-pulse 2.4s cubic-bezier(.2,.6,.4,1) infinite; }
+  @keyframes pin-pulse{ 0%{ transform:scale(1); border-width:3px; opacity:.55; } 100%{ transform:scale(2.4); border-width:.5px; opacity:0; } }
+  @media (prefers-reduced-motion: reduce){ .pin-marker.pin-status-operational .pin-pulse{ animation:none; display:none; } }
 
-  /* The whole sourcing apparatus, collapsed. Available to anyone who wants
-     it, invisible to everyone who does not. */
-  .site-disclosure{
-    border:1px solid var(--border); border-radius:var(--radius);
-    background:var(--surface); max-width:62rem;
+  .pin-label{
+    position:absolute; bottom:calc(100% + 4px); left:50%; transform:translateX(-50%);
+    display:flex; flex-direction:column; align-items:center; gap:.1rem;
+    padding:.35rem .55rem; border-radius:6px; background:var(--color-surface); border:1px solid var(--color-divider);
+    white-space:nowrap; opacity:0; pointer-events:none; transition:opacity .12s ease; z-index:5;
   }
-  .site-disclosure > summary{
-    display:flex; align-items:center; gap:0.5rem;
-    padding:0.8rem 1rem; cursor:pointer; list-style:none;
-    font-size:0.86rem; font-weight:600; color:var(--ink);
-  }
-  .site-disclosure > summary::-webkit-details-marker{ display:none; }
-  .site-disclosure > summary:hover{ color:var(--accent); }
-  .disc-chevron{ color:var(--ink-soft); transition:transform 0.16s ease; display:inline-block; }
-  .site-disclosure[open] .disc-chevron{ transform:rotate(90deg); }
-  .disc-body{ padding:0 1rem 0.4rem; border-top:1px solid var(--border); }
+  .pin-marker:hover .pin-label, .pin-marker:focus .pin-label{ opacity:1; }
+  .pin-label-name{ font-size:.76rem; font-weight:600; color:var(--color-text); line-height:1.2; }
+  .pin-label-cap{ font-size:.7rem; color:var(--color-neutral-400); line-height:1.2; font-variant-numeric:tabular-nums; }
 
-  .disc-block{ padding:0.9rem 0; border-bottom:1px solid var(--border); }
-  .disc-block:last-child{ border-bottom:0; }
-  .disc-head{ display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap; }
-  .disc-field{ font-size:0.66rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--ink-soft); min-width:5rem; }
-  .disc-blurb{ margin:0.45rem 0 0; font-size:0.8rem; line-height:1.55; color:var(--ink-soft); max-width:70ch; }
-  .disc-lift{ margin:0.5rem 0 0; font-size:0.79rem; line-height:1.55; color:var(--ink-soft); max-width:70ch; }
-  .disc-lift strong{ color:var(--ink); font-weight:600; }
-  .disc-hint{
-    margin:0.55rem 0 0; padding:0.5rem 0.65rem;
-    border-left:2px solid rgba(53,214,184,0.3); background:rgba(53,214,184,0.045);
-    border-radius:0 6px 6px 0;
-    font-size:0.75rem; line-height:1.5; color:var(--ink-soft); max-width:70ch;
-  }
-  .disc-note{ margin:0.9rem 0 1rem; font-size:0.78rem; line-height:1.55; color:var(--ink-soft); max-width:70ch; }
+  /* ---- full-screen overlay views (Sources & method / provider / site) ---- */
+  .ov{ position:absolute; inset:0; z-index:40; background:var(--color-bg); overflow-y:auto; display:none; padding:96px var(--space-8) 96px; }
+  .ov.on{ display:block; }
+  .wrap{ max-width:1040px; margin:0 auto; }
+  .lede{ font-size:15px; color:var(--color-neutral-300); max-width:66ch; }
+  .back-link{ background:none; border:0; color:var(--color-neutral-500); font:500 12px var(--font-heading); letter-spacing:.03em; cursor:pointer; padding:0 0 var(--space-6); display:block; }
+  .back-link:hover{ color:var(--color-accent-300); }
+  .plink{ cursor:pointer; }
+  .plink:hover{ color:var(--color-accent-300); }
 
-  .detail-title-link{
-    background:none; border:0; padding:0; margin:0; cursor:pointer;
-    font:inherit; color:inherit; text-align:left;
-    display:inline-flex; align-items:center; gap:0.4rem;
-  }
-  .detail-title-link:hover h2{ color:var(--accent); }
-  .detail-title-link h2{ transition:color 0.14s ease; }
-  .detail-title-link .go-arrow{ color:var(--ink-soft); font-size:0.85rem; transition:color 0.14s ease, transform 0.14s ease; }
-  .detail-title-link:hover .go-arrow{ color:var(--accent); transform:translateX(2px); }
-  .detail-open-hint{ margin:0.1rem 0 0; font-size:0.68rem; color:var(--ink-soft); }
+  .tally{ display:flex; align-items:baseline; gap:var(--space-4); margin:var(--space-8) 0 var(--space-4); flex-wrap:wrap; }
+  .tally b{ font:500 56px/1 var(--font-heading); letter-spacing:-.035em; }
+  .tally span{ font-size:14px; color:var(--color-neutral-400); max-width:34ch; }
+  .meter{ display:flex; height:6px; max-width:620px; margin-bottom:var(--space-3); border-radius:3px; overflow:hidden; }
+  .meter i:nth-child(1){ background:var(--color-accent); }
+  .meter i:nth-child(2){ background:var(--color-neutral-700); }
+  .meter i:nth-child(3){ background:repeating-linear-gradient(to right, var(--color-neutral-800) 0 3px, transparent 3px 6px); }
 
-  .cls-chip{
-    display:inline-flex; align-items:center; justify-content:center;
-    width:1.15rem; height:1.15rem; border-radius:4px;
-    font-family:var(--font-mono); font-size:0.66rem; font-weight:600;
-    background:var(--chip-bg); color:var(--chip-fg);
-    border:1px solid var(--chip-bd);
-    cursor:help; flex-shrink:0;
-  }
-  .cls-chip-row{ display:inline-flex; gap:0.22rem; vertical-align:middle; }
+  .band{ margin:56px 0 var(--space-8); }
+  .band h4{ font-size:20px; margin-bottom:var(--space-2); }
+  .band p{ color:var(--color-neutral-400); font-size:13px; max-width:70ch; margin:0; }
 
-  .basis-tag{
-    font-family:var(--font-mono); font-size:0.62rem; text-transform:uppercase;
-    letter-spacing:0.06em; color:var(--ink-soft); margin-left:0.4rem;
-  }
-  .basis-tag.basis-derived,
-  .basis-tag.basis-estimated{ color:#FBBF24; }
+  .classes{ display:grid; gap:0; margin-top:var(--space-6); }
+  .cl{ display:grid; grid-template-columns:26px 200px 1fr; gap:var(--space-6); align-items:baseline;
+    padding:var(--space-4) 0; border-top:1px solid color-mix(in srgb, var(--color-text) 8%, transparent); }
+  .cl .code{ font:500 12px/22px var(--font-heading); text-align:center; border:1px solid var(--color-neutral-700); color:var(--color-neutral-300); border-radius:3px; }
+  .cl.ind .code{ border-color:var(--color-accent-600); color:var(--color-accent-300); }
+  .cl .lab{ font:500 14px var(--font-heading); }
+  .cl .bl{ font-size:12.5px; color:var(--color-neutral-400); }
 
-  .kv dd .conf-badge{ margin-left:0.45rem; }
-  .detail-conf{
-    display:flex; align-items:center; gap:0.5rem;
-    margin:0.15rem 0 0.65rem; padding-top:0.6rem;
-    border-top:1px solid var(--border);
-    font-size:0.72rem; color:var(--ink-soft);
-  }
-  .conf-why{
-    margin:0.5rem 0 0; padding:0.55rem 0.7rem;
-    background:var(--surface-2); border-left:2px solid var(--border);
-    border-radius:0 6px 6px 0;
-    font-size:0.72rem; line-height:1.5; color:var(--ink-soft);
-  }
+  table.table{ width:100%; border-collapse:collapse; font-size:13.5px; margin-top:var(--space-4); }
+  table.table th{ text-align:left; font:500 10.5px var(--font-heading); letter-spacing:.08em; text-transform:uppercase; color:var(--color-neutral-500); padding:var(--space-2) var(--space-3) var(--space-2) 0; }
+  table.table td{ padding:var(--space-3) var(--space-3) var(--space-3) 0; vertical-align:top; }
+  table.table thead tr{ background:linear-gradient(to right, transparent, var(--color-divider) 0, var(--color-divider) 100%, transparent) no-repeat bottom / 100% 1px; }
+  table.table tbody tr{ background:linear-gradient(to right, transparent, color-mix(in srgb, var(--color-text) 8%, transparent) 0, color-mix(in srgb, var(--color-text) 8%, transparent) 100%, transparent) no-repeat bottom / 100% 1px; }
+  table.table tbody tr:hover{ background: linear-gradient(color-mix(in srgb, var(--color-text) 4%, transparent), color-mix(in srgb, var(--color-text) 4%, transparent)) no-repeat 0 0/100% 100%, linear-gradient(to right, transparent, color-mix(in srgb, var(--color-text) 8%, transparent) 0, color-mix(in srgb, var(--color-text) 8%, transparent) 100%, transparent) no-repeat bottom / 100% 1px; }
+  .ch-name{ font-weight:500; }
+  .ch-gives{ color:var(--color-neutral-400); font-size:12.5px; line-height:1.5; max-width:44ch; }
+  .ch-meta{ font-size:12px; color:var(--color-neutral-400); white-space:nowrap; }
+  .cls-cell{ width:26px; }
 
-  /* ---- Method page ------------------------------------------------------ */
-  .method-wrap{ display:flex; flex-direction:column; gap:2.5rem; }
-  .method-section > h2{
-    margin:0 0 0.4rem; font-size:1.05rem; font-weight:600; letter-spacing:-0.01em;
-  }
-  .method-section > p.method-lede{
-    margin:0 0 1.1rem; max-width:76ch; color:var(--ink-soft);
-    font-size:0.9rem; line-height:1.6;
-  }
-  .method-figure{
-    background:var(--surface); border:1px solid var(--border);
-    border-radius:var(--radius); padding:1.25rem; overflow-x:auto;
-  }
+  .rule-list{ list-style:none; margin:var(--space-4) 0 0; padding:0; display:flex; flex-direction:column; gap:var(--space-3); }
+  .rule-list li{ display:grid; grid-template-columns:6.5rem 1fr; gap:var(--space-6); align-items:baseline;
+    background:var(--color-surface); border:1px solid var(--color-divider); border-radius:8px; padding:var(--space-3) var(--space-4);
+    font-size:12.5px; line-height:1.55; color:var(--color-neutral-400); }
+  .rule-list li strong{ color:var(--color-text); }
+
+  .tally-row{ display:flex; flex-wrap:wrap; gap:var(--space-3); margin:var(--space-4) 0 0; }
+  .tally-card{ background:var(--color-surface); border:1px solid var(--color-divider); border-top:2px solid var(--tc); border-radius:8px; padding:var(--space-3) var(--space-4); min-width:8.5rem; }
+  .tally-value{ font:500 26px var(--font-heading); color:var(--tc); }
+  .tally-label{ font-size:11.5px; color:var(--color-neutral-500); margin-top:2px; }
+
+  .method-figure{ background:var(--color-surface); border:1px solid var(--color-divider); border-radius:var(--radius-lg); padding:20px; overflow-x:auto; margin-top:var(--space-4); }
   .method-figure svg{ display:block; min-width:940px; width:100%; height:auto; }
 
-  .class-grid{
-    display:grid; gap:0.75rem;
-    grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));
-  }
-  .class-card{
-    background:var(--surface); border:1px solid var(--border);
-    border-left:3px solid var(--cls-color);
-    border-radius:8px; padding:0.85rem 0.95rem;
-  }
-  .class-card-head{ display:flex; align-items:center; gap:0.5rem; margin-bottom:0.4rem; }
-  .class-card-name{ font-weight:600; font-size:0.87rem; }
-  .class-card-tag{
-    margin-left:auto; font-size:0.62rem; text-transform:uppercase;
-    letter-spacing:0.07em; padding:0.1rem 0.4rem; border-radius:4px;
-  }
-  .class-card-tag.indep{ background:rgba(74,222,128,0.13); color:#4ADE80; }
-  .class-card-tag.dep{ background:rgba(224,112,138,0.13); color:#E0708A; }
-  .class-card-tag.none{ background:var(--surface-2); color:var(--ink-soft); }
-  .class-card p{ margin:0 0 0.4rem; font-size:0.78rem; line-height:1.55; color:var(--ink); }
-  .class-card p.why{ margin:0; color:var(--ink-soft); font-size:0.75rem; }
+  /* ---- provider page ---- */
+  .p-head{ display:flex; align-items:center; gap:var(--space-3); }
+  .p-head .dot{ width:14px; height:14px; border-radius:50%; flex-shrink:0; }
+  .p-head h1{ font-size:28px; }
+  .p-stats{ display:flex; gap:var(--space-8); flex-wrap:wrap; padding:var(--space-6) 0 0; }
+  .p-stat-value{ font:500 26px var(--font-heading); font-variant-numeric:tabular-nums; }
+  .p-stat-label{ font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--color-neutral-500); margin-top:3px; }
+  .p-body{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:var(--space-8); margin-top:56px; }
+  @media (max-width:860px){ .p-body{ grid-template-columns:1fr; } }
+  .p-section h2{ font-size:14px; font-weight:600; margin-bottom:var(--space-3); }
+  .p-locations{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; }
+  .p-loc-item{ display:flex; align-items:center; gap:var(--space-3); padding:.4rem 0; font-size:13px; cursor:pointer;
+    border-top:1px solid color-mix(in srgb, var(--color-text) 7%, transparent); }
+  .p-loc-item:first-child{ border-top:0; }
+  .p-loc-item:hover{ color:var(--color-accent-300); }
+  .p-loc-name{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .p-loc-place{ color:var(--color-neutral-500); font-size:12px; flex-shrink:0; }
+  .p-loc-cap{ color:var(--color-neutral-500); font-size:12px; font-variant-numeric:tabular-nums; flex-shrink:0; width:5em; text-align:right; }
+  .status-dot{ width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+  .status-dot.status-operational{ background:#4ADE80; }
+  .status-dot.status-under-construction{ background:#FBBF24; }
+  .status-dot.status-planned{ background:#94A3B8; }
 
-  .channel-table td{ vertical-align:top; }
-  .channel-table .ch-name{ font-weight:500; }
-  .channel-table .ch-gives{ color:var(--ink-soft); font-size:0.78rem; line-height:1.5; max-width:52ch; }
-  .channel-table .ch-meta{ font-family:var(--font-mono); font-size:0.7rem; color:var(--ink-soft); white-space:nowrap; }
+  .p-partners{ margin-top:var(--space-8); }
+  .partner-list{ list-style:none; margin:0; padding:0; display:grid; gap:var(--space-3); }
+  .partner-card{ border:1px solid var(--color-divider); border-radius:8px; padding:var(--space-4); }
+  .partner-top{ display:flex; align-items:baseline; justify-content:space-between; gap:var(--space-2); }
+  .partner-name{ font-weight:600; font-size:13.5px; }
+  .partner-relationship{ font-size:10.5px; letter-spacing:.05em; text-transform:uppercase; color:var(--color-accent-300); white-space:nowrap; }
+  .partner-detail{ margin:.4rem 0 0; font-size:12.5px; color:var(--color-neutral-400); line-height:1.5; }
+  .partner-meta{ display:block; margin-top:.4rem; font-size:11px; color:var(--color-neutral-500); }
+  .partner-meta a{ color:var(--color-neutral-500); }
+  .partner-meta a:hover{ color:var(--color-accent-300); }
+  .empty-note{ color:var(--color-neutral-500); font-size:13px; font-style:italic; }
 
-  .rule-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:0.6rem; }
-  .rule-list li{
-    display:grid; grid-template-columns:5.5rem 1fr; gap:0.9rem; align-items:baseline;
-    background:var(--surface); border:1px solid var(--border);
-    border-radius:8px; padding:0.7rem 0.9rem;
-    font-size:0.8rem; line-height:1.55; color:var(--ink-soft);
-  }
-  .rule-list li strong{ color:var(--ink); }
+  .headline-list{ list-style:none; margin:0; padding:0; }
+  .headline-item{ padding:var(--space-3) 0; border-top:1px solid color-mix(in srgb, var(--color-text) 7%, transparent); font-size:13px; line-height:1.45; }
+  .headline-item:first-child{ border-top:0; }
+  .headline-top{ display:flex; align-items:center; gap:var(--space-2); margin-bottom:2px; }
+  .headline-date{ font-size:11px; color:var(--color-neutral-500); white-space:nowrap; }
+  .headline-category{ font-size:10px; letter-spacing:.04em; text-transform:uppercase; padding:.1rem .4rem; border-radius:999px; border:1px solid var(--color-divider); color:var(--color-neutral-500); }
+  .headline-title{ display:block; color:var(--color-text); font-weight:500; }
+  .headline-why{ margin:.25rem 0 0; color:var(--color-neutral-400); font-size:12px; line-height:1.5; }
+  .headline-meta{ display:block; margin-top:.3rem; font-size:11px; color:var(--color-neutral-500); }
+  .headline-meta a{ color:var(--color-neutral-500); }
+  .headline-meta a:hover{ color:var(--color-accent-300); }
+  .p-search-link{ display:inline-block; margin-top:var(--space-4); font-size:12.5px; }
 
-  .tally-row{ display:flex; flex-wrap:wrap; gap:0.75rem; margin:1rem 0 0; }
-  .tally-card{
-    background:var(--surface); border:1px solid var(--border);
-    border-top:2px solid var(--tally-color);
-    border-radius:8px; padding:0.7rem 1rem; min-width:8.5rem;
-  }
-  .tally-value{ font-family:var(--font-mono); font-size:1.5rem; font-weight:600; color:var(--tally-color); }
-  .tally-label{ font-size:0.72rem; color:var(--ink-soft); margin-top:0.15rem; }
+  /* ---- site page ---- */
+  .s-head{ display:flex; align-items:flex-start; gap:var(--space-4); }
+  .s-head h1{ font-size:26px; }
+  .s-sub{ margin:4px 0 0; color:var(--color-accent-300); font-size:13px; }
+  .s-head .provider-tag{ margin-left:auto; flex-shrink:0; }
+  .s-facts{ display:flex; flex-wrap:wrap; gap:var(--space-6) var(--space-8);
+    padding:var(--space-4) var(--space-6); margin:var(--space-6) 0 var(--space-8);
+    background:var(--color-surface); border:1px solid var(--color-divider); border-radius:var(--radius-lg); }
+  .fact-label{ font-size:10px; text-transform:uppercase; letter-spacing:.09em; color:var(--color-neutral-500); }
+  .fact-value{ margin-top:.3rem; font-size:15px; }
+  .fact-muted{ color:var(--color-neutral-500); }
+  .s-block{ margin-bottom:var(--space-8); }
+  .s-block h2{ font-size:14px; font-weight:600; margin-bottom:var(--space-3); }
+  .s-prose{ max-width:70ch; font-size:13.5px; line-height:1.68; color:var(--color-text); white-space:pre-line; }
+  .src-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; }
+  .src-list li{ display:grid; grid-template-columns:22px 1fr; gap:var(--space-4); align-items:start;
+    padding:var(--space-3) 0; border-top:1px solid color-mix(in srgb, var(--color-text) 8%, transparent); font-size:13px; line-height:1.45; }
+  .src-list li:first-child{ border-top:0; }
+  .src-meta{ margin-top:2px; font-size:11px; color:var(--color-neutral-500); }
 
-  @media (prefers-reduced-motion: reduce){
-    *{ transition:none !important; }
+  .site-disclosure{ border:1px solid var(--color-divider); border-radius:var(--radius-lg); background:var(--color-surface); }
+  .site-disclosure > summary{ display:flex; align-items:center; gap:var(--space-3); padding:var(--space-4); cursor:pointer; list-style:none; font-size:13.5px; font-weight:600; }
+  .site-disclosure > summary::-webkit-details-marker{ display:none; }
+  .site-disclosure > summary:hover{ color:var(--color-accent-300); }
+  .disc-chevron{ color:var(--color-neutral-500); transition:transform .16s ease; display:inline-block; }
+  .site-disclosure[open] .disc-chevron{ transform:rotate(90deg); }
+  .disc-body{ padding:0 var(--space-4) var(--space-2); border-top:1px solid var(--color-divider); }
+  .disc-block{ padding:var(--space-4) 0; border-bottom:1px solid color-mix(in srgb, var(--color-text) 8%, transparent); }
+  .disc-block:last-child{ border-bottom:0; }
+  .disc-head{ display:flex; align-items:center; gap:var(--space-3); flex-wrap:wrap; }
+  .disc-field{ font-size:10.5px; text-transform:uppercase; letter-spacing:.08em; color:var(--color-neutral-500); min-width:5rem; }
+  .disc-blurb{ margin:.45rem 0 0; font-size:12.5px; line-height:1.55; color:var(--color-neutral-400); max-width:68ch; }
+  .disc-lift{ margin:.5rem 0 0; font-size:12.5px; line-height:1.55; color:var(--color-neutral-400); max-width:68ch; }
+  .disc-lift strong{ color:var(--color-text); font-weight:600; }
+  .disc-hint{ margin:.55rem 0 0; padding:.5rem .65rem; border-left:2px solid color-mix(in srgb, var(--color-accent) 35%, transparent);
+    background:color-mix(in srgb, var(--color-accent) 6%, transparent); border-radius:0 6px 6px 0; font-size:11.5px; line-height:1.5; color:var(--color-neutral-400); max-width:68ch; }
+  .verdict-inline{ display:inline-flex; align-items:center; gap:6px; font-size:12.5px; font-weight:600; }
+  .verdict-inline i{ width:3px; height:12px; flex:none; display:block; }
+  .verdict-independent{ color:var(--color-accent-300); } .verdict-independent i{ background:var(--color-accent); }
+  .verdict-operator{ color:var(--color-neutral-400); } .verdict-operator i{ background:var(--color-neutral-600); }
+  .verdict-unsourced{ color:var(--color-neutral-500); } .verdict-unsourced i{ background:repeating-linear-gradient(to bottom, var(--color-neutral-700) 0 2px, transparent 2px 4px); }
+
+  @media (max-width:1100px){
+    #detail{ width:320px; }
+    #rail{ width:232px; }
   }
+  @media (max-width:760px){
+    #rail{ display:none; }
+    #detail{ width:88%; max-width:340px; }
+    .row{ grid-template-columns:10px minmax(120px,1.4fr) 84px minmax(90px,.9fr); }
+    .row .place, .row .stat{ display:none; }
+    .legend{ display:none; }
+  }
+  @media (prefers-reduced-motion: reduce){ *{ transition:none !important; } }
 </style>
 
-<div class="page">
-
-  <div class="tabs" role="tablist">
-    <button class="tab-btn active" id="tabBtnMap" role="tab" aria-selected="true">Map</button>
-    <button class="tab-btn" id="tabBtnSources" role="tab" aria-selected="false">Sources</button>
-    <button class="tab-btn" id="tabBtnMethod" role="tab" aria-selected="false">Method</button>
+<div id="shell">
+  <div id="mapwrap">
+    <div id="map" role="img" aria-label="World map with data center site markers"></div>
+    <p class="map-loading" id="mapLoading">Loading map…</p>
   </div>
 
-  <div id="mapTabPanel">
+  <header id="bar">
+    <div class="brand">Site Atlas <span>/ data center buildout</span></div>
+    <nav class="tabs" role="tablist">
+      <button data-view="atlas" aria-current="true">Atlas</button>
+      <button data-view="sources">Sources &amp; method</button>
+    </nav>
+    <div class="bar-meta">
+      <button class="bar-reset" id="resetView" title="Fit the map to every site">⤾ Reset view</button>
+      <span id="barMeta"></span>
+    </div>
+  </header>
 
-    <main>
-      <div class="map-panel">
-        <div id="map" role="img" aria-label="World map with data center site markers"></div>
-        <p class="map-loading" id="mapLoading">Loading map…</p>
-        <button class="reset-view" id="resetView" title="Reset view">⤾ Reset view</button>
-        <p class="map-caption" id="mapCaption" style="display:none">scroll to zoom · drag to pan &nbsp; <span id="mapCount"></span></p>
+  <aside id="rail">
+    <div class="eyebrow">Disclosed capacity</div>
+    <div class="stat-mw" id="totalMw">—<em>MW</em></div>
+    <div class="stat-sub" id="totalSub"></div>
+    <hr class="hr">
+    <div class="eyebrow" style="margin-bottom:var(--space-2)">Operators</div>
+    <div id="provList"></div>
+  </aside>
 
-        <div class="detail-panel" id="detailPanel">
-          <button class="detail-close" id="detailClose" title="Close" aria-label="Close">×</button>
-          <div id="detailPanelBody">
-            <p class="detail-empty">Select a site on the map or in the table below to see its details here.</p>
-          </div>
-        </div>
+  <section id="drawer">
+    <div class="head">
+      <div class="eyebrow">Sites</div>
+      <div class="stat-sub" id="drawerMeta" style="margin:0"></div>
+      <div class="legend">
+        <div><span class="lg" style="background:var(--color-neutral-300)"></span> Operational</div>
+        <div><span class="lg" style="background:transparent;border:1.5px solid var(--color-neutral-300)"></span> Under construction</div>
+        <div><span class="lg" style="background:transparent;border:1px dashed var(--color-neutral-500)"></span> Planned</div>
+        <div>Dot size ∝ disclosed MW</div>
       </div>
-    </main>
-
-    <section class="provider-dashboard" id="providerDashboard"></section>
-
-    <div id="providerTabPanel" hidden>
-      <button class="back-link" id="providerBack">← Back to full list</button>
-      <div class="provider-page-head">
-        <span class="provider-page-dot" id="providerPageDot"></span>
-        <h1 id="providerPageName"></h1>
-      </div>
-      <div class="provider-page-stats" id="providerPageStats"></div>
-      <div class="provider-page-body">
-        <div class="provider-page-col-left">
-          <section class="provider-page-locations">
-            <h2>Locations</h2>
-            <ul id="providerPageLocations"></ul>
-          </section>
-          <section class="provider-page-partners">
-            <h2>Partnerships</h2>
-            <ul id="providerPagePartners"></ul>
-          </section>
+      <div class="srch">
+        <div class="seg" id="statusSeg">
+          <button data-f="operational" aria-pressed="true">Operational</button>
+          <button data-f="all" aria-pressed="false">All</button>
         </div>
-        <section class="provider-page-news">
-          <h2>Latest headlines</h2>
-          <ul class="headline-list" id="providerPageHeadlines"></ul>
-          <a class="provider-page-search-link" id="providerPageSearchLink" target="_blank" rel="noopener">Search for more coverage →</a>
-        </section>
+        <input id="q" placeholder="Filter sites, cities, operators">
       </div>
     </div>
+    <div class="fade-x"></div>
+    <div class="rows" id="rows"></div>
+  </section>
 
-    <div id="siteTabPanel" hidden>
-      <button class="back-link" id="siteBack">← Back to full list</button>
-      <div class="site-page">
-        <div class="site-page-head">
-          <div>
-            <h1 id="sitePageCity"></h1>
-            <p class="site-page-sub" id="sitePageName"></p>
-          </div>
-          <span class="provider-tag" id="sitePageProvider"></span>
-        </div>
+  <aside id="detail"></aside>
 
-        <div class="site-facts" id="sitePageFacts"></div>
-
-        <section class="site-block" id="sitePageNotesBlock">
-          <h2>What we know</h2>
-          <div class="site-prose" id="sitePageNotes"></div>
-        </section>
-
-        <section class="site-block">
-          <h2 id="sitePageSourcesHeading">Sources</h2>
-          <ul class="src-list" id="sitePageSources"></ul>
-        </section>
-
-        <details class="site-disclosure" id="sitePageDisclosure">
-          <summary>
-            <span class="disc-chevron" aria-hidden="true">›</span>
-            <span id="discSummary">How solid is this?</span>
-          </summary>
-          <div class="disc-body" id="sitePageFields"></div>
-        </details>
-      </div>
-    </div>
-
-    <section class="table-section" id="tableSection">
-      <div class="table-toolbar">
-        <p class="count" id="count"></p>
-      </div>
-      <div class="table-scroll">
-        <table>
-          <thead>
-            <tr>
-              <th>Operator</th>
-              <th>Site</th>
-              <th>Location</th>
-              <th>
-                <div class="status-th">
-                  <span>Status</span>
-                  <button class="status-toggle status-pill" id="statusToggle" type="button"></button>
-                </div>
-              </th>
-              <th class="mono">Capacity</th>
-            </tr>
-          </thead>
-          <tbody id="tableBody"></tbody>
-        </table>
-      </div>
-    </section>
-
-  </div>
-
-  <div id="sourcesTabPanel" hidden>
-    <p class="subtitle">Every fact on this map traced back to where it came from — check here before relying on anything. Weakest-confidence entries are listed first, since those are the ones needing a second, independent source class. Letters are source classes; see the <strong>Method</strong> tab for what each one means.</p>
-    <section class="table-section">
-      <div class="table-scroll">
-        <table>
-          <thead>
-            <tr>
-              <th>Site</th>
-              <th>Confidence</th>
-              <th class="mono">Last updated</th>
-              <th>Sources</th>
-            </tr>
-          </thead>
-          <tbody id="sourcesBody"></tbody>
-        </table>
-      </div>
-    </section>
-  </div>
-
-  <div id="methodTabPanel" hidden>
-    <p class="subtitle">How a fact gets from a filing, a satellite pass, or a press release into a pin on the map — and what has to be true before this atlas calls anything confident.</p>
-
-    <div class="method-wrap">
-
-      <section class="method-section">
-        <h2>The pipeline</h2>
-        <p class="method-lede">Four layers, and the distinction between them matters more than the flow does. A <strong>trigger</strong> starts a run. A <strong>worker</strong> researches and reports — and cannot write a file, ever, because it holds no tool that could. The <strong>applier</strong> is the main session, the one thing here with write and git access, and it routes findings by confidence. The <strong>data files</strong> feed the page. <span class="mono">data/sources.js</span> is drawn apart on purpose: it is a ruleset that both the researcher and the page read, not a stage anything passes through.</p>
-        <div class="method-figure">
-          <svg viewBox="0 0 1280 830" role="img" aria-labelledby="pipelineTitle pipelineDesc">
-            <title id="pipelineTitle">Site Atlas evidence pipeline</title>
-            <desc id="pipelineDesc">Four layers. A trigger (you in chat, or the reconcile slash command) starts a subagent. The subagents research and return a report; none of them can write files. The main Claude session is the only thing holding write and git access, and it routes findings by confidence: high confidence is applied and pushed, everything else is shown to you. The data files feed the page. data/sources.js is a shared ruleset read by both research-agent and the page, not a stage in the flow.</desc>
-
-            <defs>
-              <marker id="arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-                <path d="M 0 0 L 10 5 L 0 10 z" fill="#4b5f59"/>
-              </marker>
-              <marker id="arwd" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-                <path d="M 0 0 L 10 5 L 0 10 z" fill="#35D6B8"/>
-              </marker>
-            </defs>
-
-            <style>
-              .bnd{ font:600 10px var(--font-mono); fill:#5f746d; letter-spacing:0.12em; text-transform:uppercase; }
-              .bx{ fill:var(--surface-2); stroke:var(--border); stroke-width:1; }
-              .nm{ font:600 12px var(--font-sans); fill:var(--ink); }
-              .sb{ font:400 10.5px var(--font-sans); fill:var(--ink-soft); }
-              .mn{ font:500 10.5px var(--font-mono); fill:var(--ink-soft); }
-              .warn{ font:600 10.5px var(--font-sans); fill:#E0708A; }
-              .cn{ stroke:#4b5f59; stroke-width:1.4; fill:none; }
-              .cnd{ stroke:#35D6B8; stroke-width:1.2; fill:none; stroke-dasharray:3 3; opacity:0.75; }
-              .lbl{ font:500 9.5px var(--font-mono); fill:#5f746d; letter-spacing:0.05em; }
-              .lbla{ font:500 9.5px var(--font-mono); fill:#35D6B8; letter-spacing:0.05em; opacity:0.85; }
-              .div{ stroke:var(--border); stroke-width:1; }
-            </style>
-
-            <!-- ================= 1 · TRIGGERS ================= -->
-            <text class="bnd" x="40" y="30">1 · What starts a run</text>
-
-            <rect class="bx" x="40" y="44" width="260" height="104" rx="6"/>
-            <text class="nm" x="56" y="66">You, in chat</text>
-            <text class="sb" x="56" y="84">“vet this site before I add it”</text>
-            <text class="sb" x="56" y="99">“re-check the Kristiansand entry”</text>
-            <text class="sb" x="56" y="114">“audit every CoreWeave entry”</text>
-            <text class="mn" x="56" y="134" fill="#5f746d">→ research-agent</text>
-
-            <rect class="bx" x="320" y="44" width="290" height="104" rx="6"/>
-            <text class="nm" x="336" y="66">/reconcile [scope]</text>
-            <text class="sb" x="336" y="84">A slash command, not an agent. The</text>
-            <text class="sb" x="336" y="99">session reads the data files, lists the</text>
-            <text class="sb" x="336" y="114">claims already on record, hands them over.</text>
-            <text class="mn" x="336" y="134" fill="#5f746d">→ research-agent</text>
-
-            <rect class="bx" x="630" y="44" width="270" height="104" rx="6"/>
-            <text class="nm" x="646" y="66">You, in chat</text>
-            <text class="sb" x="646" y="84">“what's new about CoreWeave”</text>
-            <text class="sb" x="646" y="99">Headlines for a provider page —</text>
-            <text class="sb" x="646" y="114">not fact-checking a site entry.</text>
-            <text class="mn" x="646" y="134" fill="#5f746d">→ news-agent</text>
-
-            <path class="cn" d="M 170 148 C 170 176 180 176 180 200" marker-end="url(#arw)"/>
-            <path class="cn" d="M 465 148 C 465 176 300 176 300 200" marker-end="url(#arw)"/>
-            <path class="cn" d="M 765 148 C 765 176 575 176 575 200" marker-end="url(#arw)"/>
-
-            <!-- ================= 2 · WORKERS ================= -->
-            <text class="bnd" x="40" y="192">2 · Workers — they research and report. None of them can write a file.</text>
-
-            <rect class="bx" x="40" y="204" width="390" height="192" rx="6"/>
-            <text class="nm" x="56" y="226">research-agent</text>
-            <text class="mn" x="56" y="242">subagent · judgment runs on sonnet</text>
-            <text class="sb" x="56" y="260">Tools: Read, Grep, Glob, WebSearch, WebFetch,</text>
-            <text class="sb" x="56" y="274">openrouter_ask.</text>
-            <text class="warn" x="56" y="291">No Write. No Edit. No git. By design.</text>
-            <line class="div" x1="56" y1="302" x2="414" y2="302"/>
-            <text class="sb" x="56" y="320">Classes every source R/N/O/P/T/G/D/U, checks</text>
-            <text class="sb" x="56" y="334">cross-class corroboration and recency, assigns</text>
-            <text class="sb" x="56" y="348">a confidence level per field.</text>
-            <rect x="56" y="358" width="358" height="28" rx="4" fill="rgba(53,214,184,0.06)" stroke="rgba(53,214,184,0.25)"/>
-            <text class="sb" x="66" y="376">openrouter_ask → deepseek-chat: legwork, never a finding.</text>
-
-            <rect class="bx" x="450" y="204" width="250" height="192" rx="6"/>
-            <text class="nm" x="466" y="226">news-agent</text>
-            <text class="mn" x="466" y="242">subagent · sonnet + deepseek</text>
-            <text class="sb" x="466" y="260">Same tools.</text>
-            <text class="warn" x="466" y="277">Also cannot write.</text>
-            <line class="div" x1="466" y1="288" x2="684" y2="288"/>
-            <text class="sb" x="466" y="306">Curates dated company-level</text>
-            <text class="sb" x="466" y="320">headlines. Does not verify any</text>
-            <text class="sb" x="466" y="334">site field, ever.</text>
-            <text class="sb" x="466" y="356">Output lands in data/news.js,</text>
-            <text class="sb" x="466" y="370">a separate track from site facts.</text>
-
-            <rect class="bx" x="720" y="204" width="180" height="192" rx="6" stroke-dasharray="4 3"/>
-            <text class="nm" x="736" y="226" fill="#8FA39C">monitor-agent</text>
-            <text class="mn" x="736" y="242" fill="#5f746d">not built yet</text>
-            <text class="sb" x="736" y="262">⟳ self-triggering, on a</text>
-            <text class="sb" x="736" y="276">schedule. Nobody asks it.</text>
-            <line class="div" x1="736" y1="288" x2="884" y2="288"/>
-            <text class="sb" x="736" y="306">Diffs the structured</text>
-            <text class="sb" x="736" y="320">feeds in code, then shows</text>
-            <text class="sb" x="736" y="334">the model only the rows</text>
-            <text class="sb" x="736" y="348">that changed.</text>
-            <text class="sb" x="736" y="370">Cost scales with drift,</text>
-            <text class="sb" x="736" y="384">not with site count.</text>
-
-            <path class="cn" d="M 235 396 L 235 432" marker-end="url(#arw)"/>
-            <path class="cn" d="M 575 396 L 575 432" marker-end="url(#arw)"/>
-            <path class="cn" d="M 810 396 L 810 432" marker-end="url(#arw)" stroke-dasharray="4 3"/>
-            <text class="lbl" x="248" y="418">a report</text>
-            <text class="lbl" x="588" y="418">a report</text>
-
-            <!-- ================= 3 · APPLIER ================= -->
-            <text class="bnd" x="40" y="430">3 · Applier</text>
-
-            <rect x="40" y="440" width="860" height="164" rx="6" fill="var(--surface-2)" stroke="var(--accent)" stroke-opacity="0.35" stroke-width="1"/>
-            <text class="nm" x="56" y="464">Main Claude session — the applier</text>
-            <text class="sb" x="56" y="482">The only thing in this diagram holding Write, Edit and git. The subagents hand it a report; it decides what happens next.</text>
-            <text class="sb" x="56" y="497">Nothing reaches a data file except through here, which is what stopped the two fabricated claims in the openrouter_ask incident.</text>
-
-            <rect x="56" y="510" width="410" height="78" rx="5" fill="rgba(74,222,128,0.07)" stroke="rgba(74,222,128,0.35)"/>
-            <text class="nm" x="70" y="531" fill="#4ADE80">High confidence</text>
-            <text class="sb" x="70" y="549">Edit the data file, update lastUpdated and</text>
-            <text class="sb" x="70" y="563">sources, commit, push. No pause to ask.</text>
-            <text class="sb" x="70" y="579">2+ classes · one independent · current.</text>
-
-            <rect x="480" y="510" width="404" height="78" rx="5" fill="rgba(251,191,36,0.06)" stroke="rgba(251,191,36,0.32)"/>
-            <text class="nm" x="494" y="531" fill="#FBBF24">Medium · Low · conflicting · unverifiable</text>
-            <text class="sb" x="494" y="549">Show you the finding and stop. No file is</text>
-            <text class="sb" x="494" y="563">touched, nothing is committed.</text>
-            <text class="sb" x="494" y="579">You make the call.</text>
-
-            <path class="cn" d="M 470 604 L 470 638" marker-end="url(#arw)"/>
-
-            <!-- ================= 4 · DATA FILES ================= -->
-            <text class="bnd" x="40" y="632">4 · Data files</text>
-
-            <rect class="bx" x="40" y="646" width="204" height="62" rx="6"/>
-            <text class="mn" x="54" y="668" fill="var(--accent)">data/sites.js</text>
-            <text class="sb" x="54" y="686">Site facts and the</text>
-            <text class="sb" x="54" y="699">per-field provenance.</text>
-
-            <rect class="bx" x="258" y="646" width="204" height="62" rx="6"/>
-            <text class="mn" x="272" y="668" fill="var(--accent)">data/providers.js</text>
-            <text class="sb" x="272" y="686">Operators, colors,</text>
-            <text class="sb" x="272" y="699">partnerships.</text>
-
-            <rect class="bx" x="476" y="646" width="204" height="62" rx="6"/>
-            <text class="mn" x="490" y="668" fill="var(--accent)">data/news.js</text>
-            <text class="sb" x="490" y="686">Provider headlines,</text>
-            <text class="sb" x="490" y="699">from news-agent.</text>
-
-            <rect x="694" y="646" width="206" height="62" rx="6" fill="var(--surface-2)" stroke="var(--accent)" stroke-opacity="0.5" stroke-dasharray="4 3"/>
-            <text class="mn" x="708" y="668" fill="var(--accent)">data/sources.js</text>
-            <text class="sb" x="708" y="686">The shared ruleset.</text>
-            <text class="sb" x="708" y="699">Not a stage in the flow.</text>
-
-            <!-- sources.js is read by research-agent (the rules) and by the page (the scoring) -->
-            <path class="cnd" d="M 900 662 L 920 662 L 920 416 L 22 416 L 22 300 L 36 300" marker-end="url(#arwd)"/>
-            <text class="lbla" x="330" y="410">how to class a source · what counts as corroboration · staleness windows</text>
-
-            <path class="cnd" d="M 797 708 L 797 744" marker-end="url(#arwd)"/>
-            <text class="lbla" x="808" y="730">scores every entry, in the browser</text>
-
-            <path class="cn" d="M 350 708 L 350 744" marker-end="url(#arw)"/>
-
-            <!-- ================= 5 · THE PAGE ================= -->
-            <rect class="bx" x="40" y="750" width="860" height="56" rx="6"/>
-            <text class="nm" x="56" y="774">index.html</text>
-            <text class="sb" x="56" y="793">Map, provider dashboard, site table, per-field confidence badges, Sources tab, Method tab. Scoring runs client-side, so rendering this costs no tokens at all.</text>
-          </svg>
-        </div>
-      </section>
-
-      <section class="method-section">
-        <h2>Why classes, not tiers</h2>
-        <p class="method-lede">The atlas used to call a claim confident when two reputable sources agreed. That test quietly failed on the most common case in this industry: an operator issues a press release, two trade outlets write it up, and the claim collects two ticks without anything ever having checked it. Both outlets are downstream of the same interested party. Independence has to be measured by <em>who produced the evidence and why</em> — which is what these classes encode.</p>
-        <div class="class-grid" id="classGrid"></div>
-      </section>
-
-      <section class="method-section">
-        <h2>Where evidence comes from</h2>
-        <p class="method-lede">The working catalogue of channels. Regulatory and network sources are the ones worth the effort: they are filed or observed independently of any announcement, and most of them are diffable on a schedule rather than read once.</p>
-        <div class="table-section">
-          <div class="table-scroll">
-            <table class="channel-table">
-              <thead>
-                <tr>
-                  <th>Class</th>
-                  <th>Channel</th>
-                  <th>What it gives you</th>
-                  <th>Coverage</th>
-                  <th>Cadence</th>
-                  <th>Access</th>
-                </tr>
-              </thead>
-              <tbody id="channelBody"></tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-
-      <section class="method-section">
-        <h2>The confidence rules</h2>
-        <ul class="rule-list">
-          <li><strong>High</strong><span>Two or more distinct classes agree, at least one of them independent (regulatory, network, or observed), and the freshest evidence is inside this field's re-check window. This is the only level that gets applied and pushed without asking.</span></li>
-          <li><strong>Medium</strong><span>Two or more classes agree but all of them are the operator or outlets restating the operator — or a single regulatory record standing alone. Believable, uncorroborated.</span></li>
-          <li><strong>Low</strong><span>One class only, or every source is past its window, or sources genuinely conflict. Conflicts are never silently resolved.</span></li>
-          <li><strong>Unverified</strong><span>Nothing usable. Directory and unattributed sources are still cited on the entry, but they cannot lift a claim to any level above this.</span></li>
-        </ul>
-        <p class="method-lede" style="margin-top:1.1rem">Where the current dataset actually stands under these rules — computed live from <span class="mono">data/sites.js</span>, not written down:</p>
-        <div class="tally-row" id="tallyRow"></div>
-        <p class="method-lede" style="margin-top:1rem">If most entries read Medium, that is the point. The atlas is currently built almost entirely on trade press restating operator announcements, and this page is the first thing that says so out loud.</p>
-      </section>
-
-    </div>
-  </div>
-
-  <footer class="foot">Status and capacity figures reflect public reporting as of when each entry was added — verify before relying on them. Basemap © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors, © <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>.</footer>
-
+  <section class="ov" id="viewSourcesMethod"></section>
+  <section class="ov" id="viewProvider"></section>
+  <section class="ov" id="viewSite"></section>
 </div>
 
 <script>
 (function(){
 
-  // SITES comes from data/sites.js, PROVIDERS from data/providers.js —
-  // both loaded before this script.
+  // SITES comes from data/sites.js, PROVIDERS from data/providers.js, NEWS
+  // from data/news.js, and the confidence engine (SOURCE_CLASSES,
+  // classifySource, scoreSite, scoreSiteField, VERDICTS, verdictFor,
+  // liftAdvice, derivativeHint, BASIS_LABELS, CONFIDENCE_LEVELS,
+  // PROVENANCE_FIELDS, hostOf, siteFieldBasis, siteFieldHasProvenance,
+  // siteEvidenceFor, FIELD_LABELS) from data/sources.js — all loaded
+  // before this script.
+
+  var TODAY = new Date().toISOString().slice(0, 10);
+
+  function esc(s){
+    return String(s == null ? "" : s)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+  function hexToRgba(hex, a){
+    var h = hex.replace("#", "");
+    var n = parseInt(h, 16);
+    return "rgba(" + ((n >> 16) & 255) + "," + ((n >> 8) & 255) + "," + (n & 255) + "," + a + ")";
+  }
+  function statusSlug(status){ return (status||"").toLowerCase().replace(/[^a-z]+/g,"-").replace(/(^-|-$)/g,""); }
+  function fmtDate(iso){
+    if (!iso) return "—";
+    var d = new Date(iso + "T00:00:00Z");
+    if (isNaN(d.getTime())) return iso;
+    return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
+  }
 
   // ---- Provider colors ---------------------------------------------------
-  // A provider entry in data/providers.js can pin a specific color; any
-  // provider name that shows up in SITES without one there gets the next
-  // unused color from PALETTE automatically, no edit needed.
   var PALETTE = ["#E39149", "#5B9BE0", "#9A85E0", "#E0708A", "#D9C24E", "#4FC2C9", "#C97AD1"];
   var providerLookup = {};
   (typeof PROVIDERS !== "undefined" ? PROVIDERS : []).forEach(function(p){ providerLookup[p.name] = p; });
@@ -1376,68 +536,7 @@
       providerColor[p] = pinned || PALETTE[next++ % PALETTE.length];
     });
   })();
-  function colorFor(provider){ return providerColor[provider] || "#5EEAD4"; }
-
-  // ---- Confidence rendering ----------------------------------------------
-  // The scoring itself lives in data/sources.js; everything here is display.
-  var TODAY = new Date().toISOString().slice(0, 10);
-
-  function esc(s){
-    return String(s == null ? "" : s)
-      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;");
-  }
-
-  function hexToRgba(hex, a){
-    var h = hex.replace("#", "");
-    var n = parseInt(h, 16);
-    return "rgba(" + ((n >> 16) & 255) + "," + ((n >> 8) & 255) + "," + (n & 255) + "," + a + ")";
-  }
-
-  // score: the object returned by scoreEvidence/scoreSiteField/scoreSite.
-  // Renders as a bare coloured dot; the label is revealed on hover or focus.
-  // Pass {open:true} where the word itself is the content rather than an
-  // annotation on something else.
-  function confBadge(score, opts){
-    opts = opts || {};
-    var lvl = CONFIDENCE_LEVELS[score.level] || CONFIDENCE_LEVELS.unverified;
-    var title = opts.title || score.reason || "";
-    return '<span class="conf-badge' + (opts.open ? ' conf-open' : '') + '"' +
-      ' tabindex="0" role="img" aria-label="' + lvl.label + ' confidence' + (title ? '. ' + esc(title) : '') + '"' +
-      ' style="--conf-fg:' + lvl.color + ';--conf-bg:' + hexToRgba(lvl.color, 0.12) + ';--conf-bd:' + hexToRgba(lvl.color, 0.3) + '"' +
-      (title ? ' title="' + esc(title) + '"' : '') +
-      '><span class="conf-label">' + lvl.label + '</span></span>';
-  }
-
-  function classChip(code){
-    var c = SOURCE_CLASSES[code];
-    if (!c) return "";
-    return '<span class="cls-chip" style="--chip-fg:' + c.color + ';--chip-bg:' + hexToRgba(c.color, 0.12) +
-      ';--chip-bd:' + hexToRgba(c.color, 0.3) + '" title="' + esc(c.label + " — " + c.blurb) + '">' + c.code + '</span>';
-  }
-
-  function classChips(codes){
-    if (!codes || !codes.length) return "";
-    // Sorted into the canonical class order so a row always reads the same way.
-    var ordered = SOURCE_CLASS_ORDER.filter(function(c){ return codes.indexOf(c) !== -1; });
-    return '<span class="cls-chip-row">' + ordered.map(classChip).join("") + '</span>';
-  }
-
-  // One field's badge, with the derived/estimated marker when the value
-  // wasn't disclosed by anyone but worked out here.
-  function fieldConf(site, field){
-    var score = scoreSiteField(site, field, TODAY);
-    var basis = siteFieldBasis(site, field);
-    var basisHtml = (basis && basis !== "disclosed")
-      ? '<span class="basis-tag basis-' + basis + '" title="This value was not disclosed by the operator — it was ' + basis + ' from the evidence.">' + (BASIS_LABELS[basis] || basis) + '</span>'
-      : '';
-    return { score: score, html: confBadge(score) + basisHtml };
-  }
-  function statusSlug(status){ return (status||"").toLowerCase().replace(/[^a-z]+/g,"-").replace(/(^-|-$)/g,""); }
-
-  // Table row order: grouped by provider (first-appearance order, same as
-  // the color assignment above), then within each provider by status —
-  // Operational, then Under construction, then Planned.
+  function colorFor(provider){ return providerColor[provider] || "#9184d9"; }
   var providerOrder = Object.keys(providerColor);
   var STATUS_ORDER = { "Operational": 0, "Under construction": 1, "Planned": 2 };
   function tableSortCompare(a, b){
@@ -1447,23 +546,60 @@
     var sb = STATUS_ORDER[b.status] != null ? STATUS_ORDER[b.status] : 99;
     return sa - sb;
   }
-  // ---- Map (MapLibre GL, CARTO Dark Matter vector basemap) --------------
-  // Markers are plain DOM elements MapLibre positions/repositions itself on
-  // pan/zoom — no custom projection math or per-frame transform code needed
-  // (that was the source of the old SVG map's sluggishness under load).
+
+  // ---- Confidence / verdict rendering ------------------------------------
+  function confBadge(score, opts){
+    opts = opts || {};
+    var lvl = CONFIDENCE_LEVELS[score.level] || CONFIDENCE_LEVELS.unverified;
+    var title = opts.title || score.reason || "";
+    return '<span class="conf-badge" tabindex="0" role="img" aria-label="' + lvl.label + ' confidence' + (title ? '. ' + esc(title) : '') + '"' +
+      ' style="--conf-fg:' + lvl.color + ';--conf-bg:' + hexToRgba(lvl.color, 0.12) + ';--conf-bd:' + hexToRgba(lvl.color, 0.3) + '"' +
+      (title ? ' title="' + esc(title) + '"' : '') +
+      '><span class="conf-label">' + lvl.label + '</span></span>';
+  }
+  function classChip(code){
+    var c = SOURCE_CLASSES[code];
+    if (!c) return "";
+    return '<span class="cls' + (c.independent ? ' ind' : '') + '" title="' + esc(c.label + " — " + c.blurb) + '">' + c.code + '</span>';
+  }
+  function verdictInline(v, extra){
+    return '<span class="vd ' + v.key + '"><i></i>' + v.label + (extra || '') + '</span>';
+  }
+  function scoredFields(site){
+    return PROVENANCE_FIELDS.filter(function(f){ return !(f === "capacityMW" && site.capacityMW == null); });
+  }
+  // The site's single headline verdict: has anything other than the operator
+  // confirmed any of this. Weakest-link, same logic as the confidence level.
+  function siteVerdict(site){
+    var fields = scoredFields(site);
+    if (!fields.length) return VERDICTS.unsourced;
+    var anyOperator = false, anyUnsourced = false;
+    fields.forEach(function(f){
+      var v = verdictFor(scoreSiteField(site, f, TODAY));
+      if (v.key === "operator") anyOperator = true;
+      if (v.key === "unsourced") anyUnsourced = true;
+    });
+    if (anyUnsourced) return VERDICTS.unsourced;
+    return anyOperator ? VERDICTS.operator : VERDICTS.independent;
+  }
+  function basisHtml(site, field){
+    var basis = siteFieldBasis(site, field);
+    return (basis && basis !== "disclosed")
+      ? '<span class="basis-tag basis-' + basis + '" title="Not disclosed by the operator — ' + basis + ' from the sources listed.">' + (BASIS_LABELS[basis] || basis) + '</span>'
+      : '';
+  }
+
+  // ════════════════════════════════════════════════════════════════════
+  // Map — MapLibre GL, CARTO Dark Matter vector basemap, globe projection
+  // ════════════════════════════════════════════════════════════════════
   var pinEls = {};
   var DEFAULT_SITE_ZOOM = 9;
-
   var lons = SITES.map(function(s){ return s.lon; });
   var lats = SITES.map(function(s){ return s.lat; });
   var fitBoundsArg = [
     [Math.min.apply(null, lons), Math.min.apply(null, lats)],
     [Math.max.apply(null, lons), Math.max.apply(null, lats)]
   ];
-
-  // Default landing view is North America, not a fit-to-all-sites bound —
-  // "Reset view" still fits every site (fitBoundsArg below), a distinct,
-  // still-useful "show me everything" action.
   var DEFAULT_CENTER = [-98, 39];
   var DEFAULT_ZOOM = 3;
 
@@ -1481,41 +617,46 @@
   map.touchZoomRotate.disableRotation();
   // Globe instead of flat Mercator: vector tiles are Mercator-projected at
   // the data level regardless, but rendering them onto a sphere removes the
-  // flat projection's area/distance distortion (no more oversized Nordic
-  // countries) since a globe has no projection to distort in the first
-  // place — it's a straightforward map onto the actual 3D shape.
+  // flat projection's area/distance distortion since a globe has no
+  // projection to distort in the first place.
   map.on("style.load", function(){ map.setProjection({ type: "globe" }); });
+
+  var CAP_MAX = Math.max.apply(null, SITES.map(function(s){ return s.capacityMW || 0; })) || 1;
+  function pinDiameter(mw){
+    var v = mw == null ? 0 : Math.max(0, mw);
+    var t = Math.sqrt(v / CAP_MAX);
+    return Math.round(10 + 24 * t); // 10..34px
+  }
 
   function buildPins(){
     SITES.forEach(function(site){
       var slug = statusSlug(site.status);
+      var d = pinDiameter(site.capacityMW);
       var el = document.createElement("div");
       el.className = "pin-marker pin-status-" + slug;
       el.style.setProperty("--dot", colorFor(site.provider));
       el.title = site.provider + (site.site ? " · " + site.site : "") + " (" + site.city + ") — " + site.status;
       el.tabIndex = 0;
 
-      if (slug !== "operational") {
-        var ring = document.createElement("span");
-        ring.className = "pin-ring";
-        el.appendChild(ring);
-      }
       if (slug === "operational") {
         var pulse = document.createElement("span");
         pulse.className = "pin-pulse";
+        pulse.style.width = d + "px"; pulse.style.height = d + "px";
         el.appendChild(pulse);
       }
       var halo = document.createElement("span");
       halo.className = "pin-halo";
+      halo.style.width = (d + 10) + "px"; halo.style.height = (d + 10) + "px";
       var core = document.createElement("span");
       core.className = "pin-core";
+      core.style.width = d + "px"; core.style.height = d + "px";
       el.appendChild(halo);
       el.appendChild(core);
 
       var label = document.createElement("span");
       label.className = "pin-label";
       label.innerHTML =
-        '<span class="pin-label-name">' + site.provider + ' - ' + site.city + '</span>' +
+        '<span class="pin-label-name">' + esc(site.provider) + ' · ' + esc(site.city) + '</span>' +
         '<span class="pin-label-cap">' + (site.capacityMW != null ? site.capacityMW + ' MW' : 'Capacity not disclosed') + '</span>';
       el.appendChild(label);
 
@@ -1525,46 +666,324 @@
       new maplibregl.Marker({ element: el, anchor: "center" }).setLngLat([site.lon, site.lat]).addTo(map);
       pinEls[site.id] = el;
     });
-
     document.getElementById("mapLoading").style.display = "none";
-    document.getElementById("mapCaption").style.display = "block";
-    document.getElementById("mapCount").textContent = SITES.length + " sites plotted";
   }
 
-  map.on("load", function(){
-    buildPins();
-  });
-  map.on("error", function(e){
+  map.on("load", buildPins);
+  map.on("error", function(){
     document.getElementById("mapLoading").textContent = "Couldn't load the map — check your connection and reload.";
   });
 
-  // Scrolling/pinching out closes the detail card — treat it as the user
-  // backing out to look at the wider map again. Only reacts to genuine
-  // user gestures (e.getOriginalEvent() is set for wheel/touch/drag input,
-  // unset for our own flyTo/fitBounds calls) so selecting a site or
-  // hitting "reset view" doesn't self-close the card it just opened.
+  // Scrolling/pinching out closes the detail card, treating it as the user
+  // backing out to look at the wider map again. Only reacts to genuine user
+  // gestures (flyTo/fitBounds calls leave originalEvent unset).
   var lastZoom = map.getZoom();
   map.on("zoom", function(e){
     var z = map.getZoom();
-    if (e.originalEvent && z < lastZoom && detailPanel.classList.contains("open")) {
-      closeDetailPanel();
-    }
+    if (e.originalEvent && z < lastZoom && detailEl.classList.contains("on")) closeDetail();
     lastZoom = z;
   });
 
   function zoomToSite(site, targetZoom){
     map.flyTo({ center: [site.lon, site.lat], zoom: targetZoom || DEFAULT_SITE_ZOOM, duration: 650 });
   }
-
   document.getElementById("resetView").addEventListener("click", function(){
     map.fitBounds(fitBoundsArg, { padding: 60, duration: 500 });
   });
 
-  // ---- Provider dashboard (one card per provider found in the data) -----
-  var providers = Object.keys(providerColor);
+  // ════════════════════════════════════════════════════════════════════
+  // Rail — disclosed capacity + operator filter
+  // ════════════════════════════════════════════════════════════════════
   var activeProviders = {};
-  providers.forEach(function(p){ activeProviders[p] = true; });
+  providerOrder.forEach(function(p){ activeProviders[p] = true; });
 
+  function providerRailStats(p){
+    var sites = SITES.filter(function(s){ return s.provider === p; });
+    var disclosed = sites.filter(function(s){ return s.capacityMW != null; });
+    var mw = disclosed.reduce(function(t, s){ return t + s.capacityMW; }, 0);
+    return { n: sites.length, mw: mw, undis: sites.length - disclosed.length };
+  }
+
+  function renderRail(){
+    var byProv = providerOrder.map(function(p){
+      var st = providerRailStats(p);
+      return { name: p, n: st.n, mw: st.mw, undis: st.undis };
+    }).sort(function(a, b){ return b.mw - a.mw; });
+    var max = Math.max.apply(null, byProv.map(function(p){ return p.mw; })) || 1;
+
+    var shown = SITES.filter(function(s){ return activeProviders[s.provider]; });
+    var total = shown.reduce(function(t, s){ return t + (s.capacityMW || 0); }, 0);
+    document.getElementById("totalMw").innerHTML = total.toLocaleString() + "<em>MW</em>";
+    document.getElementById("totalSub").textContent =
+      "across " + shown.length + " sites · " + shown.filter(function(s){ return s.capacityMW == null; }).length + " disclose no figure";
+
+    document.getElementById("provList").innerHTML = byProv.map(function(p){
+      return '<button class="prov" data-prov="' + esc(p.name) + '" data-off="' + (activeProviders[p.name] ? 0 : 1) + '">' +
+        '<span class="dot" style="background:' + colorFor(p.name) + '"></span>' +
+        '<span class="pname plink" data-open-provider="' + esc(p.name) + '">' + esc(p.name) + '</span>' +
+        '<span class="pmw">' + p.mw.toLocaleString() + ' MW</span>' +
+        '<span class="pbar"><i style="width:' + Math.round(p.mw / max * 100) + '%;background:' + colorFor(p.name) + '"></i></span>' +
+        '<span class="pcount">' + p.n + ' site' + (p.n === 1 ? '' : 's') + ' · ' + p.undis + ' undisclosed</span>' +
+      '</button>';
+    }).join("");
+
+    document.querySelectorAll("#provList .prov").forEach(function(btn){
+      btn.addEventListener("click", function(e){
+        if (e.target.closest("[data-open-provider]")) {
+          e.stopPropagation();
+          openProviderView(e.target.closest("[data-open-provider]").getAttribute("data-open-provider"));
+          return;
+        }
+        var name = btn.getAttribute("data-prov");
+        activeProviders[name] = !activeProviders[name];
+        renderRail(); renderRows(); applyPinFilter();
+      });
+    });
+  }
+
+  function applyPinFilter(){
+    SITES.forEach(function(s){
+      if (pinEls[s.id]) pinEls[s.id].classList.toggle("dim", !activeProviders[s.provider]);
+    });
+  }
+
+  // ════════════════════════════════════════════════════════════════════
+  // Drawer — searchable, filterable site list
+  // ════════════════════════════════════════════════════════════════════
+  var query = "";
+  var statusFilter = "operational";
+  var selectedId = null;
+  var rowEls = {};
+
+  function visibleSites(){
+    var q = query.trim().toLowerCase();
+    return SITES.filter(function(s){
+      if (!activeProviders[s.provider]) return false;
+      if (statusFilter === "operational" && s.status !== "Operational") return false;
+      if (!q) return true;
+      var hay = (s.site || "") + " " + s.city + " " + s.country + " " + s.provider + " " + s.status;
+      return hay.toLowerCase().indexOf(q) !== -1;
+    }).sort(function(a, b){ return (b.capacityMW || 0) - (a.capacityMW || 0); });
+  }
+
+  function renderRows(){
+    var v = visibleSites();
+    var indepCount = v.filter(function(s){ return siteVerdict(s).key === "independent"; }).length;
+    document.getElementById("drawerMeta").textContent =
+      v.length + " shown · sorted by disclosed capacity · " + indepCount + " independently verified";
+
+    var rowsEl = document.getElementById("rows");
+    rowEls = {};
+    rowsEl.innerHTML =
+      '<div class="row hrow"><span></span><span>Site</span><span>Location</span><span>Status</span><span style="text-align:right">Capacity</span><span>Evidence</span></div>' +
+      v.map(function(s){
+        var vd = siteVerdict(s);
+        return '<button class="row" data-id="' + s.id + '" aria-selected="' + (selectedId === s.id) + '">' +
+          '<span class="dot" style="background:' + colorFor(s.provider) + '"></span>' +
+          '<span class="name plink" data-open-site="' + s.id + '">' + esc(s.site || s.city) + '</span>' +
+          '<span class="place">' + esc(s.city) + ', ' + esc(s.country) + '</span>' +
+          '<span class="stat">' + esc(s.status) + '</span>' +
+          '<span class="cap">' + (s.capacityMW == null ? '<span style="color:var(--color-neutral-500)">undisclosed</span>' : s.capacityMW + ' MW') + '</span>' +
+          verdictInline(vd) +
+        '</button>';
+      }).join("");
+
+    rowsEl.querySelectorAll(".row[data-id]").forEach(function(r){
+      var id = r.getAttribute("data-id");
+      r.addEventListener("click", function(e){
+        if (e.target.closest("[data-open-site]")) { e.stopPropagation(); openSiteView(id); return; }
+        selectSite(id);
+      });
+      rowEls[id] = r;
+    });
+  }
+
+  document.getElementById("q").addEventListener("input", function(e){ query = e.target.value; renderRows(); });
+  document.querySelectorAll("#statusSeg button").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      statusFilter = btn.getAttribute("data-f");
+      document.querySelectorAll("#statusSeg button").forEach(function(b){ b.setAttribute("aria-pressed", String(b === btn)); });
+      renderRows();
+    });
+  });
+
+  // ════════════════════════════════════════════════════════════════════
+  // Detail panel — verdict-first per-field display + evidence on file
+  // ════════════════════════════════════════════════════════════════════
+  var detailEl = document.getElementById("detail");
+
+  function closeDetail(){
+    selectedId = null;
+    detailEl.classList.remove("on");
+    Object.keys(pinEls).forEach(function(k){ pinEls[k].classList.remove("active"); });
+    Object.keys(rowEls).forEach(function(k){ rowEls[k].removeAttribute("aria-selected"); });
+  }
+
+  function fieldBlock(site, field, label, valueHtml){
+    var score = scoreSiteField(site, field, TODAY);
+    var v = verdictFor(score);
+    return '<div class="field">' +
+      '<span class="k">' + esc(label) + '</span>' +
+      '<span class="v">' + valueHtml + verdictInline(v) + confBadge(score, { title: score.reason }) + '</span>' +
+    '</div>';
+  }
+
+  function selectSite(id){
+    selectedId = id;
+    var site = SITES.filter(function(s){ return s.id === id; })[0];
+    if (!site) return;
+
+    Object.keys(pinEls).forEach(function(k){ pinEls[k].classList.toggle("active", k === id); });
+    Object.keys(rowEls).forEach(function(k){
+      if (k === id) rowEls[k].setAttribute("aria-selected", "true"); else rowEls[k].removeAttribute("aria-selected");
+    });
+    zoomToSite(site);
+    detailEl.classList.add("on");
+
+    var color = colorFor(site.provider);
+    var overall = scoreSite(site, TODAY);
+    var weakest = null;
+    Object.keys(overall.fields).forEach(function(f){ if (overall.fields[f].level === overall.level && !weakest) weakest = f; });
+
+    var sourcesHtml = (site.sources || []).map(function(s){
+      return '<div class="src">' + classChip(classifySource(s, site.provider)) +
+        '<span><span class="sl"><a href="' + s.url + '" target="_blank" rel="noopener">' + esc(s.label) + '</a></span></span></div>';
+    }).join("");
+
+    detailEl.innerHTML =
+      '<button class="dclose" aria-label="Close">✕</button>' +
+      '<div class="d-op" id="detailProv"><span class="dot" style="background:' + color + '"></span><span class="d-op-name">' + esc(site.provider) + '</span></div>' +
+      '<div class="d-title" id="detailTitle">' + esc(site.site || site.city) + '</div>' +
+      '<div class="d-place">' + esc(site.city) + ', ' + esc(site.country) + ' · ' + site.lat.toFixed(3) + ', ' + site.lon.toFixed(3) + '</div>' +
+      '<div class="fields">' +
+        fieldBlock(site, "capacityMW", "Disclosed capacity",
+          site.capacityMW != null ? site.capacityMW + ' MW ' + basisHtml(site, "capacityMW") : 'Undisclosed ') +
+        fieldBlock(site, "status", "Status", '<span class="status-pill status-' + statusSlug(site.status) + '">' + esc(site.status) + '</span> ') +
+        fieldBlock(site, "location", "Location", esc(site.city) + ' ') +
+      '</div>' +
+      '<p class="conf-why">' + esc(overall.fields[weakest] ? overall.fields[weakest].reason : "No fields scored.") +
+        (siteFieldHasProvenance(site, weakest || "status") ? '' : ' No per-field provenance recorded yet, so every source on this entry counts toward every field.') +
+      '</p>' +
+      (site.notes && site.notes.length ? '<div class="d-notes">' + esc(site.notes) + '</div>' : '') +
+      (sourcesHtml ? '<div class="srcs"><div class="eyebrow" style="margin-bottom:var(--space-3)">Evidence on file</div>' + sourcesHtml + '</div>' : '') +
+      '<div class="d-updated">Updated ' + fmtDate(site.lastUpdated) + '</div>';
+
+    detailEl.querySelector(".dclose").addEventListener("click", closeDetail);
+    document.getElementById("detailTitle").addEventListener("click", function(){ openSiteView(site.id); });
+    document.getElementById("detailProv").addEventListener("click", function(){ openProviderView(site.provider); });
+    detailEl.scrollTop = 0;
+  }
+
+  // ════════════════════════════════════════════════════════════════════
+  // Sources & method — one continuous page (merges the old Sources and
+  // Method tabs, per the redesign brief). Rendered from data/sources.js so
+  // it can't drift from the rules it describes.
+  // ════════════════════════════════════════════════════════════════════
+  function computeFieldVerdictTally(){
+    var counts = { independent: 0, operator: 0, unsourced: 0 };
+    var total = 0;
+    SITES.forEach(function(s){
+      scoredFields(s).forEach(function(f){
+        var v = verdictFor(scoreSiteField(s, f, TODAY));
+        counts[v.key] = (counts[v.key] || 0) + 1;
+        total++;
+      });
+    });
+    return { counts: counts, total: total };
+  }
+
+  function renderSourcesMethodView(){
+    var tally = computeFieldVerdictTally();
+    var indepPct = tally.total ? Math.round(tally.counts.independent / tally.total * 100) : 0;
+    var opPct = tally.total ? Math.round(tally.counts.operator / tally.total * 100) : 0;
+    var unsPct = Math.max(0, 100 - indepPct - opPct);
+
+    var classesHtml = SOURCE_CLASS_ORDER.map(function(code){
+      var c = SOURCE_CLASSES[code];
+      return '<div class="cl' + (c.independent ? ' ind' : '') + '"><span class="code">' + c.code + '</span>' +
+        '<span class="lab">' + esc(c.label) + (c.independent ? ' <span style="color:var(--color-neutral-500);font-weight:400;font-size:11.5px">independent</span>' : '') + '</span>' +
+        '<span class="bl">' + esc(c.blurb) + '</span></div>';
+    }).join("");
+
+    var channelsHtml = SOURCE_CHANNELS.map(function(ch){
+      var name = ch.url ? '<a href="' + ch.url + '" target="_blank" rel="noopener">' + esc(ch.name) + '</a>' : esc(ch.name);
+      return '<tr><td class="cls-cell">' + classChip(ch.cls) + '</td><td class="ch-name">' + name + '</td>' +
+        '<td class="ch-gives">' + esc(ch.gives) + '</td><td class="ch-meta">' + esc(ch.scope) + '</td>' +
+        '<td class="ch-meta">' + esc(ch.cadence) + '</td><td class="ch-meta">' + esc(ch.access) + '</td></tr>';
+    }).join("");
+
+    var siteTally = {};
+    var ordered = SITES.slice().sort(function(a, b){
+      var ra = CONFIDENCE_LEVELS[scoreSite(a, TODAY).level].rank;
+      var rb = CONFIDENCE_LEVELS[scoreSite(b, TODAY).level].rank;
+      return ra !== rb ? ra - rb : tableSortCompare(a, b);
+    });
+    var entriesHtml = ordered.map(function(site){
+      siteTally[scoreSite(site, TODAY).level] = (siteTally[scoreSite(site, TODAY).level] || 0) + 1;
+      var overall = scoreSite(site, TODAY);
+      var links = (site.sources || []).map(function(s){
+        return classChip(classifySource(s, site.provider)) + ' <a href="' + s.url + '" target="_blank" rel="noopener">' + esc(s.label) + '</a>';
+      }).join('<br>');
+      return '<tr>' +
+        '<td><span class="dot" style="display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:.5rem;vertical-align:middle;background:' + colorFor(site.provider) + '"></span>' +
+          '<span class="plink" data-open-site="' + site.id + '">' + esc(site.provider) + ' — ' + esc(site.city) + (site.site ? ' <span style="color:var(--color-neutral-500)">(' + esc(site.site) + ')</span>' : '') + '</span></td>' +
+        '<td>' + confBadge(overall, { title: "A site scores as its weakest field." }) + '</td>' +
+        '<td class="ch-meta">' + fmtDate(site.lastUpdated) + '</td>' +
+        '<td>' + (links || '<span class="empty-note">No sources logged</span>') + '</td>' +
+      '</tr>';
+    }).join("");
+
+    var order = ["high", "medium", "low", "unverified"];
+    var tallyRowHtml = order.map(function(k){
+      var lvl = CONFIDENCE_LEVELS[k];
+      return '<div class="tally-card" style="--tc:' + lvl.color + '"><div class="tally-value">' + (siteTally[k] || 0) + '</div><div class="tally-label">' + lvl.label + ' confidence</div></div>';
+    }).join("") + '<div class="tally-card" style="--tc:var(--color-accent)"><div class="tally-value">' + SITES.length + '</div><div class="tally-label">sites tracked</div></div>';
+
+    var el = document.getElementById("viewSourcesMethod");
+    el.innerHTML = '<div class="wrap">' +
+      '<button class="back-link">← Back to atlas</button>' +
+      '<h2 style="font-size:30px;letter-spacing:-.025em">Where the numbers come from</h2>' +
+      '<p class="lede">Corroboration is counted across source <em>classes</em>, not across articles. An operator\'s press release written up by two trade outlets is one claim republished twice — so a claim only reads as verified when a public record or an independent observation stands behind it.</p>' +
+
+      '<div class="tally"><b>' + tally.counts.operator + '</b><span>of ' + tally.total + ' scored fields in this dataset are the operator\'s word, and nothing else.</span></div>' +
+      '<div class="meter"><i style="flex:' + Math.max(indepPct,1) + '"></i><i style="flex:' + Math.max(opPct,1) + '"></i><i style="flex:' + Math.max(unsPct,1) + '"></i></div>' +
+      '<div class="stat-sub">' + tally.counts.independent + ' independently verified · ' + tally.counts.operator + ' operator\'s word · ' + tally.counts.unsourced + ' unsourced — computed live from data/sites.js and data/sources.js.</div>' +
+
+      '<div class="band"><h4>The eight classes</h4><p>Three of them are produced independently of any announcement. Only those can lift a claim past "the operator says so".</p></div>' +
+      '<div class="classes">' + classesHtml + '</div>' +
+
+      '<div class="band"><h4>Channels worth the effort</h4><p>The working catalogue. Regulatory and network channels are filed or observed independently, and most are diffable on a schedule rather than read once.</p></div>' +
+      '<table class="table"><thead><tr><th>Class</th><th>Channel</th><th>What it gives you</th><th>Coverage</th><th>Cadence</th><th>Access</th></tr></thead><tbody>' + channelsHtml + '</tbody></table>' +
+
+      '<div class="band"><h4>The confidence rules</h4></div>' +
+      '<ul class="rule-list">' +
+        '<li><strong>High</strong><span>Two or more distinct classes agree, at least one of them independent (regulatory, network, or observed), and the freshest evidence is inside this field\'s re-check window. The only level applied and pushed without asking.</span></li>' +
+        '<li><strong>Medium</strong><span>Two or more classes agree but all of them are the operator or outlets restating the operator — or a single regulatory record standing alone. Believable, uncorroborated.</span></li>' +
+        '<li><strong>Low</strong><span>One class only, or every source is past its window, or sources genuinely conflict. Conflicts are never silently resolved.</span></li>' +
+        '<li><strong>Unverified</strong><span>Nothing usable. Directory and unattributed sources are still cited on the entry, but they cannot lift a claim above this.</span></li>' +
+      '</ul>' +
+      '<p class="lede" style="margin-top:var(--space-4)">Where the current dataset actually stands under these rules, computed live rather than written down:</p>' +
+      '<div class="tally-row">' + tallyRowHtml + '</div>' +
+
+      '<div class="band"><h4>How a fact becomes a pin</h4><p class="method-lede">Four layers, and the distinction between them matters more than the flow does. A <strong>trigger</strong> starts a run. A <strong>worker</strong> researches and reports — and cannot write a file, ever, because it holds no tool that could. The <strong>applier</strong> is the main session, the one thing here with write and git access, and it routes findings by confidence. The <strong>data files</strong> feed the page. <span style="font-weight:500">data/sources.js</span> is drawn apart on purpose: it is a ruleset that both the researcher and the page read, not a stage anything passes through.</p></div>' +
+      '<div class="method-figure" id="pipelineFigure"></div>' +
+
+      '<div class="band"><h4>Every entry, weakest first</h4><p>The worklist. Sorted by confidence so the entries most in need of a second, independent source class surface first.</p></div>' +
+      '<table class="table"><thead><tr><th>Site</th><th>Confidence</th><th>Last updated</th><th>Sources</th></tr></thead><tbody>' + entriesHtml + '</tbody></table>' +
+
+      '<div class="band"><h4>Why classes, not tiers</h4><p>The atlas used to call a claim confident when two reputable sources agreed. That test quietly failed on the most common case in this industry: an operator issues a press release, two trade outlets write it up, and the claim collects two ticks without anything ever having checked it. Both outlets are downstream of the same interested party. Independence has to be measured by who produced the evidence and why — which is what these classes encode.</p></div>' +
+    '</div>';
+
+    el.querySelector(".back-link").addEventListener("click", function(){ switchMainView("atlas"); });
+    el.querySelectorAll("[data-open-site]").forEach(function(node){
+      node.addEventListener("click", function(){ openSiteView(node.getAttribute("data-open-site")); });
+    });
+    document.getElementById("pipelineFigure").innerHTML = PIPELINE_SVG;
+  }
+
+  // ════════════════════════════════════════════════════════════════════
+  // Provider page
+  // ════════════════════════════════════════════════════════════════════
   function providerStats(p){
     var sites = SITES.filter(function(s){ return s.provider === p; });
     var operational = sites.filter(function(s){ return s.status === "Operational"; });
@@ -1573,647 +992,345 @@
     return { siteCount: sites.length, operationalCount: operational.length, totalGW: totalGW, disclosedCount: disclosed.length };
   }
 
-  var dashboardEl = document.getElementById("providerDashboard");
-  var providerCardEls = {};
-  providers.forEach(function(p){
+  function renderProviderView(p){
     var stats = providerStats(p);
+    var color = colorFor(p);
     var capacityLabel, capacitySub;
-    if (stats.operationalCount === 0) {
-      capacityLabel = "—";
-      capacitySub = "no operational sites yet";
-    } else if (stats.disclosedCount === 0) {
-      capacityLabel = "—";
-      capacitySub = "operational capacity undisclosed";
-    } else {
+    if (stats.operationalCount === 0) { capacityLabel = "—"; capacitySub = "no operational sites yet"; }
+    else if (stats.disclosedCount === 0) { capacityLabel = "—"; capacitySub = "operational capacity undisclosed"; }
+    else {
       capacityLabel = stats.totalGW.toFixed(2);
       capacitySub = stats.disclosedCount < stats.operationalCount
         ? "GW (" + stats.disclosedCount + "/" + stats.operationalCount + " operational disclosed)"
         : "GW operational";
     }
-
-    var card = document.createElement("div");
-    card.className = "provider-card";
-    card.style.setProperty("--dot", colorFor(p));
-    card.innerHTML =
-      '<div class="provider-card-head">' +
-        '<span class="provider-card-dot"></span>' +
-        '<span class="provider-card-name">' + p + '</span>' +
-      '</div>' +
-      '<div class="provider-card-stats">' +
-        '<div><div class="provider-stat-value">' + capacityLabel + '</div><div class="provider-stat-label">' + capacitySub + '</div></div>' +
-        '<div><div class="provider-stat-value">' + stats.siteCount + '</div><div class="provider-stat-label">site' + (stats.siteCount === 1 ? '' : 's') + '</div></div>' +
-      '</div>' +
-      '<div class="provider-newsfeed">Newsfeed coming soon.</div>';
-
-    card.addEventListener("click", function(){ expandProvider(p); });
-    providerCardEls[p] = card;
-
-    var toggle = document.createElement("button");
-    toggle.className = "provider-toggle";
-    toggle.setAttribute("aria-pressed", "true");
-    toggle.title = "Toggle " + p + " on map";
-    toggle.addEventListener("click", function(e){
-      e.stopPropagation();
-      activeProviders[p] = !activeProviders[p];
-      toggle.setAttribute("aria-pressed", String(activeProviders[p]));
-      card.classList.toggle("inactive", !activeProviders[p]);
-      renderTable();
-      SITES.forEach(function(s){
-        if (pinEls[s.id]) pinEls[s.id].classList.toggle("dim", !activeProviders[s.provider]);
-      });
-    });
-    card.appendChild(toggle);
-
-    dashboardEl.appendChild(card);
-  });
-
-  // ---- Table ------------------------------------------------------------
-  var tbody = document.getElementById("tableBody");
-  var rowEls = {};
-
-  // Status column filter — defaults to "operational only" since that's
-  // almost always what's actually relevant; "All" brings back
-  // planned/under-construction rows too.
-  var statusFilter = "operational";
-  var statusToggle = document.getElementById("statusToggle");
-  function updateStatusToggle(){
-    if (statusFilter === "operational") {
-      statusToggle.className = "status-toggle status-pill status-operational";
-      statusToggle.textContent = "Operational";
-      statusToggle.setAttribute("aria-pressed", "true");
-      statusToggle.title = "Showing operational sites only — click to show all statuses";
-    } else {
-      statusToggle.className = "status-toggle status-pill status-all";
-      statusToggle.textContent = "All";
-      statusToggle.setAttribute("aria-pressed", "false");
-      statusToggle.title = "Showing all statuses — click to show operational only";
-    }
-  }
-  statusToggle.addEventListener("click", function(){
-    statusFilter = statusFilter === "operational" ? "all" : "operational";
-    updateStatusToggle();
-    renderTable();
-  });
-  updateStatusToggle();
-
-  function renderTable(){
-    tbody.innerHTML = "";
-    rowEls = {};
-    var shown = 0;
-    var sorted = SITES.slice().sort(tableSortCompare);
-    sorted.forEach(function(site){
-      if (!activeProviders[site.provider]) return;
-      if (statusFilter === "operational" && site.status !== "Operational") return;
-      shown++;
-      var tr = document.createElement("tr");
-      tr.setAttribute("data-id", site.id);
-      tr.innerHTML =
-        '<td><span class="provider-dot" style="background:' + colorFor(site.provider) + '"></span>' + site.provider + '</td>' +
-        '<td>' + (site.site || '—') + '</td>' +
-        '<td>' + site.city + ', ' + site.country + '</td>' +
-        '<td><span class="status-pill status-' + statusSlug(site.status) + '">' + site.status + '</span></td>' +
-        '<td class="mono">' + (site.capacityMW != null ? site.capacityMW + ' MW' : 'Not disclosed') + '</td>';
-      tr.addEventListener("click", function(){ selectSite(site.id); });
-      tbody.appendChild(tr);
-      rowEls[site.id] = tr;
-    });
-    document.getElementById("count").innerHTML = "<b>" + shown + "</b> / " + SITES.length + " sites shown";
-  }
-  renderTable();
-
-  // ---- Selection ----------------------------------------------------------
-  var currentId = null;
-  var detailPanel = document.getElementById("detailPanel");
-  var detailPanelBody = document.getElementById("detailPanelBody");
-
-  function goToSiteOnMap(id){
-    switchToMapTab();
-    selectSite(id);
-  }
-
-  function closeDetailPanel(){
-    currentId = null;
-    detailPanel.classList.remove("open");
-    Object.keys(pinEls).forEach(function(k){ pinEls[k].classList.remove("active"); });
-    Object.keys(rowEls).forEach(function(k){ rowEls[k].classList.remove("active"); });
-  }
-  document.getElementById("detailClose").addEventListener("click", closeDetailPanel);
-
-  function selectSite(id){
-    currentId = id;
-    var site = SITES.filter(function(s){ return s.id === id; })[0];
-    if (!site) return;
-
-    Object.keys(pinEls).forEach(function(k){ pinEls[k].classList.toggle("active", k === id); });
-    Object.keys(rowEls).forEach(function(k){ rowEls[k].classList.toggle("active", k === id); });
-    zoomToSite(site);
-    detailPanel.classList.add("open");
-
-    var color = colorFor(site.provider);
-    // Each source now carries its class chip, so it's visible at a glance
-    // whether a citation is a filing or an outlet restating a press release.
-    var sourcesHtml = (site.sources || []).map(function(s){
-      return classChip(classifySource(s, site.provider)) + ' <a href="' + s.url + '" target="_blank" rel="noopener">' + s.label + '</a>';
-    }).join('<br>');
-
-    var overall = scoreSite(site, TODAY);
-    var locConf = fieldConf(site, "location");
-    var statusConf = fieldConf(site, "status");
-    var capConf = site.capacityMW != null ? fieldConf(site, "capacityMW") : null;
-
-    // The weakest field is what set the site's headline score — say which,
-    // rather than leaving the reader to work it out from three badges.
-    var weakest = null;
-    Object.keys(overall.fields).forEach(function(f){
-      if (overall.fields[f].level === overall.level && !weakest) weakest = f;
-    });
-
-    detailPanelBody.innerHTML =
-      '<div class="detail-head">' +
-        '<div>' +
-          '<button class="detail-title-link" id="detailTitleLink" type="button" title="Open the full evidence page for this site">' +
-            '<h2>' + site.city + '</h2><span class="go-arrow">→</span>' +
-          '</button>' +
-          '<p class="region-code">' + (site.site || site.country) + '</p>' +
-          '<p class="detail-open-hint">Click the name for every source behind this entry</p>' +
-        '</div>' +
-        '<span class="provider-tag" style="background:' + color + '">' + site.provider + '</span>' +
-      '</div>' +
-      '<div class="detail-conf">' +
-        '<span>Confidence</span>' + confBadge(overall, { title: "A site scores as its weakest field." }) +
-        (weakest ? '<span>set by ' + (FIELD_LABELS[weakest] || weakest).toLowerCase() + '</span>' : '') +
-      '</div>' +
-      '<dl class="kv">' +
-        '<dt>Country</dt><dd>' + site.country + '</dd>' +
-        '<dt>Coordinates</dt><dd>' + site.lat.toFixed(4) + ', ' + site.lon.toFixed(4) + locConf.html + '</dd>' +
-        '<dt>Status</dt><dd><span class="status-pill status-' + statusSlug(site.status) + '">' + site.status + '</span>' + statusConf.html + '</dd>' +
-        '<dt>Capacity</dt><dd>' + (site.capacityMW != null ? site.capacityMW + ' MW' + capConf.html : 'Not disclosed') + '</dd>' +
-      '</dl>' +
-      '<p class="conf-why">' + esc(overall.fields[weakest] ? overall.fields[weakest].reason : "No fields scored.") +
-        (siteFieldHasProvenance(site, weakest || "status") ? '' : ' <em>No per-field provenance recorded yet, so every source on this entry is being counted toward every field.</em>') +
-      '</p>' +
-      '<div class="notes-box">' + (site.notes && site.notes.length ? site.notes : "No notes yet — add one in data/sites.js.") + '</div>' +
-      '<p class="source-line">Updated ' + (site.lastUpdated || '—') + (sourcesHtml ? '<br>' + sourcesHtml : '') + '</p>';
-
-    document.getElementById("detailTitleLink").addEventListener("click", function(){
-      openSitePage(site.id);
-    });
-  }
-
-  // ---- Sources tab --------------------------------------------------------
-  function renderSourcesTab(){
-    var body = document.getElementById("sourcesBody");
-    body.innerHTML = "";
-    // Weakest-confidence entries first — this table is for finding what needs
-    // work, so sorting by "most in need of a second source class" is more
-    // useful than sorting by provider.
-    var ordered = SITES.slice().sort(function(a, b){
-      var ra = CONFIDENCE_LEVELS[scoreSite(a, TODAY).level].rank;
-      var rb = CONFIDENCE_LEVELS[scoreSite(b, TODAY).level].rank;
-      return ra !== rb ? ra - rb : tableSortCompare(a, b);
-    });
-    ordered.forEach(function(site){
-      var tr = document.createElement("tr");
-      var overall = scoreSite(site, TODAY);
-      var links = (site.sources || []).map(function(s){
-        return classChip(classifySource(s, site.provider)) + ' <a href="' + s.url + '" target="_blank" rel="noopener">' + s.label + '</a>';
-      }).join('<br>');
-      var classes = [];
-      (site.sources || []).forEach(function(s){
-        var c = classifySource(s, site.provider);
-        if (classes.indexOf(c) === -1) classes.push(c);
-      });
-      tr.innerHTML =
-        '<td><span class="provider-dot" style="background:' + colorFor(site.provider) + '"></span>' +
-          site.provider + ' — ' + site.city + (site.site ? ' <span class="region-code">(' + site.site + ')</span>' : '') + '</td>' +
-        '<td>' + confBadge(overall, { title: "A site scores as its weakest field." }) +
-          '<div style="margin-top:0.3rem">' + classChips(classes) + '</div></td>' +
-        '<td class="mono">' + (site.lastUpdated || '—') + '</td>' +
-        '<td>' + (links || '<span class="detail-empty" style="margin:0">No sources logged</span>') + '</td>';
-      body.appendChild(tr);
-    });
-  }
-  renderSourcesTab();
-
-  // ---- Method tab ---------------------------------------------------------
-  // Rendered from data/sources.js rather than hand-written, so the page can't
-  // drift out of sync with the rules it's describing.
-  function renderMethodTab(){
-    var grid = document.getElementById("classGrid");
-    grid.innerHTML = SOURCE_CLASS_ORDER.map(function(code){
-      var c = SOURCE_CLASSES[code];
-      var tag = c.weight === 0
-        ? '<span class="class-card-tag none">not counted</span>'
-        : (c.independent
-            ? '<span class="class-card-tag indep">independent</span>'
-            : '<span class="class-card-tag dep">derivative</span>');
-      return '<div class="class-card" style="--cls-color:' + c.color + '">' +
-        '<div class="class-card-head">' + classChip(code) +
-          '<span class="class-card-name">' + esc(c.label) + '</span>' + tag + '</div>' +
-        '<p>' + esc(c.blurb) + '</p>' +
-        '<p class="why">' + esc(c.why) + '</p>' +
-      '</div>';
-    }).join('');
-
-    var chBody = document.getElementById("channelBody");
-    chBody.innerHTML = SOURCE_CHANNELS.map(function(ch){
-      var name = ch.url
-        ? '<a href="' + ch.url + '" target="_blank" rel="noopener">' + esc(ch.name) + '</a>'
-        : esc(ch.name);
-      return '<tr>' +
-        '<td>' + classChip(ch.cls) + '</td>' +
-        '<td class="ch-name">' + name + '</td>' +
-        '<td class="ch-gives">' + esc(ch.gives) + '</td>' +
-        '<td class="ch-meta">' + esc(ch.scope) + '</td>' +
-        '<td class="ch-meta">' + esc(ch.cadence) + '</td>' +
-        '<td class="ch-meta">' + esc(ch.access) + '</td>' +
-      '</tr>';
-    }).join('');
-
-    var tally = {};
-    SITES.forEach(function(s){
-      var lvl = scoreSite(s, TODAY).level;
-      tally[lvl] = (tally[lvl] || 0) + 1;
-    });
-    var order = ["high", "medium", "low", "unverified"];
-    document.getElementById("tallyRow").innerHTML = order.map(function(k){
-      var lvl = CONFIDENCE_LEVELS[k];
-      return '<div class="tally-card" style="--tally-color:' + lvl.color + '">' +
-        '<div class="tally-value">' + (tally[k] || 0) + '</div>' +
-        '<div class="tally-label">' + lvl.label + ' confidence</div>' +
-      '</div>';
-    }).join('') +
-      '<div class="tally-card" style="--tally-color:var(--accent)">' +
-        '<div class="tally-value">' + SITES.length + '</div>' +
-        '<div class="tally-label">sites tracked</div>' +
-      '</div>';
-  }
-  renderMethodTab();
-
-  // ---- Provider page (opened by clicking a dashboard card) --------------
-  var providerTabPanel = document.getElementById("providerTabPanel");
-  var providerPageDot = document.getElementById("providerPageDot");
-  var providerPageName = document.getElementById("providerPageName");
-  var providerPageStats = document.getElementById("providerPageStats");
-  var providerPageLocations = document.getElementById("providerPageLocations");
-  var providerPagePartners = document.getElementById("providerPagePartners");
-  var providerPageHeadlines = document.getElementById("providerPageHeadlines");
-  var providerPageSearchLink = document.getElementById("providerPageSearchLink");
-
-  function renderProviderPage(p){
-    var stats = providerStats(p);
-    providerPageDot.style.setProperty("--dot", colorFor(p));
-    providerPageName.textContent = p;
-
-    var capacityLabel, capacitySub;
-    if (stats.operationalCount === 0) {
-      capacityLabel = "—"; capacitySub = "no operational sites yet";
-    } else if (stats.disclosedCount === 0) {
-      capacityLabel = "—"; capacitySub = "operational capacity undisclosed";
-    } else {
-      capacityLabel = stats.totalGW.toFixed(2);
-      capacitySub = stats.disclosedCount < stats.operationalCount
-        ? "GW (" + stats.disclosedCount + "/" + stats.operationalCount + " operational disclosed)"
-        : "GW operational";
-    }
-    providerPageStats.innerHTML =
-      '<div><div class="provider-page-stat-value">' + capacityLabel + '</div><div class="provider-page-stat-label">' + capacitySub + '</div></div>' +
-      '<div><div class="provider-page-stat-value">' + stats.siteCount + '</div><div class="provider-page-stat-label">total site' + (stats.siteCount === 1 ? '' : 's') + '</div></div>' +
-      '<div><div class="provider-page-stat-value">' + stats.operationalCount + '</div><div class="provider-page-stat-label">operational</div></div>';
 
     var providerSites = SITES.filter(function(s){ return s.provider === p; }).sort(tableSortCompare);
-    providerPageLocations.innerHTML = providerSites.map(function(s){
-      return '<li class="provider-site-item" data-id="' + s.id + '">' +
+    var locationsHtml = providerSites.map(function(s){
+      return '<li class="p-loc-item" data-id="' + s.id + '">' +
         '<span class="status-dot status-' + statusSlug(s.status) + '"></span>' +
-        '<span class="provider-site-name">' + (s.site || s.city) + '</span>' +
-        '<span class="provider-site-loc">' + s.city + ', ' + s.country + '</span>' +
-        '<span class="provider-site-cap">' + (s.capacityMW != null ? s.capacityMW + ' MW' : '—') + '</span>' +
+        '<span class="p-loc-name">' + esc(s.site || s.city) + '</span>' +
+        '<span class="p-loc-place">' + esc(s.city) + ', ' + esc(s.country) + '</span>' +
+        '<span class="p-loc-cap">' + (s.capacityMW != null ? s.capacityMW + ' MW' : '—') + '</span>' +
       '</li>';
-    }).join('');
-    providerPageLocations.querySelectorAll(".provider-site-item").forEach(function(li){
-      li.addEventListener("click", function(){
-        goToSiteOnMap(li.getAttribute("data-id"));
-        scrollToMap();
-      });
-    });
+    }).join("");
 
-    // Partnerships (data/providers.js) — major labs/companies with a
-    // disclosed relationship to this provider, distinct from the site-level
-    // sources and the dated headline feed.
     var partners = (providerLookup[p] && providerLookup[p].partners) || [];
-    providerPagePartners.innerHTML = partners.length
-      ? partners.map(function(partner){
-          var sourceLinks = (partner.sources || []).map(function(s){
-            return '<a href="' + s.url + '" target="_blank" rel="noopener">' + s.label + '</a>';
-          }).join(', ');
-          return '<li class="partner-card">' +
-            '<div class="partner-top">' +
-              '<span class="partner-name">' + partner.name + '</span>' +
-              '<span class="partner-relationship">' + partner.relationship + '</span>' +
-            '</div>' +
-            (partner.detail ? '<p class="partner-detail">' + partner.detail + '</p>' : '') +
-            (sourceLinks ? '<span class="partner-meta">' + (partner.since ? partner.since + ' · ' : '') + sourceLinks + '</span>' : '') +
+    var partnersHtml = partners.length
+      ? '<ul class="partner-list">' + partners.map(function(partner){
+          var sourceLinks = (partner.sources || []).map(function(s){ return '<a href="' + s.url + '" target="_blank" rel="noopener">' + esc(s.label) + '</a>'; }).join(', ');
+          return '<li class="partner-card"><div class="partner-top"><span class="partner-name">' + esc(partner.name) + '</span><span class="partner-relationship">' + esc(partner.relationship) + '</span></div>' +
+            (partner.detail ? '<p class="partner-detail">' + esc(partner.detail) + '</p>' : '') +
+            (sourceLinks ? '<span class="partner-meta">' + (partner.since ? esc(partner.since) + ' · ' : '') + sourceLinks + '</span>' : '') +
           '</li>';
-        }).join('')
-      : '<li class="partners-empty">No disclosed partnerships logged yet — see data/providers.js.</li>';
+        }).join('') + '</ul>'
+      : '<p class="empty-note">No disclosed partnerships logged yet — see data/providers.js.</p>';
 
-    // Curated company-level headlines (data/news.js, via news-agent) take
-    // priority when available. Falls back to citations already attached to
-    // this provider's sites (data/sites.js) when there's no curated list
-    // yet — that fallback is fact-sourcing, not real news, but beats
-    // showing nothing.
     var curated = (typeof NEWS !== "undefined" && NEWS[p]) ? NEWS[p] : [];
-
+    var headlinesHtml;
     if (curated.length) {
-      providerPageHeadlines.innerHTML = curated.slice().sort(function(a, b){
-        return (b.date || "").localeCompare(a.date || "");
-      }).map(function(h){
-        var sourceLinks = (h.sources || []).map(function(s){
-          return '<a href="' + s.url + '" target="_blank" rel="noopener">' + s.label + '</a>';
-        }).join(', ');
-        return '<li class="headline-item">' +
-          '<div class="headline-top">' +
-            '<span class="headline-date">' + (h.date || '') + '</span>' +
-            '<span class="headline-category">' + (h.category || 'other') + '</span>' +
-          '</div>' +
-          '<span class="headline-title">' + h.headline + '</span>' +
-          (h.why ? '<p class="headline-why">' + h.why + '</p>' : '') +
+      headlinesHtml = '<ul class="headline-list">' + curated.slice().sort(function(a, b){ return (b.date || "").localeCompare(a.date || ""); }).map(function(h){
+        var sourceLinks = (h.sources || []).map(function(s){ return '<a href="' + s.url + '" target="_blank" rel="noopener">' + esc(s.label) + '</a>'; }).join(', ');
+        return '<li class="headline-item"><div class="headline-top"><span class="headline-date">' + esc(h.date || '') + '</span><span class="headline-category">' + esc(h.category || 'other') + '</span></div>' +
+          '<span class="headline-title">' + esc(h.headline) + '</span>' +
+          (h.why ? '<p class="headline-why">' + esc(h.why) + '</p>' : '') +
           (sourceLinks ? '<span class="headline-meta">Source: ' + sourceLinks + '</span>' : '') +
         '</li>';
-      }).join('');
+      }).join('') + '</ul>';
     } else {
-      var seenUrls = {};
-      var fallbackHeadlines = [];
-      providerSites
-        .slice()
-        .sort(function(a, b){ return (b.lastUpdated || "").localeCompare(a.lastUpdated || ""); })
-        .forEach(function(s){
-          (s.sources || []).forEach(function(src){
-            if (seenUrls[src.url]) return;
-            seenUrls[src.url] = true;
-            fallbackHeadlines.push({ label: src.label, url: src.url, site: s.site || s.city, lastUpdated: s.lastUpdated });
-          });
+      var seenUrls = {}, fallback = [];
+      providerSites.slice().sort(function(a, b){ return (b.lastUpdated || "").localeCompare(a.lastUpdated || ""); }).forEach(function(s){
+        (s.sources || []).forEach(function(src){
+          if (seenUrls[src.url]) return;
+          seenUrls[src.url] = true;
+          fallback.push({ label: src.label, url: src.url, site: s.site || s.city, lastUpdated: s.lastUpdated });
         });
-
-      providerPageHeadlines.innerHTML = fallbackHeadlines.length
-        ? '<li class="headline-empty">No curated headlines yet — showing sourced citations from this provider\'s sites instead.</li>' +
-          fallbackHeadlines.map(function(h){
-            return '<li class="headline-item">' +
-              '<a href="' + h.url + '" target="_blank" rel="noopener">' + h.label + '</a>' +
-              '<span class="headline-meta">' + h.site + (h.lastUpdated ? ' · checked ' + h.lastUpdated : '') + '</span>' +
-            '</li>';
-          }).join('')
-        : '<li class="headline-empty">No sourced coverage logged yet — see data/sites.js.</li>';
+      });
+      headlinesHtml = fallback.length
+        ? '<ul class="headline-list"><li class="empty-note">No curated headlines yet — showing sourced citations from this provider\'s sites instead.</li>' +
+          fallback.map(function(h){ return '<li class="headline-item"><a href="' + h.url + '" target="_blank" rel="noopener">' + esc(h.label) + '</a><span class="headline-meta">' + esc(h.site) + (h.lastUpdated ? ' · checked ' + fmtDate(h.lastUpdated) : '') + '</span></li>'; }).join('') + '</ul>'
+        : '<p class="empty-note">No sourced coverage logged yet — see data/sites.js.</p>';
     }
 
-    providerPageSearchLink.href = "https://www.google.com/search?tbm=nws&q=" + encodeURIComponent(p + " data center");
-    providerPageSearchLink.textContent = "Search for more coverage of " + p + " →";
-  }
+    var el = document.getElementById("viewProvider");
+    el.innerHTML = '<div class="wrap">' +
+      '<button class="back-link">← Back to atlas</button>' +
+      '<div class="p-head"><span class="dot" style="background:' + color + '"></span><h1>' + esc(p) + '</h1></div>' +
+      '<div class="p-stats">' +
+        '<div><div class="p-stat-value">' + capacityLabel + '</div><div class="p-stat-label">' + esc(capacitySub) + '</div></div>' +
+        '<div><div class="p-stat-value">' + stats.siteCount + '</div><div class="p-stat-label">total site' + (stats.siteCount === 1 ? '' : 's') + '</div></div>' +
+        '<div><div class="p-stat-value">' + stats.operationalCount + '</div><div class="p-stat-label">operational</div></div>' +
+      '</div>' +
+      '<div class="p-body">' +
+        '<div class="p-section-col">' +
+          '<div class="p-section"><h2>Locations</h2><ul class="p-locations">' + locationsHtml + '</ul></div>' +
+          '<div class="p-section p-partners"><h2>Partnerships</h2>' + partnersHtml + '</div>' +
+        '</div>' +
+        '<div class="p-section"><h2>Latest headlines</h2>' + headlinesHtml +
+          '<a class="p-search-link" href="https://www.google.com/search?tbm=nws&q=' + encodeURIComponent(p + " data center") + '" target="_blank" rel="noopener">Search for more coverage of ' + esc(p) + ' →</a>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
 
-  // Expanding a provider replaces the site table (not the map/detail-card
-  // area above) with that provider's full panel, and collapses every
-  // dashboard card down to just its heading — an inline accordion, not a
-  // separate page/route. Clicking the same provider's (now-collapsed)
-  // heading again, or the back link, returns to the normal view.
-  var tableSection = document.getElementById("tableSection");
-  var mapPanelEl = document.querySelector(".map-panel");
-  var expandedProvider = null;
-
-  function scrollToMap(){
-    if (mapPanelEl) mapPanelEl.scrollIntoView({ behavior: "smooth", block: "start" });
-  }
-
-  // MapLibre v5 auto-observes container resizes, but firing an explicit
-  // resize right as the CSS transition finishes avoids any lag/blank-tile
-  // flash while it catches up on its own.
-  mapPanelEl.addEventListener("transitionend", function(e){
-    if (e.propertyName === "min-height") map.resize();
-  });
-
-  function expandProvider(p){
-    if (expandedProvider === p) { collapseProviderPanel(); return; }
-    // The provider panel and the single-site page both replace the table, so
-    // opening one closes the other.
-    closeSitePage();
-    expandedProvider = p;
-    renderProviderPage(p);
-    Object.keys(providerCardEls).forEach(function(name){
-      providerCardEls[name].classList.add("collapsed");
-      providerCardEls[name].classList.toggle("active", name === p);
-    });
-    tableSection.hidden = true;
-    providerTabPanel.hidden = false;
-    mapPanelEl.classList.add("compact");
-  }
-
-  function collapseProviderPanel(){
-    expandedProvider = null;
-    mapPanelEl.classList.remove("compact");
-    Object.keys(providerCardEls).forEach(function(name){
-      providerCardEls[name].classList.remove("collapsed", "active");
-    });
-    providerTabPanel.hidden = true;
-    tableSection.hidden = false;
-  }
-
-  document.getElementById("providerBack").addEventListener("click", collapseProviderPanel);
-
-  // ---- Site page (one facility, all of its evidence) ---------------------
-  // Opened by clicking the site name in the map's detail panel. The detail
-  // panel is a summary sized for a map overlay; this is the place to actually
-  // study an entry — which source backs which field, what class each one
-  // counts as, and what is missing.
-  var siteTabPanel = document.getElementById("siteTabPanel");
-  var openSiteId = null;
-
-  // ---- Site page ---------------------------------------------------------
-  // A page about a data center, not about how the atlas sources data centers.
-  // The sourcing apparatus is real and stays available, but it lives behind
-  // one disclosure at the bottom — an earlier version led with it, and the
-  // result read as a methodology essay with a facility attached.
-
-  function fieldValueHtml(site, field){
-    if (field === "capacityMW") return site.capacityMW + ' MW';
-    if (field === "status") return '<span class="status-pill status-' + statusSlug(site.status) + '">' + site.status + '</span>';
-    return site.lat.toFixed(4) + ', ' + site.lon.toFixed(4);
-  }
-
-  function basisHtml(site, field){
-    var basis = siteFieldBasis(site, field);
-    return (basis && basis !== "disclosed")
-      ? '<span class="basis-tag basis-' + basis + '" title="Not disclosed by the operator — ' + basis + ' from the sources listed.">' + (BASIS_LABELS[basis] || basis) + '</span>'
-      : '';
-  }
-
-  function scoredFields(site){
-    return PROVENANCE_FIELDS.filter(function(f){
-      return !(f === "capacityMW" && site.capacityMW == null);
+    el.querySelector(".back-link").addEventListener("click", function(){ switchMainView("atlas"); });
+    el.querySelectorAll(".p-loc-item").forEach(function(li){
+      li.addEventListener("click", function(){
+        switchMainView("atlas");
+        selectSite(li.getAttribute("data-id"));
+      });
     });
   }
 
-  // The site's single headline verdict: has anything other than the operator
-  // confirmed any of this. Weakest-link, same as the confidence level.
-  function siteVerdict(site){
-    var fields = scoredFields(site);
-    if (!fields.length) return VERDICTS.unsourced;
-    var anyOperator = false, anyUnsourced = false;
-    fields.forEach(function(f){
-      var v = verdictFor(scoreSiteField(site, f, TODAY));
-      if (v.key === "operator") anyOperator = true;
-      if (v.key === "unsourced") anyUnsourced = true;
-    });
-    if (anyUnsourced) return VERDICTS.unsourced;
-    return anyOperator ? VERDICTS.operator : VERDICTS.independent;
+  function openProviderView(p){
+    renderProviderView(p);
+    switchMainView("provider");
   }
 
+  // ════════════════════════════════════════════════════════════════════
+  // Site page — one facility, all of its evidence
+  // ════════════════════════════════════════════════════════════════════
   function fact(label, value){
-    return '<div class="fact"><div class="fact-label">' + label + '</div>' +
-      '<div class="fact-value">' + value + '</div></div>';
-  }
-
-  function renderSitePage(site){
-    var color = colorFor(site.provider);
-
-    document.getElementById("sitePageCity").textContent = site.city;
-    document.getElementById("sitePageName").textContent = site.site || site.country;
-    var tag = document.getElementById("sitePageProvider");
-    tag.textContent = site.provider;
-    tag.style.background = color;
-
-    // ---- Facts. What the thing is. No duplication anywhere else on the page.
-    var v = siteVerdict(site);
-    document.getElementById("sitePageFacts").innerHTML =
-      fact("Capacity", site.capacityMW != null
-        ? site.capacityMW + ' MW' + basisHtml(site, "capacityMW")
-        : '<span class="fact-muted">Not disclosed</span>') +
-      fact("Status", '<span class="status-pill status-' + statusSlug(site.status) + '">' + site.status + '</span>') +
-      fact("Location", esc(site.city) + ', ' + esc(site.country)) +
-      fact("Coordinates", site.lat.toFixed(4) + ', ' + site.lon.toFixed(4)) +
-      fact("Last checked", site.lastUpdated || '—') +
-      fact("Sourcing", '<span class="verdict-inline verdict-' + v.key + '">' + v.short + '</span>');
-
-    // ---- What we know. The notes were the most informative thing on the
-    // page and were buried in a sidebar; they lead now.
-    var notesBlock = document.getElementById("sitePageNotesBlock");
-    if (site.notes && site.notes.length) {
-      document.getElementById("sitePageNotes").textContent = site.notes;
-      notesBlock.hidden = false;
-    } else {
-      notesBlock.hidden = true;
-    }
-
-    // ---- Sources. One list, one line each. "Backs: …" only appears where
-    // the entry actually distinguishes fields — otherwise it repeated the
-    // same three words on every row and said nothing.
-    var sources = site.sources || [];
-    var perField = scoredFields(site).some(function(f){ return siteFieldHasProvenance(site, f); });
-    document.getElementById("sitePageSourcesHeading").textContent =
-      "Sources" + (sources.length ? " (" + sources.length + ")" : "");
-
-    document.getElementById("sitePageSources").innerHTML = sources.length
-      ? sources.map(function(src){
-          var cls = classifySource(src, site.provider);
-          var backing = perField ? scoredFields(site).filter(function(f){
-            return siteEvidenceFor(site, f).some(function(ev){ return ev.source === src; });
-          }).map(function(f){ return FIELD_LABELS[f].toLowerCase(); }) : [];
-          return '<li>' + classChip(cls) + '<div>' +
-            '<a href="' + src.url + '" target="_blank" rel="noopener">' + esc(src.label) + '</a>' +
-            '<div class="src-meta">' + esc(hostOf(src.url) || 'no url') +
-              (backing.length ? ' · backs ' + backing.join(', ') : '') + '</div>' +
-          '</div></li>';
-        }).join('')
-      : '<li><div class="fact-muted">No sources logged for this entry.</div></li>';
-
-    // ---- The disclosure. Everything methodological, folded away.
-    document.getElementById("discSummary").innerHTML =
-      'How solid is this? <span class="verdict-inline verdict-' + v.key + '">' + v.short + '</span>';
-    document.getElementById("sitePageFields").innerHTML = renderDisclosure(site);
-    document.getElementById("sitePageDisclosure").open = false;
-  }
-
-  // Everything below here only renders inside the collapsed disclosure.
-  function renderDisclosure(site){
-    var fields = scoredFields(site);
-    var hasProv = fields.some(function(f){ return siteFieldHasProvenance(site, f); });
-    var out = "";
-
-    if (!hasProv) {
-      // Without per-field provenance every field scores on the same sources,
-      // so one statement covers all of them.
-      var score = scoreSiteField(site, fields[0] || "status", TODAY);
-      out += discBlock("All fields", score, site, fields[0] || "status");
-      out += '<p class="disc-note">Sources on this entry are not yet tied to individual facts, so each of them counts toward capacity, status and location alike.</p>';
-    } else {
-      out += fields.map(function(f){
-        return discBlock(FIELD_LABELS[f], scoreSiteField(site, f, TODAY), site, f);
-      }).join('');
-    }
-    return out;
+    return '<div class="fact"><div class="fact-label">' + label + '</div><div class="fact-value">' + value + '</div></div>';
   }
 
   function discBlock(label, score, site, field){
     var v = verdictFor(score);
     var hint = derivativeHint(score);
     return '<div class="disc-block">' +
-      '<div class="disc-head">' +
-        '<span class="disc-field">' + esc(label) + '</span>' +
-        '<span class="verdict-inline verdict-' + v.key + '">' + v.short + '</span>' +
-        confBadge(score, { title: score.reason }) +
-      '</div>' +
+      '<div class="disc-head"><span class="disc-field">' + esc(label) + '</span>' + verdictInline(v) + confBadge(score, { title: score.reason }) + '</div>' +
       '<p class="disc-blurb">' + esc(v.blurb) + '</p>' +
       '<p class="disc-lift"><strong>What would confirm it:</strong> ' + esc(liftAdvice(score, field, site.status)) + '</p>' +
       (hint ? '<p class="disc-hint">' + esc(hint) + '</p>' : '') +
     '</div>';
   }
 
-  function openSitePage(id){
+  function renderDisclosure(site){
+    var fields = scoredFields(site);
+    var hasProv = fields.some(function(f){ return siteFieldHasProvenance(site, f); });
+    var out = "";
+    if (!hasProv) {
+      var score = scoreSiteField(site, fields[0] || "status", TODAY);
+      out += discBlock("All fields", score, site, fields[0] || "status");
+      out += '<p style="margin:.9rem 0 1rem;font-size:12px;color:var(--color-neutral-500)">Sources on this entry are not yet tied to individual facts, so each of them counts toward capacity, status and location alike.</p>';
+    } else {
+      out += fields.map(function(f){ return discBlock(FIELD_LABELS[f], scoreSiteField(site, f, TODAY), site, f); }).join('');
+    }
+    return out;
+  }
+
+  function renderSiteView(site){
+    var color = colorFor(site.provider);
+    var v = siteVerdict(site);
+
+    var factsHtml =
+      fact("Capacity", site.capacityMW != null ? site.capacityMW + ' MW' + basisHtml(site, "capacityMW") : '<span class="fact-muted">Not disclosed</span>') +
+      fact("Status", '<span class="status-pill status-' + statusSlug(site.status) + '">' + esc(site.status) + '</span>') +
+      fact("Location", esc(site.city) + ', ' + esc(site.country)) +
+      fact("Coordinates", site.lat.toFixed(4) + ', ' + site.lon.toFixed(4)) +
+      fact("Last checked", fmtDate(site.lastUpdated)) +
+      fact("Sourcing", verdictInline(v));
+
+    var sources = site.sources || [];
+    var perField = scoredFields(site).some(function(f){ return siteFieldHasProvenance(site, f); });
+    var sourcesHtml = sources.length
+      ? sources.map(function(src){
+          var cls = classifySource(src, site.provider);
+          var backing = perField ? scoredFields(site).filter(function(f){
+            return siteEvidenceFor(site, f).some(function(ev){ return ev.source === src; });
+          }).map(function(f){ return FIELD_LABELS[f].toLowerCase(); }) : [];
+          return '<li>' + classChip(cls) + '<div><a href="' + src.url + '" target="_blank" rel="noopener">' + esc(src.label) + '</a>' +
+            '<div class="src-meta">' + esc(hostOf(src.url) || 'no url') + (backing.length ? ' · backs ' + backing.join(', ') : '') + '</div></div></li>';
+        }).join('')
+      : '<li><div class="fact-muted">No sources logged for this entry.</div></li>';
+
+    var el = document.getElementById("viewSite");
+    el.innerHTML = '<div class="wrap">' +
+      '<button class="back-link">← Back to atlas</button>' +
+      '<div class="s-head"><div><h1>' + esc(site.city) + '</h1><p class="s-sub">' + esc(site.site || site.country) + '</p></div>' +
+        '<span class="provider-tag" style="background:' + color + '">' + esc(site.provider) + '</span></div>' +
+      '<div class="s-facts">' + factsHtml + '</div>' +
+      (site.notes && site.notes.length ? '<section class="s-block"><h2>What we know</h2><div class="s-prose">' + esc(site.notes) + '</div></section>' : '') +
+      '<section class="s-block"><h2>Sources' + (sources.length ? ' (' + sources.length + ')' : '') + '</h2><ul class="src-list">' + sourcesHtml + '</ul></section>' +
+      '<details class="site-disclosure"><summary><span class="disc-chevron" aria-hidden="true">›</span><span>How solid is this? ' + verdictInline(v) + '</span></summary>' +
+        '<div class="disc-body">' + renderDisclosure(site) + '</div>' +
+      '</details>' +
+    '</div>';
+
+    el.querySelector(".back-link").addEventListener("click", function(){ switchMainView("atlas"); });
+  }
+
+  function openSiteView(id){
     var site = SITES.filter(function(s){ return s.id === id; })[0];
     if (!site) return;
-    openSiteId = id;
-    // Mutually exclusive with the provider panel — both replace the table.
-    collapseProviderPanel();
-    renderSitePage(site);
-    tableSection.hidden = true;
-    siteTabPanel.hidden = false;
-    dashboardEl.hidden = true;
-    mapPanelEl.classList.add("compact");
-    closeDetailPanel();
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    renderSiteView(site);
+    switchMainView("site");
   }
 
-  function closeSitePage(){
-    if (siteTabPanel.hidden) return;
-    openSiteId = null;
-    siteTabPanel.hidden = true;
-    tableSection.hidden = false;
-    dashboardEl.hidden = false;
-    mapPanelEl.classList.remove("compact");
-  }
+  // ════════════════════════════════════════════════════════════════════
+  // View switching — Atlas (map+rail+drawer+detail) vs. the three
+  // full-screen overlays (Sources & method, provider, site).
+  // ════════════════════════════════════════════════════════════════════
+  var ATLAS_PARTS = ["rail", "drawer", "detail", "mapwrap"];
+  var OVERLAYS = { sources: "viewSourcesMethod", provider: "viewProvider", site: "viewSite" };
+  var currentView = "atlas";
 
-  document.getElementById("siteBack").addEventListener("click", closeSitePage);
-
-
-  // ---- Tabs ---------------------------------------------------------------
-  // Three tabs now, so drive them from a table rather than toggling each
-  // pair by hand — adding a fourth shouldn't mean rewriting the switcher.
-  var TABS = [
-    { btn: "tabBtnMap",     panel: "mapTabPanel" },
-    { btn: "tabBtnSources", panel: "sourcesTabPanel" },
-    { btn: "tabBtnMethod",  panel: "methodTabPanel" }
-  ];
-  function switchToTab(btnId){
-    TABS.forEach(function(t){
-      var on = t.btn === btnId;
-      var btn = document.getElementById(t.btn);
-      btn.classList.toggle("active", on);
-      btn.setAttribute("aria-selected", on ? "true" : "false");
-      document.getElementById(t.panel).hidden = !on;
+  function switchMainView(view){
+    currentView = view;
+    var onAtlas = view === "atlas";
+    ATLAS_PARTS.forEach(function(id){ document.getElementById(id).style.visibility = onAtlas ? "visible" : "hidden"; });
+    Object.keys(OVERLAYS).forEach(function(key){
+      document.getElementById(OVERLAYS[key]).classList.toggle("on", view === key);
     });
+    document.querySelectorAll("nav.tabs button").forEach(function(b){
+      var isSources = b.getAttribute("data-view") === "sources";
+      b.setAttribute("aria-current", String((isSources && view === "sources") || (!isSources && onAtlas)));
+    });
+    if (view !== "atlas") closeDetail();
+    if (view === "sources") renderSourcesMethodView();
+    window.scrollTo(0, 0);
   }
-  TABS.forEach(function(t){
-    document.getElementById(t.btn).addEventListener("click", function(){ switchToTab(t.btn); });
+
+  document.querySelectorAll("nav.tabs button").forEach(function(b){
+    b.addEventListener("click", function(){ switchMainView(b.getAttribute("data-view") === "sources" ? "sources" : "atlas"); });
   });
-  function switchToMapTab(){ switchToTab("tabBtnMap"); }
+
+  // ════════════════════════════════════════════════════════════════════
+  // Pipeline diagram — unchanged from the previous Method tab, reused
+  // verbatim (via the --surface-2/--border/--ink/--ink-soft/--accent/
+  // --font-mono/--font-sans compat aliases) so the hand-tuned layout isn't
+  // put at risk by the redesign.
+  // ════════════════════════════════════════════════════════════════════
+  var PIPELINE_SVG = '<svg viewBox="0 0 1280 830" role="img" aria-labelledby="pipelineTitle pipelineDesc">' +
+    '<title id="pipelineTitle">Site Atlas evidence pipeline</title>' +
+    '<desc id="pipelineDesc">Four layers. A trigger (you in chat, or the reconcile slash command) starts a subagent. The subagents research and return a report; none of them can write files. The main Claude session is the only thing holding write and git access, and it routes findings by confidence: high confidence is applied and pushed, everything else is shown to you. The data files feed the page. data/sources.js is a shared ruleset read by both research-agent and the page, not a stage in the flow.</desc>' +
+    '<defs>' +
+      '<marker id="arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#4b5f59"/></marker>' +
+      '<marker id="arwd" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#9184d9"/></marker>' +
+    '</defs>' +
+    '<style>' +
+      '.bnd{ font:600 10px var(--font-mono); fill:#5f746d; letter-spacing:0.12em; text-transform:uppercase; }' +
+      '.bx{ fill:var(--surface-2); stroke:var(--border); stroke-width:1; }' +
+      '.nm{ font:600 12px var(--font-sans); fill:var(--ink); }' +
+      '.sb{ font:400 10.5px var(--font-sans); fill:var(--ink-soft); }' +
+      '.mn{ font:500 10.5px var(--font-mono); fill:var(--ink-soft); }' +
+      '.warn{ font:600 10.5px var(--font-sans); fill:#E0708A; }' +
+      '.cn{ stroke:#4b5f59; stroke-width:1.4; fill:none; }' +
+      '.cnd{ stroke:#9184d9; stroke-width:1.2; fill:none; stroke-dasharray:3 3; opacity:0.75; }' +
+      '.lbl{ font:500 9.5px var(--font-mono); fill:#5f746d; letter-spacing:0.05em; }' +
+      '.lbla{ font:500 9.5px var(--font-mono); fill:#9184d9; letter-spacing:0.05em; opacity:0.85; }' +
+      '.div{ stroke:var(--border); stroke-width:1; }' +
+    '</style>' +
+    '<text class="bnd" x="40" y="30">1 · What starts a run</text>' +
+    '<rect class="bx" x="40" y="44" width="260" height="104" rx="6"/>' +
+    '<text class="nm" x="56" y="66">You, in chat</text>' +
+    '<text class="sb" x="56" y="84">“vet this site before I add it”</text>' +
+    '<text class="sb" x="56" y="99">“re-check the Kristiansand entry”</text>' +
+    '<text class="sb" x="56" y="114">“audit every CoreWeave entry”</text>' +
+    '<text class="mn" x="56" y="134" fill="#5f746d">→ research-agent</text>' +
+    '<rect class="bx" x="320" y="44" width="290" height="104" rx="6"/>' +
+    '<text class="nm" x="336" y="66">/reconcile [scope]</text>' +
+    '<text class="sb" x="336" y="84">A slash command, not an agent. The</text>' +
+    '<text class="sb" x="336" y="99">session reads the data files, lists the</text>' +
+    '<text class="sb" x="336" y="114">claims already on record, hands them over.</text>' +
+    '<text class="mn" x="336" y="134" fill="#5f746d">→ research-agent</text>' +
+    '<rect class="bx" x="630" y="44" width="270" height="104" rx="6"/>' +
+    '<text class="nm" x="646" y="66">You, in chat</text>' +
+    '<text class="sb" x="646" y="84">“what’s new about CoreWeave”</text>' +
+    '<text class="sb" x="646" y="99">Headlines for a provider page —</text>' +
+    '<text class="sb" x="646" y="114">not fact-checking a site entry.</text>' +
+    '<text class="mn" x="646" y="134" fill="#5f746d">→ news-agent</text>' +
+    '<path class="cn" d="M 170 148 C 170 176 180 176 180 200" marker-end="url(#arw)"/>' +
+    '<path class="cn" d="M 465 148 C 465 176 300 176 300 200" marker-end="url(#arw)"/>' +
+    '<path class="cn" d="M 765 148 C 765 176 575 176 575 200" marker-end="url(#arw)"/>' +
+    '<text class="bnd" x="40" y="192">2 · Workers — they research and report. None of them can write a file.</text>' +
+    '<rect class="bx" x="40" y="204" width="390" height="192" rx="6"/>' +
+    '<text class="nm" x="56" y="226">research-agent</text>' +
+    '<text class="mn" x="56" y="242">subagent · judgment runs on sonnet</text>' +
+    '<text class="sb" x="56" y="260">Tools: Read, Grep, Glob, WebSearch, WebFetch,</text>' +
+    '<text class="sb" x="56" y="274">openrouter_ask.</text>' +
+    '<text class="warn" x="56" y="291">No Write. No Edit. No git. By design.</text>' +
+    '<line class="div" x1="56" y1="302" x2="414" y2="302"/>' +
+    '<text class="sb" x="56" y="320">Classes every source R/N/O/P/T/G/D/U, checks</text>' +
+    '<text class="sb" x="56" y="334">cross-class corroboration and recency, assigns</text>' +
+    '<text class="sb" x="56" y="348">a confidence level per field.</text>' +
+    '<rect x="56" y="358" width="358" height="28" rx="4" fill="rgba(145,132,217,0.08)" stroke="rgba(145,132,217,0.3)"/>' +
+    '<text class="sb" x="66" y="376">openrouter_ask → deepseek-chat: legwork, never a finding.</text>' +
+    '<rect class="bx" x="450" y="204" width="250" height="192" rx="6"/>' +
+    '<text class="nm" x="466" y="226">news-agent</text>' +
+    '<text class="mn" x="466" y="242">subagent · sonnet + deepseek</text>' +
+    '<text class="sb" x="466" y="260">Same tools.</text>' +
+    '<text class="warn" x="466" y="277">Also cannot write.</text>' +
+    '<line class="div" x1="466" y1="288" x2="684" y2="288"/>' +
+    '<text class="sb" x="466" y="306">Curates dated company-level</text>' +
+    '<text class="sb" x="466" y="320">headlines. Does not verify any</text>' +
+    '<text class="sb" x="466" y="334">site field, ever.</text>' +
+    '<text class="sb" x="466" y="356">Output lands in data/news.js,</text>' +
+    '<text class="sb" x="466" y="370">a separate track from site facts.</text>' +
+    '<rect class="bx" x="720" y="204" width="180" height="192" rx="6" stroke-dasharray="4 3"/>' +
+    '<text class="nm" x="736" y="226" fill="#8FA39C">monitor-agent</text>' +
+    '<text class="mn" x="736" y="242" fill="#5f746d">not built yet</text>' +
+    '<text class="sb" x="736" y="262">⟳ self-triggering, on a</text>' +
+    '<text class="sb" x="736" y="276">schedule. Nobody asks it.</text>' +
+    '<line class="div" x1="736" y1="288" x2="884" y2="288"/>' +
+    '<text class="sb" x="736" y="306">Diffs the structured</text>' +
+    '<text class="sb" x="736" y="320">feeds in code, then shows</text>' +
+    '<text class="sb" x="736" y="334">the model only the rows</text>' +
+    '<text class="sb" x="736" y="348">that changed.</text>' +
+    '<text class="sb" x="736" y="370">Cost scales with drift,</text>' +
+    '<text class="sb" x="736" y="384">not with site count.</text>' +
+    '<path class="cn" d="M 235 396 L 235 432" marker-end="url(#arw)"/>' +
+    '<path class="cn" d="M 575 396 L 575 432" marker-end="url(#arw)"/>' +
+    '<path class="cn" d="M 810 396 L 810 432" marker-end="url(#arw)" stroke-dasharray="4 3"/>' +
+    '<text class="lbl" x="248" y="418">a report</text>' +
+    '<text class="lbl" x="588" y="418">a report</text>' +
+    '<text class="bnd" x="40" y="430">3 · Applier</text>' +
+    '<rect x="40" y="440" width="860" height="164" rx="6" fill="var(--surface-2)" stroke="var(--accent)" stroke-opacity="0.35" stroke-width="1"/>' +
+    '<text class="nm" x="56" y="464">Main Claude session — the applier</text>' +
+    '<text class="sb" x="56" y="482">The only thing in this diagram holding Write, Edit and git. The subagents hand it a report; it decides what happens next.</text>' +
+    '<text class="sb" x="56" y="497">Nothing reaches a data file except through here, which is what stopped the two fabricated claims in the openrouter_ask incident.</text>' +
+    '<rect x="56" y="510" width="410" height="78" rx="5" fill="rgba(74,222,128,0.07)" stroke="rgba(74,222,128,0.35)"/>' +
+    '<text class="nm" x="70" y="531" fill="#4ADE80">High confidence</text>' +
+    '<text class="sb" x="70" y="549">Edit the data file, update lastUpdated and</text>' +
+    '<text class="sb" x="70" y="563">sources, commit, push. No pause to ask.</text>' +
+    '<text class="sb" x="70" y="579">2+ classes · one independent · current.</text>' +
+    '<rect x="480" y="510" width="404" height="78" rx="5" fill="rgba(251,191,36,0.06)" stroke="rgba(251,191,36,0.32)"/>' +
+    '<text class="nm" x="494" y="531" fill="#FBBF24">Medium · Low · conflicting · unverifiable</text>' +
+    '<text class="sb" x="494" y="549">Show you the finding and stop. No file is</text>' +
+    '<text class="sb" x="494" y="563">touched, nothing is committed.</text>' +
+    '<text class="sb" x="494" y="579">You make the call.</text>' +
+    '<path class="cn" d="M 470 604 L 470 638" marker-end="url(#arw)"/>' +
+    '<text class="bnd" x="40" y="632">4 · Data files</text>' +
+    '<rect class="bx" x="40" y="646" width="204" height="62" rx="6"/>' +
+    '<text class="mn" x="54" y="668" fill="var(--accent)">data/sites.js</text>' +
+    '<text class="sb" x="54" y="686">Site facts and the</text>' +
+    '<text class="sb" x="54" y="699">per-field provenance.</text>' +
+    '<rect class="bx" x="258" y="646" width="204" height="62" rx="6"/>' +
+    '<text class="mn" x="272" y="668" fill="var(--accent)">data/providers.js</text>' +
+    '<text class="sb" x="272" y="686">Operators, colors,</text>' +
+    '<text class="sb" x="272" y="699">partnerships.</text>' +
+    '<rect class="bx" x="476" y="646" width="204" height="62" rx="6"/>' +
+    '<text class="mn" x="490" y="668" fill="var(--accent)">data/news.js</text>' +
+    '<text class="sb" x="490" y="686">Provider headlines,</text>' +
+    '<text class="sb" x="490" y="699">from news-agent.</text>' +
+    '<rect x="694" y="646" width="206" height="62" rx="6" fill="var(--surface-2)" stroke="var(--accent)" stroke-opacity="0.5" stroke-dasharray="4 3"/>' +
+    '<text class="mn" x="708" y="668" fill="var(--accent)">data/sources.js</text>' +
+    '<text class="sb" x="708" y="686">The shared ruleset.</text>' +
+    '<text class="sb" x="708" y="699">Not a stage in the flow.</text>' +
+    '<path class="cnd" d="M 900 662 L 920 662 L 920 416 L 22 416 L 22 300 L 36 300" marker-end="url(#arwd)"/>' +
+    '<text class="lbla" x="330" y="410">how to class a source · what counts as corroboration · staleness windows</text>' +
+    '<path class="cnd" d="M 797 708 L 797 744" marker-end="url(#arwd)"/>' +
+    '<text class="lbla" x="808" y="730">scores every entry, in the browser</text>' +
+    '<path class="cn" d="M 350 708 L 350 744" marker-end="url(#arw)"/>' +
+    '<rect class="bx" x="40" y="750" width="860" height="56" rx="6"/>' +
+    '<text class="nm" x="56" y="774">index.html</text>' +
+    '<text class="sb" x="56" y="793">Map, rail, site drawer, detail panel, Sources &amp; method page. Scoring runs client-side, so rendering this costs no tokens at all.</text>' +
+    '</svg>';
+
+  // ---- Boot ----------------------------------------------------------------
+  renderRail();
+  renderRows();
+  document.getElementById("barMeta").textContent =
+    SITES.length + " sites · " + providerOrder.length + " operators · updated " + fmtDate(SITES.reduce(function(m, s){ return (s.lastUpdated || "") > m ? s.lastUpdated : m; }, ""));
 
 })();
 </script>
