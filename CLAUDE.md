@@ -207,7 +207,21 @@ three levels: the per-call `model` param, then `OPENROUTER_DEFAULT_MODEL`
 in `.env`, then a hardcoded fallback. Note that nothing currently passes
 the per-call param, so the adversarial second pass described under Open
 concerns is at present re-asking *the same model that made the error* —
-pass a different `model` explicitly when re-checking a hard number.
+pass a different `model` explicitly when re-checking a hard number, and
+prefer a different model *family*, since two revisions of one model tend
+to share their blind spots.
+
+**Pin a specific model; never a floating alias.** The default was
+`deepseek/deepseek-chat` for a long time, which is an alias that follows
+whatever DeepSeek's current chat model is — OpenRouter's logs showed it
+resolving to v2.5 on some runs and v3 on others. A research run that
+can't say which model produced a claim can't be reproduced or blamed,
+which matters here more than usual given the fabrication incident below.
+Anything ending `-latest` floats the same way by design. As of Sep 2026
+the default is `deepseek/deepseek-v4.1-flash`. Live pricing and exact
+slugs come from `https://openrouter.ai/api/v1/models` (public, keyless) —
+check it rather than going from memory, since the model list turns over
+faster than any note written here.
 
 **The structured feeds** (`edgar_search`, `peeringdb_facility`,
 `epa_echo_facilities`) are the opposite kind of tool: no model is involved
