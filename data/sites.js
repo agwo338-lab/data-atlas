@@ -156,13 +156,46 @@ var SITES = [
     lon: 28.1887,
     status: "Under construction",
     capacityMW: 310,
-    lastUpdated: "2026-08-21",
+    lastUpdated: "2026-09-15",
     sources: [
       { label: "Nebius newsroom, Mar 2026", url: "https://nebius.com/newsroom/nebius-to-construct-310-mw-ai-factory-in-finland" },
       { label: "Finnish AI Region, Apr 2026", url: "https://www.fairedih.fi/en/2026/04/14/nebius-plans-e8-5-billion-data-centre-in-lappeenranta-cementing-finland-as-its-european-base/" },
-      { label: "Polarnode newsroom, May 2026", url: "https://www.polarnode.fi/polarnode-begins-pre-construction-works-for-the-lappeenranta-data-center-project/" }
+      { label: "Polarnode newsroom, May 2026", url: "https://www.polarnode.fi/polarnode-begins-pre-construction-works-for-the-lappeenranta-data-center-project/", cls: "P" },
+      { label: "City of Lappeenranta — Pajarila data center (project page)", url: "https://lappeenranta.fi/en/decision-making-and-administration/pajarila-data-center", cls: "R" },
+      { label: "City of Lappeenranta — Pajarila data center FAQ", url: "https://lappeenranta.fi/en/decision-making-and-administration/pajarila-data-center/frequently-asked-questions", cls: "R" },
+      { label: "Yle — building permit granted, covers 60MW, Jan 2026", url: "https://yle.fi/a/74-20206812", cls: "T" },
+      { label: "Yle — second permit needed to exceed 300MW", url: "https://yle.fi/a/74-20206370", cls: "T" },
+      { label: "Etelä-Saimaa — site clearing underway, Mar 2026", url: "https://www.esaimaa.fi/paikalliset/9342174", cls: "G" }
     ],
-    notes: "€8.5B project; first capacity expected 2027. Polarnode (developer) began pre-construction works in the Pajarila district in May 2026, confirmed by the City of Lappeenranta's own site — status updated from \"Planned\" accordingly."
+    provenance: {
+      capacityMW: {
+        basis: "disclosed",
+        asOf: "2026-05-01",
+        evidence: [
+          { source: 0, cls: "P", note: "Nebius newsroom announces the 310MW target." },
+          { source: 1, cls: "G", note: "Repeats the €8.5B / 310MW figures." },
+          { source: 5, cls: "T", note: "Reports the granted building permit covers only 60MW — so 310MW is a stated multi-phase ambition, not a permitted figure." }
+        ]
+      },
+      status: {
+        basis: "disclosed",
+        asOf: "2026-04-14",
+        evidence: [
+          { source: 3, cls: "R", note: "City of Lappeenranta's own project page: 60-year land lease over two plots (41ha) to Polarnode, permit granted, construction beginning spring 2026." },
+          { source: 4, cls: "R", note: "City FAQ states Polarnode is project developer and Nebius operates the facility — settles who builds versus who runs it." },
+          { source: 5, cls: "T", note: "Building committee granted the construction permit 2026-01-28." },
+          { source: 7, cls: "G", note: "Site clearing underway as of Mar 2026." }
+        ]
+      },
+      location: {
+        basis: "estimated",
+        asOf: "2026-09-15",
+        evidence: [
+          { source: 3, cls: "R", note: "City page places the site on Kettukuja in the Pajarila district, south of Highway 6, inside the confirmed Pajarilanväylä vaihe 1 / Pajarilan teollisuusalue zoning plans. The stored lat/lon is still Lappeenranta city centre, ~5km off — basis stays 'estimated' until a parcel-level fix is pulled from kartta.lappeenranta.fi or the asemakaava PDF." }
+        ]
+      }
+    },
+    notes: "Re-verified 2026-09-15. The \"confirmed by the City of Lappeenranta's own site\" claim that previously sat in these notes with no citation behind it checks out — the city runs a project page and an FAQ for this site, and both are now cited as R-class records. They also settle the roles: Polarnode is developer and landholder (60-year lease from the city, signed 2025), Nebius operates. CAPACITY CAVEAT: the building permit granted by Lappeenranta's rakennuslautakunta on 2026-01-28 covers only 60MW; Polarnode has stated intent to seek a second permit to exceed 300MW, but that permit is not yet granted as of Sep 2026. So 310MW is a multi-phase target, not an approved figure — trade coverage does not draw this distinction. LOCATION: the stored pin is Lappeenranta city centre/harbour; every source places the site in Pajarila, roughly 5km south. Not corrected here because the only coordinate found for Pajarila was a Wikipedia district centroid (D-class), which is not good enough to overwrite a pin with. Searched without result: EDGAR full-text for \"Lappeenranta\" and \"Nebius Finland\" (no hits); PeeringDB (no facility — site is pre-operational); Fingrid's connection queue for a signed capacity figure (only secondary press discussion found). Not chased: YTJ/Finnish Trade Register for the Polarnode entity. Reclassified polarnode.fi from G to P — it is the developer's own newsroom, not press."
   },
   {
     id: "nebius-bethune",
@@ -316,18 +349,52 @@ var SITES = [
     id: "coreweave-kristiansand",
     provider: "CoreWeave",
     site: "N01 Datacenter Campus (Bulk Infrastructure)",
-    city: "Kristiansand",
+    city: "Øvrebø, Vennesla",
     country: "Norway",
-    lat: 58.1467,
-    lon: 7.9956,
+    lat: 58.257573,
+    lon: 7.889861,
     status: "Under construction",
     capacityMW: 400,
-    lastUpdated: "2026-08-20",
+    lastUpdated: "2026-09-15",
     sources: [
       { label: "Bulk Infrastructure newsroom", url: "https://bulkinfrastructure.com/newsroom/coreweave-partners-with-bulk-infrastructure" },
-      { label: "Nordic Property News", url: "https://www.nordicpropertynews.com/article/10575/one-of-europes-largest-data-centers-will-be-built-in-norway" }
+      { label: "Nordic Property News", url: "https://www.nordicpropertynews.com/article/10575/one-of-europes-largest-data-centers-will-be-built-in-norway" },
+      { label: "PeeringDB — Bulk Norway Data Center Campus N01 (fac/5520)", url: "https://www.peeringdb.com/fac/5520", cls: "N" },
+      { label: "CoreWeave/Bulk joint release (PRNewswire), Mar 2025", url: "https://www.prnewswire.com/news-releases/coreweave-partners-with-bulk-infrastructure-for-one-of-the-largest-nvidia-ai-deployments-in-europe-302401685.html", cls: "P" },
+      { label: "Vennesla kommune — \"Imponert over Bulks utvikling\", Aug 2024", url: "https://www.vennesla.kommune.no/nyheter-aktuelt/imponert-over-bulks-utvikling.6361.aspx", cls: "G" },
+      { label: "Bulk Infrastructure — €410M financing for N01 expansion, Nov 2025", url: "https://bulkinfrastructure.com/newsroom/bulk-infrastructure-secures-410-million-for-n01-data-center-campus-expansion", cls: "P" },
+      { label: "CoreWeave Inc. FY2025 10-K, Exhibit 21.1 (subsidiaries)", url: "https://www.sec.gov/Archives/edgar/data/1769628/000176962826000104/ex211-coreweaveincx10xk.htm" }
     ],
-    notes: "One of the largest single NVIDIA AI deployments announced in Europe; site has room to expand toward 1GW. Targeted for operation by summer 2025 per the original announcement — marked as under construction here since current live status wasn't independently confirmed."
+    provenance: {
+      capacityMW: {
+        basis: "disclosed",
+        asOf: "2025-11-03",
+        evidence: [
+          { source: 3, cls: "P", note: "Joint release states \"Bulk has secured 400 MW at the site with potential up to 1GW\" — this is Bulk's site-level grid reservation for the whole campus, NOT a CoreWeave-specific contracted load." },
+          { source: 5, cls: "P", note: "Nov 2025 financing release repeats the same 400MW/1GW figure ~8 months on, unchanged — consistent retelling rather than a drifting number." },
+          { source: 0, cls: "G", note: "Developer's own newsroom announcement, the original basis for this figure." }
+        ]
+      },
+      status: {
+        basis: "disclosed",
+        asOf: "2025-11-03",
+        evidence: [
+          { source: 4, cls: "G", note: "Vennesla municipality describes a third facility under construction at Støleheia (~NOK 3bn) as of Aug 2024 — already incomplete before the original summer-2025 target." },
+          { source: 5, cls: "P", note: "Nov 2025 financing proceeds earmarked for \"continued expansion at the site\" — funding a build, not an operating asset." },
+          { source: 6, cls: "R", note: "CoreWeave FY2025 10-K lists CoreWeave Norway AS as an active subsidiary — confirms the relationship is live, but says nothing about build progress." }
+        ]
+      },
+      location: {
+        basis: "disclosed",
+        asOf: "2025-09-26",
+        evidence: [
+          { source: 2, cls: "N", note: "PeeringDB facility record: Stølevegen 39, Øvrebø 4715, coords 58.257573/7.889861, 7 networks + 1 exchange present. First N-class citation this entry has ever carried." },
+          { source: 3, cls: "P", note: "Joint release names \"the N01 Datacenter Campus, Vennesla, Norway\" — administratively Vennesla, not Kristiansand." },
+          { source: 4, cls: "G", note: "Municipality places the build at Støleheia in Vennesla, agreeing with the PeeringDB address." }
+        ]
+      }
+    },
+    notes: "Re-verified 2026-09-15. LOCATION CORRECTED: previously pinned at Kristiansand city centre (58.1467, 7.9956); PeeringDB's facility record gives a real street address ~13km north at Stølevegen 39, Øvrebø, which sits in Vennesla municipality (not Kristiansand — Øvrebø is a former municipality now inside Vennesla). The operator's own joint release and Vennesla kommune both agree. Entry id keeps the \"kristiansand\" shorthand since that is how the site is publicly known. CAPACITY CAVEAT: the 400MW figure is Bulk Infrastructure's disclosed site-level grid capacity reservation for the entire N01 campus (with headroom to 1GW), NOT a CoreWeave-specific contracted figure — no source found distinguishes CoreWeave's own MW commitment from the campus total, and that gap looks structural rather than a research failure. STATUS: the original announcement targeted operation by summer 2025; 14 months past that, nothing found claims the site is live, while a Nov 2025 financing round for \"continued expansion\" and a 2024 municipal item both indicate an ongoing build. Not checked this pass: Brønnøysundregistrene for the N01 operating entity, and Vennesla kommune's own planinnsyn/byggesak portal for a building permit (only its news page was reached). Searched without result: Statnett/NVE grid-reservation registers for a site-specific MW figure; EDGAR full-text for \"Kristiansand\" (no hits)."
   },
   {
     id: "coreweave-lancaster",
@@ -356,12 +423,46 @@ var SITES = [
     lon: -97.1331,
     status: "Operational",
     capacityMW: 260,
-    lastUpdated: "2026-08-21",
+    lastUpdated: "2026-09-15",
     sources: [
       { label: "Core Scientific investor newsroom, Feb 2025", url: "https://investors.corescientific.com/news-events/press-releases/detail/110/core-scientific-and-coreweave-announce-1-2-billion-expansion-at-denton-tx-site" },
-      { label: "Data Center Dynamics, Apr 2026", url: "https://www.datacenterdynamics.com/en/news/coreweave-deploys-16000-gpus-at-delayed-data-center-in-denton-texas/" }
+      { label: "Data Center Dynamics, Apr 2026", url: "https://www.datacenterdynamics.com/en/news/coreweave-deploys-16000-gpus-at-delayed-data-center-in-denton-texas/" },
+      { label: "TX TDLR — TABS project 2025005706, Core Scientific Denton", url: "https://www.tdlr.texas.gov/TABS/Search/Print/TABS2025005706" },
+      { label: "TX TDLR — TABS project 2022003099, south-parcel tech building", url: "https://www.tdlr.texas.gov/TABS/Search/Print/TABS2022003099" },
+      { label: "Core Scientific Q2 FY26 earnings deck (8-K exhibit), Jul 2026", url: "https://www.sec.gov/Archives/edgar/data/1839341/000183934126000012/q2fy26earningsdeck728am.htm", cls: "P" },
+      { label: "Core Scientific Q3 2025 earnings deck (8-K exhibit), Oct 2025", url: "https://www.sec.gov/Archives/edgar/data/1839341/000114036125039864/ef20057996_ex99-1.htm", cls: "P" },
+      { label: "Core Scientific 8-K exhibit — original Denton facility announcement, Mar 2022", url: "https://www.sec.gov/Archives/edgar/data/1839341/000119312522067245/d279212dex991.htm", cls: "P" }
     ],
-    notes: "Former Core Scientific bitcoin-mining site, converted for CoreWeave (reportedly hosting OpenAI workloads) under a $6.1B conversion. 260MW is the disclosed critical IT load. Coordinates are city-center approximation (site address reported as 8171 Jim Christal Rd, Denton — not independently geocoded)."
+    provenance: {
+      capacityMW: {
+        basis: "disclosed",
+        asOf: "2026-07-28",
+        evidence: [
+          { source: 4, cls: "P", note: "Q2 FY26 deck lists Denton at ~260MW leased and ~260MW billing as of mid-Jul 2026. Classed P, not R: an investor deck filed as an 8-K exhibit is still the operator describing its own site." },
+          { source: 0, cls: "P" },
+          { source: 1, cls: "T" }
+        ]
+      },
+      status: {
+        basis: "disclosed",
+        asOf: "2026-07-28",
+        evidence: [
+          { source: 4, cls: "P", note: "Q2 FY26 deck marks Denton 'substantially complete' and billing ~260MW — the basis for calling this Operational." },
+          { source: 5, cls: "P", note: "Q3 2025 deck shows only ~120+MW energized across Denton and Marble combined, so the site was materially less than fully live as recently as late 2025." },
+          { source: 1, cls: "T", note: "Apr 2026: 16,000 GPUs deployed at a 'delayed' facility — consistent with partial energization well under what 260MW would host." }
+        ]
+      },
+      location: {
+        basis: "estimated",
+        asOf: "2026-09-15",
+        evidence: [
+          { source: 2, cls: "R", note: "Texas TDLR accessibility-project registration names 8171 Jim Christal Road, Denton, TX 76207, owner Core Scientific, $635M project cost, completion target 2025-12-29 — a state filing made before construction, independent of any press cycle." },
+          { source: 3, cls: "R", note: "Companion record at 8161 Jim Christal Rd lists the City of Denton as owner of record, corroborating that part of the campus sits on city-leased land." },
+          { source: 0, cls: "P", note: "Stored lat/lon is still a Denton city-centre approximation, not geocoded to the confirmed address — hence basis 'estimated'." }
+        ]
+      }
+    },
+    notes: "Re-verified 2026-09-15. ADDRESS CONFIRMED independently: Texas TDLR accessibility-project registration TABS2025005706 names 8171 Jim Christal Road, Denton, TX 76207 with Core Scientific as owner, a $635M project cost and a Dec 2025 completion target — a state filing made ahead of construction, independent of any announcement. A companion record at 8161 Jim Christal Rd lists the City of Denton as owner, corroborating that part of the campus sits on city-leased land. The pin itself is still a city-centre approximation and was NOT updated — no geocode-grade source for the parcel was found (Denton Central Appraisal District only returned its ArcGIS portal shell). STATUS REFINED: 'Operational' is right as of Jul 2026, but the site ramped rather than arriving — Core Scientific's own SEC-filed decks show only ~120+MW energized across Denton and Marble combined in Oct 2025, the Apr 2026 trade report describes a delayed facility with 16,000 GPUs deployed, and only by the Jul 2026 deck is Denton 'substantially complete' and billing ~260MW. Do not read 260MW as having been live since the 2025 announcement. Former Core Scientific bitcoin-mining site converted for CoreWeave under a $6.1B conversion; 260MW is the disclosed critical IT load, now cross-confirmed across five separate Core Scientific filings (all P-class, so the extra citations add reliability but not independence). Note the site's original 2022 build target was 300MW TOTAL ELECTRICAL capacity for the mining-era structures — a different metric from the 260MW critical IT load cited now; do not merge the two. REMOVED: an earlier note said this facility 'reportedly' hosts OpenAI workloads. No sourcing for that was found anywhere — not in the 2022 or 2025 press releases, the earnings decks, or trade coverage — so it has been dropped rather than left hedged. Searched without result: PeeringDB (nothing under CoreWeave, Core Scientific or Denton — expected, this is GPU compute rather than carrier-neutral colo, so the miss is uninformative); EPA ECHO under NAICS 518210 and 2211 for Denton city and county (full 7,784-facility TX scan, coverage complete); ERCOT and Denton Municipal Electric records (no usable public endpoint found)."
   },
   {
     id: "coreweave-muskogee",
@@ -422,13 +523,47 @@ var SITES = [
     lon: -98.5326,
     status: "Under construction",
     capacityMW: 400,
-    lastUpdated: "2026-08-21",
+    lastUpdated: "2026-09-15",
     sources: [
       { label: "Applied Digital investor newsroom, Jun 2025", url: "https://ir.applieddigital.com/news-events/press-releases/detail/123/applied-digital-announces-250mw-ai-data-center-lease-with" },
       { label: "Applied Digital investor newsroom, Aug 2025", url: "https://ir.applieddigital.com/news-events/press-releases/detail/128/applied-digital-finalizes-additional-150mw-lease-with" },
-      { label: "Data Center Dynamics, Oct 2025", url: "https://www.datacenterdynamics.com/en/news/first-50mw-ready-for-service-at-applied-digital-data-center-in-ellendale-north-dakota/" }
+      { label: "Data Center Dynamics, Oct 2025", url: "https://www.datacenterdynamics.com/en/news/first-50mw-ready-for-service-at-applied-digital-data-center-in-ellendale-north-dakota/" },
+      { label: "Applied Digital FY2026 10-K (period ended 2026-05-31), filed 2026-07-29", url: "https://www.sec.gov/Archives/edgar/data/1144879/000114487926000048/apld-20260531.htm" },
+      { label: "Applied Digital 8-K exhibit — investor presentation, Apr 2026", url: "https://www.sec.gov/Archives/edgar/data/1144879/000114487926000036/apld_invxinvestorpresent.htm", cls: "P" },
+      { label: "Applied Digital 8-K exhibit — Q4 FY26 earnings release, Jul 2026", url: "https://www.sec.gov/Archives/edgar/data/1144879/000114487926000044/apldq426earningsreleaseasf.htm", cls: "P" }
     ],
-    notes: "Applied Digital's Polaris Forge 1 campus, fully contracted to CoreWeave (400MW across 3 buildings, ~15-year leases, ~$11B total anticipated lease revenue). Building 1 (100MW) fully energized Nov 2025; Building 2 (150MW) partially live (~75MW) as of ~Jul 2026; Building 3 (150MW) targeted 2027 — status set to \"Under construction\" reflecting the incomplete buildout. Campus designed to scale to 1GW long-term, per Applied Digital — that headline figure is aspirational/not yet contracted, distinct from the 400MW CoreWeave commitment."
+    provenance: {
+      capacityMW: {
+        basis: "disclosed",
+        asOf: "2026-07-29",
+        evidence: [
+          { source: 3, cls: "R", note: "FY2026 10-K: the Building 4 Lease added 150MW, bringing total contracted capacity at Polaris Forge 1 under the CoreWeave leases to 400MW — the same number as the press releases, but stated as a legal disclosure." },
+          { source: 4, cls: "P", note: "Apr 2026 investor-presentation exhibit labels the 400MW explicitly as Contracted Critical IT Load, confirming it matches the atlas's critical-IT convention rather than being gross power." },
+          { source: 0, cls: "P" },
+          { source: 1, cls: "P" },
+          { source: 2, cls: "T" }
+        ]
+      },
+      status: {
+        basis: "disclosed",
+        asOf: "2026-07-27",
+        evidence: [
+          { source: 3, cls: "R", note: "10-K: Building 1 operational since Oct 2025, Building 2 partially operational, Building 3 still under construction targeting RFS CY2027." },
+          { source: 5, cls: "P", note: "Q4 FY26 earnings release: Building 2 Phase 1 (75MW) delivered 2026-06-30, taking total live capacity to 175MW of the 400MW contracted." },
+          { source: 0, cls: "P" },
+          { source: 2, cls: "T" }
+        ]
+      },
+      location: {
+        basis: "estimated",
+        asOf: "2026-08-21",
+        evidence: [
+          { source: 0, cls: "P" },
+          { source: 2, cls: "T", note: "No independent record found for the pin: EPA ECHO shows no NAICS 518210 or 2211 facility in Dickey County (full-state scan, coverage complete) and PeeringDB has no record. Coordinates remain unverified." }
+        ]
+      }
+    },
+    notes: "Re-verified 2026-09-15 — capacity and status both now carry SEC-filed corroboration. The 400MW is confirmed as contracted CRITICAL IT LOAD (not gross power) by Applied Digital's FY2026 10-K and an Apr 2026 investor-presentation exhibit. Build state as of the FY26 10-K and the Jul 2026 earnings release: Building 1 (100MW) operational since Oct 2025; Building 2 (150MW) partially live — Phase 1 (75MW) delivered 2026-06-30, taking the campus to 175MW of 400MW; Building 3 (150MW) under construction, targeting RFS CY2027. Naming wrinkle worth knowing: the lease documents number the three CoreWeave leases Building 2/3/4 while investor materials call the physical structures Building 1/2/3 — the MW arithmetic (100+150+150=400) is consistent across both, so this is inconsistent internal naming, not a size discrepancy. Campus is designed to scale to 1GW long-term per Applied Digital; that headline figure remains aspirational and is distinct from the 400MW CoreWeave commitment. LOCATION still unverified against any independent record — EPA ECHO returned no facility in Dickey County under NAICS 518210 or 2211 (full-state scan of 1,887 ND air facilities, coverage complete, so a real negative) and PeeringDB has nothing. Next places to look: Dickey County parcel records or an ND PSC siting docket. The 10-K quotation was cross-checked against a second model family with live search, which reached the identical sentence via the SEC's own XBRL note pages — not a fabricated quote."
   },
   {
     id: "coreweave-barcelona",
@@ -492,14 +627,44 @@ var SITES = [
     lon: -100.7551,
     status: "Under construction",
     capacityMW: 526,
-    lastUpdated: "2026-08-23",
+    lastUpdated: "2026-09-15",
     sources: [
       { label: "Galaxy Digital (PRNewswire) — Phase I completion", url: "https://www.prnewswire.com/news-releases/galaxy-completes-phase-i-of-its-helios-data-center-campus-delivering-133-megawatts-of-critical-it-load-to-coreweave-302818664.html" },
       { label: "Data Center Dynamics — \"CoreWeave leases another 260MW capacity from Galaxy in Texas\"", url: "https://www.datacenterdynamics.com/en/news/coreweave-leases-another-260mw-capacity-from-galaxy-in-texas/" },
       { label: "Blockspace — Galaxy delivers Helios to CoreWeave", url: "https://blockspace.media/insight/galaxy-delivers-helios-to-coreweave/" },
-      { label: "Data Center Dynamics — Galaxy closes $1.4bn debt facility for Helios", url: "https://www.datacenterdynamics.com/en/news/galaxy-digital-closes-14bn-debt-facility-for-helios-data-center-campus-in-texas/" }
+      { label: "Data Center Dynamics — Galaxy closes $1.4bn debt facility for Helios", url: "https://www.datacenterdynamics.com/en/news/galaxy-digital-closes-14bn-debt-facility-for-helios-data-center-campus-in-texas/" },
+      { label: "TCEQ Form PI-1S air-permit registration — Galaxy Helios I LLC (RN111537775), filed 2025-01-30", url: "https://www.tceq.texas.gov/", cls: "R" }
     ],
-    notes: "15-year lease near Afton, TX, with two 5-year extension options; Galaxy expects >$1B avg annual revenue from CoreWeave over the term. Phase I (133MW critical IT / ~200MW gross) delivered, rent commencing Q2 2026. Phase II (260MW) under construction, targeting H1 2027. CoreWeave has committed to the \"full 800MW of gross power currently approved and contracted\" (≈526MW critical IT total across all phases) — 526MW used here as the critical-IT figure, consistent with how other entries report critical IT load rather than gross power. Campus's long-term scale-up target of up to 3.6GW is Galaxy's own aspirational ceiling, not a contracted figure. Coordinates are a Dickens, TX approximation, not independently geocoded to the exact campus address."
+    provenance: {
+      capacityMW: {
+        basis: "disclosed",
+        asOf: "2026-08-05",
+        evidence: [
+          { source: 0, cls: "P", note: "Galaxy's own Q2 2026 disclosure breaks the 526MW out as Phase I 133MW + Phase II 260MW + Phase III 133MW — the atlas's figure matches that stated breakdown exactly rather than being derived or rounded here." },
+          { source: 1, cls: "T" },
+          { source: 2, cls: "T" },
+          { source: 3, cls: "T" }
+        ]
+      },
+      status: {
+        basis: "disclosed",
+        asOf: "2026-09-08",
+        evidence: [
+          { source: 4, cls: "R", note: "TCEQ air-permit registration (Standard Permit 6005, electric generating units) filed by a named Galaxy executive, projecting construction start Mar 2025 — regulatory proof the project is real and was genuinely being built, not an announcement." },
+          { source: 0, cls: "P", note: "Phase I (133MW) delivered Q2 2026; Phase II (260MW) targeting Q2 2027 rent commencement." },
+          { source: 1, cls: "T" }
+        ]
+      },
+      location: {
+        basis: "estimated",
+        asOf: "2026-09-15",
+        evidence: [
+          { source: 4, cls: "R", note: "Registration gives the site address as 984 County Road 112, Afton, Dickens County, TX 79220 — an independent confirmation of the place. The stored lat/lon remains a county-level approximation, not geocoded to that address, hence basis 'estimated'." },
+          { source: 0, cls: "P", note: "Galaxy's own filing describes the campus as in Dickens County, West Texas, ~60 miles from Lubbock." }
+        ]
+      }
+    },
+    notes: "Re-verified 2026-09-15. ADDRESS CONFIRMED independently: a TCEQ air-permit registration (Form PI-1S, Registered Entity RN111537775, filed 2025-01-30 by Galaxy Helios I LLC and signed by a named Galaxy executive) gives the site as 984 County Road 112, Afton, Dickens County, TX 79220, with construction start projected Mar 2025. That is genuine regulatory corroboration the project exists and was being built. The map pin is still a county-level approximation and was NOT updated: a precise lat/long (33.7814, -100.8791) circulates on directory/wiki sites but neither cites how it was derived (D-class), so it was not written in. CAPACITY remains operator-sourced: the 526MW critical-IT figure traces to Galaxy's own investor materials (133 + 260 + 133 across three phases), republished via PRNewswire, refiled as an SEC exhibit and written up by trade press — the arithmetic checks out against Galaxy's stated breakdown, but no regulatory, network or observed source confirms the number itself. GROSS CAPACITY HAS MOVED: ERCOT-approved grid capacity at the campus is now ~1,630MW gross (Helios I 800MW + Helios II 830MW) per Galaxy's Jan 2026 and Sep 2026 disclosures, up from the 800MW previously noted here. That is interconnection capacity, distinct from and much larger than the 526MW critical IT leased to CoreWeave — do not conflate them. Galaxy itself describes the ERCOT Batch Zero classifications as still subject to an ongoing audit, and ERCOT is not publishing Batch Zero results, so those grid figures are sponsor-disclosed rather than independently confirmable. DROPPED CLAIM: a search summary asserted a specific TCEQ document showed 120 diesel generators at this site; the cited document was fetched and turned out to cover an unrelated LNG facility in Jefferson County — misattributed, and not applied. Searched without result: EPA ECHO (zero NAICS 518210 facilities in Dickens County; full 7,784-facility TX scan, coverage complete, though data-centre gensets may simply not be registered under that code); PeeringDB (no record, expected for a single-tenant campus); Chapter 312 abatement records (the Dickens County reinvestment-zone record found states no investment or MW figure)."
   },
   {
     id: "coreweave-plano",
