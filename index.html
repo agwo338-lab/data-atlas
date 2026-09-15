@@ -120,16 +120,21 @@
     overflow-y:auto; overflow-x:hidden;
   }
   .eyebrow{ font:500 10.5px/1 var(--font-heading); letter-spacing:.12em; text-transform:uppercase; color:var(--color-neutral-500); }
-  .stat-mw{ font:500 46px/1 var(--font-heading); letter-spacing:-.03em; margin-top:var(--space-2); }
-  .stat-mw em{ font-style:normal; font-size:17px; color:var(--color-neutral-500); margin-left:4px; }
   .stat-sub{ font-size:12px; color:var(--color-neutral-500); margin-top:var(--space-2); }
 
   .prov{ display:grid; grid-template-columns:8px 1fr auto; align-items:center; gap:var(--space-2) var(--space-3);
-    padding:var(--space-2) 0; cursor:pointer; border:0; background:none; width:100%; text-align:left; color:inherit; }
+    padding:var(--space-3) var(--space-2); margin:0 calc(var(--space-2) * -1); border-radius:6px;
+    cursor:pointer; border:0; background:none; width:calc(100% + var(--space-4)); text-align:left; color:inherit;
+    transition:background .12s ease; }
+  .prov:hover{ background:color-mix(in srgb, var(--color-text) 5%, transparent); }
   .prov + .prov{ border-top:1px solid color-mix(in srgb, var(--color-text) 8%, transparent); }
-  .prov:hover .pname{ color:var(--color-accent-300); }
-  .prov .dot{ width:8px; height:8px; border-radius:50%; }
-  .pname{ font:500 13.5px/1.2 var(--font-heading); }
+  .dot{ width:8px; height:8px; border-radius:50%; flex:none; }
+  .pname{ font:500 13.5px/1.2 var(--font-heading); display:inline-flex; align-items:center; transition:color .15s ease; }
+  .pname:hover{ color:var(--color-accent-300); }
+  .parrow{ display:inline-block; opacity:0; max-width:0; overflow:hidden; margin-left:0;
+    transform:translateX(-3px); transition:opacity .16s ease, transform .16s ease, max-width .16s ease, margin-left .16s ease;
+    font-size:11px; color:var(--color-accent-300); }
+  .pname:hover .parrow{ opacity:1; max-width:1em; margin-left:5px; transform:translateX(0); }
   .pmw{ font-size:12px; color:var(--color-neutral-400); font-variant-numeric:tabular-nums; }
   .pbar{ grid-column:2 / span 2; height:2px; background:color-mix(in srgb, var(--color-text) 10%, transparent); }
   .pbar i{ display:block; height:2px; }
@@ -279,6 +284,13 @@
   /* ---- full-screen overlay views (Sources & method / provider / site) ---- */
   .ov{ position:absolute; inset:0; z-index:40; background:var(--color-bg); overflow-y:auto; display:none; padding:96px var(--space-8) 96px; }
   .ov.on{ display:block; }
+
+  /* Provider page slides up from the bottom instead of appearing abruptly —
+     stays in the layout (display:block) always, off-screen below the fold
+     via transform, so the transition has something to animate. */
+  #viewProvider{ display:block; transform:translateY(100%); transition:transform .38s cubic-bezier(.22,.68,.32,1); pointer-events:none; }
+  #viewProvider.on{ transform:translateY(0); pointer-events:auto; }
+  @media (prefers-reduced-motion: reduce){ #viewProvider{ transition:none; } }
   .wrap{ max-width:1040px; margin:0 auto; }
   .lede{ font-size:15px; color:var(--color-neutral-300); max-width:66ch; }
   .back-link{ background:none; border:0; color:var(--color-neutral-500); font:500 12px var(--font-heading); letter-spacing:.03em; cursor:pointer; padding:0 0 var(--space-6); display:block; }
@@ -454,10 +466,6 @@
   </header>
 
   <aside id="rail">
-    <div class="eyebrow">Disclosed capacity</div>
-    <div class="stat-mw" id="totalMw">—<em>MW</em></div>
-    <div class="stat-sub" id="totalSub"></div>
-    <hr class="hr">
     <div class="eyebrow" style="margin-bottom:var(--space-2)">Operators</div>
     <div id="provList"></div>
   </aside>
@@ -711,16 +719,10 @@
     }).sort(function(a, b){ return b.mw - a.mw; });
     var max = Math.max.apply(null, byProv.map(function(p){ return p.mw; })) || 1;
 
-    var shown = SITES.filter(function(s){ return activeProviders[s.provider]; });
-    var total = shown.reduce(function(t, s){ return t + (s.capacityMW || 0); }, 0);
-    document.getElementById("totalMw").innerHTML = total.toLocaleString() + "<em>MW</em>";
-    document.getElementById("totalSub").textContent =
-      "across " + shown.length + " sites · " + shown.filter(function(s){ return s.capacityMW == null; }).length + " disclose no figure";
-
     document.getElementById("provList").innerHTML = byProv.map(function(p){
       return '<button class="prov" data-prov="' + esc(p.name) + '" data-off="' + (activeProviders[p.name] ? 0 : 1) + '">' +
         '<span class="dot" style="background:' + colorFor(p.name) + '"></span>' +
-        '<span class="pname plink" data-open-provider="' + esc(p.name) + '">' + esc(p.name) + '</span>' +
+        '<span class="pname plink" data-open-provider="' + esc(p.name) + '">' + esc(p.name) + '<span class="parrow">→</span></span>' +
         '<span class="pmw">' + p.mw.toLocaleString() + ' MW</span>' +
         '<span class="pbar"><i style="width:' + Math.round(p.mw / max * 100) + '%;background:' + colorFor(p.name) + '"></i></span>' +
         '<span class="pcount">' + p.n + ' site' + (p.n === 1 ? '' : 's') + ' · ' + p.undis + ' undisclosed</span>' +
