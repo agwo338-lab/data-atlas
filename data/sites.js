@@ -765,7 +765,7 @@ var SITES = [
     lon: -121.9622,
     status: "Under construction",
     capacityMW: 20,
-    lastUpdated: "2026-08-23",
+    lastUpdated: "2026-09-14",
     sources: [
       { label: "Silicon Valley Voice — \"SVP Makes Deal with Amazon to Power Data Center\"", url: "https://www.svvoice.com/svp-makes-deal-with-amazon-to-power-data-center/" },
       { label: "Data Center Dynamics — Silicon Valley Power to build 60kV substation for AWS Santa Clara", url: "https://www.datacenterdynamics.com/en/news/silicon-valley-power-to-build-60kv-substation-for-amazon-web-services-data-center-in-santa-clara/" },
@@ -800,7 +800,7 @@ var SITES = [
         ]
       }
     },
-    notes: "2305 Mission College Blvd. Silicon Valley Power (the city's municipal utility) signed a 15-year power agreement with AWS in Jul 2024 securing 20MW of contracted grid capacity for this site (with SVP authorized to secure up to 80MW more for other customers) — 20MW used here as the disclosed contracted-capacity figure. A separate California Energy Commission filing discloses 78.1MW of on-site backup diesel generation (43 x 2.5MW + 2 x 600kW gensets) — that's backup power, not IT load, so not used as capacityMW. SVP is building a new 60kV \"Freedom Circle Junction\" substation specifically for this site ($5.39M cost billed to Amazon, ~26-month build), still under construction as of mid-2026; developer of record is Oppidan Investment Company, building on AWS's behalf. Originally acquired for $101.4M in Dec 2019 (former PGIM Real Estate property); industry sources describe this as anchoring AWS's us-west-1 (N. California) region, though that specific framing is inferred, not AWS-confirmed. Coordinates are a Mission College Blvd-area approximation, not geocoded to the exact parcel."
+    notes: "2305 Mission College Blvd (independently confirmed via CA state CEQAnet filings 2018032008/2020040254 — same class as the CEC filing already cited, so no new corroboration, but a consistent second state record). Checked again 2026-09-14 for a PeeringDB or OSM footprint that would geocode the exact parcel; still none found — the facility isn't peered/live yet, so location basis stays 'estimated' pending that check at a future audit. Silicon Valley Power (the city's municipal utility) signed a 15-year power agreement with AWS in Jul 2024 securing 20MW of contracted grid capacity for this site (with SVP authorized to secure up to 80MW more for other customers) — 20MW used here as the disclosed contracted-capacity figure. A separate California Energy Commission filing discloses 78.1MW of on-site backup diesel generation (43 x 2.5MW + 2 x 600kW gensets) — that's backup power, not IT load, so not used as capacityMW. SVP is building a new 60kV \"Freedom Circle Junction\" substation specifically for this site ($5.39M cost billed to Amazon, ~26-month build), still under construction as of mid-2026; developer of record is Oppidan Investment Company, building on AWS's behalf. Originally acquired for $101.4M in Dec 2019 (former PGIM Real Estate property); industry sources describe this as anchoring AWS's us-west-1 (N. California) region, though that specific framing is inferred, not AWS-confirmed. Coordinates are a Mission College Blvd-area approximation, not geocoded to the exact parcel."
   },
   {
     id: "aws-wallawalla",
@@ -812,12 +812,12 @@ var SITES = [
     lon: -118.9088,
     status: "Planned",
     capacityMW: null,
-    lastUpdated: "2026-08-23",
+    lastUpdated: "2026-09-14",
     sources: [
       { label: "Walla Walla County — official Amazon Data Center FAQ page", url: "https://www.wwcowa.gov/government/community_development/amazon_data_center_faqs.php" },
       { label: "Data Center Dynamics — \"AWS likely behind $4.8bn data center in Walla Walla, Washington\"", url: "https://www.datacenterdynamics.com/en/news/aws-likely-behind-48bn-data-center-in-walla-walla-washington/" }
     ],
-    notes: "Port of Walla Walla sold ~554 acres to Amazon Data Services (via project entity \"Advance Phase LLC\") on Feb 12, 2026, in the Wallula/Burbank area east of US-12 near the Columbia River. Reported as a ~$4.8-5B project. Initial application (Phase 1) covers 134 acres for 3 data center buildings (~218,000-220,000 sq ft each); the full master plan spans up to 16 buildings across 4 phases on the full 554 acres. As of Aug 11, 2026 (most recent check), permitting remained incomplete — a Traffic Impact Analysis was due Aug 24, 2026, and the county's own site states no application had yet been received as of its Jun 24, 2026 update. No MW figure disclosed anywhere — left null rather than guessed. Re-check status after the Aug 24, 2026 permitting deadline. Coordinates are a Wallula/Burbank-area approximation, not geocoded to the exact parcel."
+    notes: "Port of Walla Walla sold ~554 acres to Amazon Data Services (via project entity \"Advance Phase LLC\") on Feb 12, 2026, in the Wallula/Burbank area east of US-12 near the Columbia River — more specifically the Wallula Gap Business Park along Sundance Road, ~1.4 miles east of Highway 12, between Dodd and Worden roads (still not a geocoded parcel). Reported as a ~$4.8-5B project. Initial application (Phase 1) covers 134 acres for 3 data center buildings (~218,000-220,000 sq ft each); the full master plan spans up to 16 buildings across 4 phases on the full 554 acres. The Aug 24, 2026 Traffic Impact Analysis deadline was met — Walla Walla County's Community Development Department deemed the land-use application \"complete\" in early Sep 2026 (per local reporting, single outlet, not yet independently corroborated), which moves it into substantive review but is not a permit grant — status stays Planned. No MW figure disclosed anywhere — left null rather than guessed. Re-check once the county's substantive review produces a decision. Coordinates are a Wallula/Burbank-area approximation, not geocoded to the exact parcel."
   },
   {
     id: "aws-shreveport",
@@ -866,13 +866,13 @@ var SITES = [
     lon: -95.9436,
     status: "Planned",
     capacityMW: null,
-    lastUpdated: "2026-09-01",
+    lastUpdated: "2026-09-14",
     sources: [
       { label: "Texas Department of Licensing and Regulation — TDLR Project TABS2026027114 (\"Project Eagle,\" Amazon Data Services, Inc.)", url: "https://www.tdlr.texas.gov/TABS/Search/Print/TABS2026027114" },
       { label: "Data Center Dynamics — \"AWS files for $1.2bn data center campus outside Houston, Texas\"", url: "https://www.datacenterdynamics.com/en/news/aws-files-for-12bn-data-center-campus-outside-houston-texas/" },
       { label: "Wharton Post — \"New Filings Expand Project Eagle Plans Near Boling\"", url: "https://whartonpost.com/2026/08/06/project-eagle-expands-10-data-centers-boling/" }
     ],
-    notes: "Amazon Data Services, Inc. is the registered TDLR owner. Expanded from 4 to 10 registered data-center buildings (plus 1 auxiliary water building) as of Aug 2026 filings; TDLR-registered construction cost ~$3B, broader press estimates ~$10B all-in (land+equipment). ~2,700-3,000-acre site near FM 1301/FM 442, addresses on Eaglewood Rd. Site prep underway but project still needs additional county permits (a groundwater district tabled two large water-well permits in Jun 2026 over community concerns) — construction has not been confirmed to have actually started. One source (Houston Chronicle investigation, recirculated elsewhere) cites 'up to 75MW at peak' but this is single-sourced and not independently corroborated — left out of capacityMW pending a second source. Coordinates are Boling town-center approximation; exact parcel address (e.g. 270 Eaglewood Rd) not geocoded. Re-check within ~3 months given fast-moving permitting situation."
+    notes: "Amazon Data Services, Inc. is the registered TDLR owner. Expanded from 4 to 10 registered data-center buildings (plus 1 auxiliary water building) as of Aug 2026 filings; TDLR-registered construction cost ~$3B, broader press estimates ~$10B all-in (land+equipment). ~2,700-3,000-acre site near FM 1301/FM 442, address confirmed via TDLR filing as 234 Eaglewood Rd, Boling, TX 77420 — independently re-geocoded coordinates land within ~0.001° of the stored point, so the existing approximation checks out. Checked ERCOT's large-load queue for a matching interconnection request; the only \"Boling\" entry found (queue ID 24INR0576) is an unrelated 400MW gas-generation project with no AWS/Amazon reference — does not corroborate the single-sourced Houston Chronicle figure of 'up to 75MW at peak', which stays excluded from capacityMW pending a second source. Site prep underway but project still needs additional county permits — a groundwater district tabled two large water-well permits in Jun 2026 over community concerns; as of Sep 2026 those two permits remain tabled/unresolved (two smaller construction wells were approved in May 2026). Construction has not been confirmed to have actually started. Re-check within ~3 months given fast-moving permitting situation."
   },
   {
     id: "aws-vicksburg",
@@ -884,14 +884,14 @@ var SITES = [
     lon: -90.8779,
     status: "Under construction",
     capacityMW: null,
-    lastUpdated: "2026-09-01",
+    lastUpdated: "2026-09-14",
     sources: [
       { label: "About Amazon — \"Amazon plans to invest at least $3 billion in Warren County, Mississippi, for next-generation data center campus\"", url: "https://www.aboutamazon.com/news/company-news/amazon-3-billion-mississippi-data-center-investment" },
       { label: "Office of Governor Tate Reeves — official announcement", url: "https://governorreeves.ms.gov/governor-tate-reeves-announces-amazon-plans-to-invest-3-billion-in-vicksburg/" },
       { label: "Data Center Dynamics — \"Amazon to build $3bn data center campus in Vicksburg, Mississippi\"", url: "https://www.datacenterdynamics.com/en/news/amazon-to-build-3bn-data-center-campus-in-vicksburg-mississippi/" },
       { label: "Vicksburg Post — \"Prime site: AWS announces U.S. 61 site for Vicksburg data center\"", url: "https://www.vicksburgpost.com/news/aws-announces-us-61-site-for-vicksburg-data-center-e70c02b7" }
     ],
-    notes: "$3B investment, largest private investment in Warren County history; ~200 direct jobs. Site is described only at road level — along U.S. Highway 61 South, entrance road off Old Cain Ridge Rd, near the Port of Vicksburg — no parcel address published, so lat/lon here is Vicksburg's city-center coordinate, NOT the actual site; treat as approximate pending a precise address. Status upgraded from Planned to Under construction based on Apr-Jun 2026 local reporting describing entrance-road construction / site mobilization (no confirmation of vertical building construction yet). No MW capacity disclosed. Re-check within 3-6 months — both the exact location and status are likely to firm up."
+    notes: "$3B investment, largest private investment in Warren County history; ~200 direct jobs. Site is described only at road level — along U.S. Highway 61 South, entrance road off Old Cain Ridge Rd, near the Port of Vicksburg — no parcel address published, so lat/lon here is Vicksburg's city-center coordinate, NOT the actual site; treat as approximate pending a precise address. Checked 2026-09-14 for a Warren County Board of Supervisors record (right-of-way approval, loan agreement) that would give a real parcel — only secondhand news coverage of those votes was found, not the underlying agenda/minutes; the county's own agenda portal is the next channel to try. Status upgraded from Planned to Under construction based on Apr-Jun 2026 local reporting describing entrance-road construction / site mobilization; most recent available reporting (Jun 2026) still describes only site-prep activity, no vertical building construction confirmed. No MW capacity disclosed. Re-check within 3-6 months — both the exact location and status are likely to firm up."
   },
   {
     id: "spacexai-colossus1",
