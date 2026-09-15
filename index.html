@@ -1,7 +1,7 @@
 <meta charset="UTF-8">
 <title>Site Atlas</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@5/dist/maplibre-gl.css">
 <script src="https://cdn.jsdelivr.net/npm/maplibre-gl@5/dist/maplibre-gl.js"></script>
 <script src="data/sites.js"></script>
@@ -33,6 +33,23 @@
 
     --font-heading:"Inter", system-ui, sans-serif;
     --font-body:"Inter", system-ui, sans-serif;
+    /* Display serif — the masthead only. High-contrast editorial face; the
+       rest of the UI stays on Inter so the wordmark reads as a wordmark
+       rather than as a theme. */
+    --font-display:"Instrument Serif", "Iowan Old Style", Georgia, "Times New Roman", serif;
+
+    /* Rail + panel geometry.
+       The provider panel opens like a drawer: the operator list slides to the
+       right and the dashboard is revealed in the space it vacates, with the
+       list ending up docked against the dashboard's right edge as its tab
+       column. The rail's buttons are inset --tab-inset from its own left edge
+       (padding --space-8, pulled back --space-2 by their negative margin), so
+       shifting the rail by (panel width - that inset) lands the active
+       operator's left edge exactly on the panel's right edge. */
+    --rail-w:272px;
+    --panel-w:520px;
+    --tab-inset:calc(var(--space-8) - var(--space-2));
+    --rail-shift:calc(var(--panel-w) - var(--tab-inset));
 
     --space-1:2.8px; --space-2:5.6px; --space-3:8.4px; --space-4:11.2px; --space-6:16.8px; --space-8:22.4px;
     --radius-sm:4px; --radius-md:8px; --radius-lg:14px;
@@ -96,8 +113,9 @@
   }
   #bar::after{ content:""; position:absolute; left:var(--space-8); right:var(--space-8); bottom:0; height:1px;
     background:linear-gradient(to right, transparent, var(--color-divider) 48px, var(--color-divider) calc(100% - 48px), transparent); }
-  .brand{ font-family:var(--font-heading); font-weight:500; font-size:17px; letter-spacing:-.01em; white-space:nowrap; }
-  .brand span{ color:var(--color-neutral-500); font-weight:400; }
+  .brand{ display:flex; align-items:baseline; gap:var(--space-3); white-space:nowrap;
+    font-family:var(--font-display); font-weight:400; font-size:32px; line-height:1; letter-spacing:.004em; }
+  .brand span{ font:400 11px/1 var(--font-body); letter-spacing:.11em; text-transform:uppercase; color:var(--color-neutral-500); }
   nav.tabs{ display:flex; gap:var(--space-6); }
   nav.tabs button{
     appearance:none; background:none; border:0; cursor:pointer; padding:0 0 2px;
@@ -115,19 +133,49 @@
 
   /* ---- left rail ---- */
   #rail{
-    position:absolute; z-index:20; top:84px; bottom:222px; left:0; width:272px;
+    position:absolute; z-index:30; top:92px; bottom:222px; left:0; width:var(--rail-w);
     padding:var(--space-8); background:linear-gradient(to right, rgba(22,24,38,.94) 0%, rgba(22,24,38,.9) 62%, rgba(22,24,38,0) 100%);
     overflow-y:auto; overflow-x:hidden;
+    transform:translateX(0);
+    transition:transform .42s cubic-bezier(.22,.68,.32,1), background .3s ease, box-shadow .3s ease;
   }
+  /* Open: the list slides right off the dashboard it was covering, and stops
+     being a floating overlay — solid ground from its buttons' left edge
+     rightward, so the seam with the panel is exact and the strip left of that
+     edge stays transparent rather than painting a gutter over the panel. The
+     shadow falls leftward, onto the surface the list just uncovered. */
+  #shell.panel-open #rail{
+    transform:translateX(var(--rail-shift));
+    background:linear-gradient(to right, transparent 0, transparent var(--tab-inset), var(--color-bg) var(--tab-inset), var(--color-bg) 100%);
+    box-shadow:-16px 0 38px rgba(0,0,0,.42);
+  }
+  @media (prefers-reduced-motion: reduce){ #rail{ transition:background .3s ease; } }
   .eyebrow{ font:500 10.5px/1 var(--font-heading); letter-spacing:.12em; text-transform:uppercase; color:var(--color-neutral-500); }
   .stat-sub{ font-size:12px; color:var(--color-neutral-500); margin-top:var(--space-2); }
 
-  .prov{ display:grid; grid-template-columns:8px 1fr auto; align-items:center; gap:var(--space-2) var(--space-3);
+  .prov{ position:relative; display:grid; grid-template-columns:8px 1fr auto; align-items:center; gap:var(--space-2) var(--space-3);
     padding:var(--space-3) var(--space-2); margin:0 calc(var(--space-2) * -1); border-radius:6px;
     cursor:pointer; border:0; background:none; width:calc(100% + var(--space-4)); text-align:left; color:inherit;
     transition:background .12s ease; }
   .prov:hover{ background:color-mix(in srgb, var(--color-text) 5%, transparent); }
   .prov + .prov{ border-top:1px solid color-mix(in srgb, var(--color-text) 8%, transparent); }
+
+  /* The open operator becomes the tab handle: same surface as the panel, square
+     on the left where the two meet, hairline on the other three sides. The rail
+     sits above the panel in z-order, so this paints across the join and the
+     seam between list and dashboard disappears. */
+  .prov.is-tab, .prov.is-tab:hover{
+    background:var(--color-surface);
+    border-radius:0 var(--radius-md) var(--radius-md) 0;
+  }
+  .prov.is-tab::before{
+    content:""; position:absolute; inset:0; pointer-events:none;
+    border:1px solid var(--color-divider); border-left:0;
+    border-radius:0 var(--radius-md) var(--radius-md) 0;
+  }
+  .prov.is-tab + .prov, .prov:has(+ .prov.is-tab){ border-top-color:transparent; }
+  .prov.is-tab .pname{ color:var(--color-accent-300); }
+  .prov.is-tab .parrow{ opacity:1; max-width:1em; margin-left:5px; transform:translateX(0) rotate(0deg); }
   .dot{ width:8px; height:8px; border-radius:50%; flex:none; }
   .pname{ font:500 13.5px/1.2 var(--font-heading); display:inline-flex; align-items:center; transition:color .15s ease; }
   .pname:hover{ color:var(--color-accent-300); }
@@ -196,7 +244,7 @@
 
   /* ---- detail panel ---- */
   #detail{
-    position:absolute; z-index:28; top:84px; right:0; bottom:222px; width:372px;
+    position:absolute; z-index:28; top:92px; right:0; bottom:222px; width:372px;
     padding:var(--space-8); background:linear-gradient(to left, rgba(22,24,38,.96) 0%, rgba(22,24,38,.93) 70%, rgba(22,24,38,0) 100%);
     overflow-y:auto; display:none;
   }
@@ -285,12 +333,56 @@
   .ov{ position:absolute; inset:0; z-index:40; background:var(--color-bg); overflow-y:auto; display:none; padding:96px var(--space-8) 96px; }
   .ov.on{ display:block; }
 
-  /* Provider page slides up from the bottom instead of appearing abruptly —
-     stays in the layout (display:block) always, off-screen below the fold
-     via transform, so the transition has something to animate. */
-  #viewProvider{ display:block; transform:translateY(100%); transition:transform .38s cubic-bezier(.22,.68,.32,1); pointer-events:none; }
-  #viewProvider.on{ transform:translateY(0); pointer-events:auto; }
-  @media (prefers-reduced-motion: reduce){ #viewProvider{ transition:none; } }
+  /* ---- provider panel ----
+     Docks to the right edge of the rail's buttons and unfurls horizontally,
+     so the operator list reads as a tab column and the open operator as the
+     tab handle attached to it. Animated with clip-path rather than transform
+     so the panel genuinely *expands* from the tab edge instead of sliding in
+     from off-screen — the shadow sweeps out with it. */
+  /* The dock is a fixed window onto the dashboard; the panel slides inside it.
+     Everything past --panel-w is clipped here rather than on the panel, so the
+     panel itself only ever animates transform. */
+  #providerDock{
+    position:absolute; z-index:26; top:92px; bottom:222px; left:0;
+    width:var(--panel-w); overflow:hidden; pointer-events:none;
+  }
+  #providerDock.on{ pointer-events:auto; }
+  #providerPanel{
+    position:absolute; inset:0;
+    background:var(--color-surface);
+    border-top:1px solid var(--color-divider); border-bottom:1px solid var(--color-divider);
+    display:flex; flex-direction:column;
+    /* Revealed, not flown in. The panel and the rail translate by the SAME
+       distance on the SAME curve, so the panel's right edge stays glued to the
+       active operator's tab edge for every frame of the motion — the dashboard
+       reads as something the list was sitting on top of. Both are transforms so
+       both run on the compositor; animating one of them as clip-path or width
+       put it on the main thread, where a busy frame (the map redrawing, say)
+       desynced it from the rail and tore the seam open. */
+    transform:translateX(calc(-1 * var(--rail-shift)));
+    transition:transform .42s cubic-bezier(.22,.68,.32,1);
+  }
+  #providerDock.on #providerPanel{ transform:translateX(0); }
+  @media (prefers-reduced-motion: reduce){ #providerPanel{ transition:none; } }
+  @media (prefers-reduced-motion: reduce){ #providerPanel{ transition:none; } }
+  .pp-body{ flex:1; min-height:0; overflow-y:auto; padding:var(--space-8) var(--space-8) 56px; }
+  .pp-body::-webkit-scrollbar{ width:6px; }
+  .pp-body::-webkit-scrollbar-thumb{ background:var(--color-neutral-800); border-radius:3px; }
+  .pp-close{
+    position:absolute; top:var(--space-4); right:var(--space-4); z-index:2;
+    background:none; border:0; cursor:pointer; padding:var(--space-2);
+    line-height:1; font-size:15px; color:var(--color-neutral-500); border-radius:var(--radius-sm);
+  }
+  .pp-close:hover{ color:var(--color-text); background:color-mix(in srgb, var(--color-text) 7%, transparent); }
+
+  /* The provider markup was written for a 1040px full-screen page; inside a
+     ~520px panel it collapses to a single column. Content is unchanged. */
+  #providerPanel .wrap{ max-width:none; }
+  #providerPanel .p-body{ grid-template-columns:1fr; gap:56px; margin-top:var(--space-8); }
+  #providerPanel .p-head h1{ font-size:23px; }
+  #providerPanel .p-stats{ gap:var(--space-8); padding-top:var(--space-4); }
+  #providerPanel .p-stat-value{ font-size:22px; }
+  #providerPanel .partner-list{ gap:var(--space-2); }
   .wrap{ max-width:1040px; margin:0 auto; }
   .lede{ font-size:15px; color:var(--color-neutral-300); max-width:66ch; }
   .back-link{ background:none; border:0; color:var(--color-neutral-500); font:500 12px var(--font-heading); letter-spacing:.03em; cursor:pointer; padding:0 0 var(--space-6); display:block; }
@@ -434,11 +526,13 @@
   .verdict-unsourced{ color:var(--color-neutral-500); } .verdict-unsourced i{ background:repeating-linear-gradient(to bottom, var(--color-neutral-700) 0 2px, transparent 2px 4px); }
 
   @media (max-width:1100px){
+    :root{ --rail-w:232px; --panel-w:430px; }
     #detail{ width:320px; }
-    #rail{ width:232px; }
   }
   @media (max-width:760px){
     #rail{ display:none; }
+    /* No list to slide — the dashboard just takes the screen. */
+    #providerPanel{ width:100%; }
     #detail{ width:88%; max-width:340px; }
     .row{ grid-template-columns:10px minmax(120px,1.4fr) 84px minmax(90px,.9fr); }
     .row .place, .row .stat{ display:none; }
@@ -495,7 +589,12 @@
   <aside id="detail"></aside>
 
   <section class="ov" id="viewSourcesMethod"></section>
-  <section class="ov" id="viewProvider"></section>
+  <div id="providerDock" aria-hidden="true">
+    <aside id="providerPanel">
+      <button class="pp-close" type="button" aria-label="Close operator panel">&#10005;</button>
+      <div class="pp-body" id="providerPanelBody"></div>
+    </aside>
+  </div>
   <section class="ov" id="viewSite"></section>
 </div>
 
@@ -696,7 +795,10 @@
     map.flyTo({ center: [site.lon, site.lat], zoom: targetZoom || DEFAULT_SITE_ZOOM, duration: 650 });
   }
   document.getElementById("resetView").addEventListener("click", function(){
-    map.fitBounds(fitBoundsArg, { padding: 60, duration: 500 });
+    map.fitBounds(fitBoundsArg, {
+      padding: { top: 60, right: 60, bottom: 60, left: 60 + occludedLeft() },
+      duration: 500
+    });
   });
 
   // ════════════════════════════════════════════════════════════════════
@@ -704,6 +806,11 @@
   // ════════════════════════════════════════════════════════════════════
   var activeProviders = {};
   providerOrder.forEach(function(p){ activeProviders[p] = true; });
+
+  // Which operator's panel is open, if any. Held here rather than read back
+  // off the DOM because renderRail() rebuilds the list wholesale whenever a
+  // filter toggles, which would otherwise drop the tab marker.
+  var openProvider = null;
 
   function providerRailStats(p){
     var sites = SITES.filter(function(s){ return s.provider === p; });
@@ -720,7 +827,8 @@
     var max = Math.max.apply(null, byProv.map(function(p){ return p.mw; })) || 1;
 
     document.getElementById("provList").innerHTML = byProv.map(function(p){
-      return '<button class="prov" data-prov="' + esc(p.name) + '" data-off="' + (activeProviders[p.name] ? 0 : 1) + '">' +
+      return '<button class="prov' + (openProvider === p.name ? ' is-tab' : '') + '" data-prov="' + esc(p.name) + '" data-off="' + (activeProviders[p.name] ? 0 : 1) + '"' +
+        (openProvider === p.name ? ' aria-expanded="true"' : '') + '>' +
         '<span class="dot" style="background:' + colorFor(p.name) + '"></span>' +
         '<span class="pname plink" data-open-provider="' + esc(p.name) + '">' + esc(p.name) + '<span class="parrow">→</span></span>' +
         '<span class="pmw">' + p.mw.toLocaleString() + ' MW</span>' +
@@ -1054,9 +1162,8 @@
         : '<p class="empty-note">No sourced coverage logged yet — see data/sites.js.</p>';
     }
 
-    var el = document.getElementById("viewProvider");
+    var el = document.getElementById("providerPanelBody");
     el.innerHTML = '<div class="wrap">' +
-      '<button class="back-link">← Back to atlas</button>' +
       '<div class="p-head"><span class="dot" style="background:' + color + '"></span><h1>' + esc(p) + '</h1></div>' +
       '<div class="p-stats">' +
         '<div><div class="p-stat-value">' + capacityLabel + '</div><div class="p-stat-label">' + esc(capacitySub) + '</div></div>' +
@@ -1074,19 +1181,98 @@
       '</div>' +
     '</div>';
 
-    el.querySelector(".back-link").addEventListener("click", function(){ switchMainView("atlas"); });
+    // The panel stays open — unlike the old full-screen page, it doesn't cover
+    // the map, so picking a location can just move the map underneath it.
     el.querySelectorAll(".p-loc-item").forEach(function(li){
       li.addEventListener("click", function(){
-        switchMainView("atlas");
+        if (currentView !== "atlas") switchMainView("atlas");
         selectSite(li.getAttribute("data-id"));
       });
     });
   }
 
-  function openProviderView(p){
-    renderProviderView(p);
-    switchMainView("provider");
+  // ── Recentering the globe ───────────────────────────────────────────
+  // With the dashboard open, the left of the canvas is covered by the panel and
+  // the operator list. MapLibre's own viewport padding is the right tool: it
+  // moves the *camera* so the globe sits centred in what's actually visible,
+  // while the canvas keeps filling the window. Transforming #mapwrap instead
+  // would drag its right edge inward and tear a gap open beside it.
+  var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  var MIN_MAP_STRIP = 380; // px of canvas the globe always keeps
+
+  function occludedLeft(){
+    var rail = document.getElementById("rail");
+    // Below the rail's breakpoint the panel covers the map outright, so there
+    // is no "remaining space" to centre anything in.
+    if (getComputedStyle(rail).display === "none") return 0;
+    var cs = getComputedStyle(document.documentElement);
+    var px = function(name){ return parseFloat(cs.getPropertyValue(name)) || 0; };
+    var want = px("--panel-w") - (px("--space-8") - px("--space-2")) + rail.getBoundingClientRect().width;
+    // Between the rail's breakpoint (760px) and a comfortable desktop, the
+    // panel plus the list can claim nearly the whole window — at 900px wide
+    // they want 645 of it. Padding the camera by that much squeezes the globe
+    // into a slit, so cap it: the map always keeps a usable strip, even if
+    // that means it isn't perfectly centred in what's left.
+    var avail = document.getElementById("mapwrap").getBoundingClientRect().width;
+    return Math.max(0, Math.min(want, avail - MIN_MAP_STRIP));
   }
+
+  // The last padding asked for, so a request that arrives before the style is
+  // ready isn't lost — easeTo is a camera command and a camera that doesn't
+  // exist yet quietly ignores it, which would leave the globe parked under the
+  // dashboard with nothing to show why.
+  var wantPadLeft = 0;
+
+  function setMapPadding(left, animate){
+    if (!map) return;
+    wantPadLeft = left;
+    var apply = function(){
+      try {
+        map.easeTo({
+          padding: { top: 0, right: 0, bottom: 0, left: wantPadLeft },
+          duration: (animate === false || reduceMotion.matches) ? 0 : 420
+        });
+      } catch (e) { console.warn("Site Atlas: map padding failed", e); }
+    };
+    if (map.isStyleLoaded && map.isStyleLoaded()) apply();
+    else map.once("load", apply);
+  }
+
+  // Keep the globe centred if the window is resized while the panel is open.
+  window.addEventListener("resize", function(){
+    if (openProvider) setMapPadding(occludedLeft(), false);
+  });
+
+  function openProviderView(p){
+    if (openProvider === p) { closeProviderPanel(); return; }
+    if (currentView !== "atlas") switchMainView("atlas");
+    openProvider = p;
+    renderProviderView(p);
+    var dock = document.getElementById("providerDock");
+    dock.classList.add("on");
+    dock.setAttribute("aria-hidden", "false");
+    document.getElementById("providerPanel").setAttribute("aria-label", p + " — operator overview");
+    document.getElementById("shell").classList.add("panel-open");
+    document.getElementById("providerPanelBody").scrollTop = 0;
+    setMapPadding(occludedLeft(), true);
+    renderRail();
+  }
+
+  function closeProviderPanel(){
+    if (!openProvider) return;
+    openProvider = null;
+    var dock = document.getElementById("providerDock");
+    dock.classList.remove("on");
+    dock.setAttribute("aria-hidden", "true");
+    document.getElementById("shell").classList.remove("panel-open");
+    setMapPadding(0, true);
+    renderRail();
+  }
+
+  document.querySelector(".pp-close").addEventListener("click", closeProviderPanel);
+  document.addEventListener("keydown", function(e){
+    if (e.key === "Escape" && openProvider) closeProviderPanel();
+  });
 
   // ════════════════════════════════════════════════════════════════════
   // Site page — one facility, all of its evidence
@@ -1173,7 +1359,7 @@
   // full-screen overlays (Sources & method, provider, site).
   // ════════════════════════════════════════════════════════════════════
   var ATLAS_PARTS = ["rail", "drawer", "detail", "mapwrap"];
-  var OVERLAYS = { sources: "viewSourcesMethod", provider: "viewProvider", site: "viewSite" };
+  var OVERLAYS = { sources: "viewSourcesMethod", site: "viewSite" };
   var currentView = "atlas";
 
   function switchMainView(view){
@@ -1187,7 +1373,8 @@
       var isSources = b.getAttribute("data-view") === "sources";
       b.setAttribute("aria-current", String((isSources && view === "sources") || (!isSources && onAtlas)));
     });
-    if (view !== "atlas") closeDetail();
+    // The provider panel belongs to the atlas view; leaving the atlas closes it.
+    if (view !== "atlas") { closeDetail(); closeProviderPanel(); }
     if (view === "sources") renderSourcesMethodView();
     window.scrollTo(0, 0);
   }
