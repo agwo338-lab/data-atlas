@@ -733,16 +733,27 @@ var SITES = [
     site: "Gilroy Data Center",
     city: "Gilroy, CA",
     country: "United States",
-    lat: 37.0058,
-    lon: -121.5683,
+    lat: 37.0175,
+    lon: -121.5592,
     status: "Under construction",
     capacityMW: null,
-    lastUpdated: "2026-08-23",
+    lastUpdated: "2026-09-14",
     sources: [
-      { label: "City of Gilroy — official project page, \"Gilroy Data Center (by Amazon Web Services)\"", url: "https://www.cityofgilroy.org/1019/Gilroy-Data-Center-by-AWS" },
-      { label: "Data Center Dynamics — \"Amazon Data Services gains approval for data center on 56 acres in Gilroy, California\"", url: "https://www.datacenterdynamics.com/en/news/amazon-data-services-gains-approval-for-data-center-on-56-acres-in-gilroy-california/" }
+      { label: "City of Gilroy — official project page, \"Gilroy Data Center (by Amazon Web Services)\"", url: "https://www.cityofgilroy.org/1019/Gilroy-Data-Center-by-AWS", cls: "R" },
+      { label: "Data Center Dynamics — \"Amazon Data Services gains approval for data center on 56 acres in Gilroy, California\"", url: "https://www.datacenterdynamics.com/en/news/amazon-data-services-gains-approval-for-data-center-on-56-acres-in-gilroy-california/" },
+      { label: "CEQAnet (California state environmental review database) — \"Gilroy Data Center\" filing 2022110127", url: "https://ceqanet.lci.ca.gov/2022110127/2", cls: "R" }
     ],
-    notes: "56-acre site at 8050 Camino Arroyo; two ~218,000 sq ft buildings (438,500 sq ft total) plus a security building. Approved administratively by Gilroy's Community Development Director on Jul 3, 2025, without a City Council public hearing — drew local controversy over the lack of public process. First phase requires a 49MW PG&E interconnection (a utility/facility spec, not a confirmed nameplate IT-capacity figure) plus 25 x 2.5MW emergency generators — left capacityMW null rather than treating the interconnection number as equivalent, same treatment as other entries with only a substation spec on file. Total investment reported at ~$2B, but that traces to press estimation, not an AWS-disclosed figure — treat as approximate. The Data Center Dynamics source was read via a search-result summary (direct fetch was blocked) rather than the full article — worth a direct re-read at next audit. Coordinates are a Gilroy city-center approximation, not geocoded to 8050 Camino Arroyo."
+    provenance: {
+      location: {
+        basis: "disclosed",
+        asOf: "2026-09-14",
+        evidence: [
+          { source: 0, cls: "R", note: "City of Gilroy project page: APN 841-69-044, permit timeline (entitlement approved Jul 3, 2025; grading/utility permits issued Dec 11, 2025; building permit issued Mar 19, 2026)." },
+          { source: 2, cls: "R", note: "CEQAnet state environmental review filing 2022110127 gives parcel coordinates 37.0175, -121.5592, replacing the prior city-center approximation." }
+        ]
+      }
+    },
+    notes: "56-acre site at 8050 Camino Arroyo, APN 841-69-044; two ~218,000 sq ft buildings (438,500 sq ft total) plus a security building. Approved administratively by Gilroy's Community Development Director on Jul 3, 2025, without a City Council public hearing — drew local controversy over the lack of public process. Grading/utility permits issued Dec 11, 2025; building permit issued Mar 19, 2026 (per the city's own project page). First phase requires a 49MW PG&E interconnection (a utility/facility spec, not a confirmed nameplate IT-capacity figure) plus 25 x 2.5MW emergency generators — left capacityMW null rather than treating the interconnection number as equivalent, same treatment as other entries with only a substation spec on file. A third-party figure of 98MW total capacity surfaced in a search-result summary but could not be traced to the city or to AWS — not used. Total investment reported at ~$2B, but that traces to press estimation, not an AWS-disclosed figure — treat as approximate. Coordinates now geocoded to the parcel via a CEQAnet state filing (2026-09-14), replacing the prior city-center approximation. No EPA ECHO record yet — site not yet operational."
   },
   {
     id: "aws-santaclara",
@@ -818,12 +829,32 @@ var SITES = [
     lon: -93.9054,
     status: "Planned",
     capacityMW: null,
-    lastUpdated: "2026-09-01",
+    lastUpdated: "2026-09-14",
     sources: [
       { label: "Data Center Dynamics — \"AWS pledges $6bn investment in data center campus in Shreveport, Louisiana\"", url: "https://www.datacenterdynamics.com/en/news/aws-pledges-6bn-investment-in-data-center-campus-in-shreveport-louisiana/" },
-      { label: "KSLA — \"Amazon Web Services announces a third data center campus is coming to Shreveport\"", url: "https://www.ksla.com/2026/08/18/amazon-web-services-announces-third-data-center-campus-is-coming-shreveport/" }
+      { label: "KSLA — \"Amazon Web Services announces a third data center campus is coming to Shreveport\"", url: "https://www.ksla.com/2026/08/18/amazon-web-services-announces-third-data-center-campus-is-coming-shreveport/" },
+      { label: "Hoodline — \"Judge Backs Amazon Data Hub in West Shreveport Showdown\" (Caddo Parish District Court ruling, Apr 20, 2026)", url: "https://hoodline.com/2026/04/judge-backs-amazon-data-hub-in-west-shreveport-showdown/", cls: "R", note: "Reports directly on the Caddo Parish District Court judgment upholding the site's special-use permit — the underlying record is the judgment itself." }
     ],
-    notes: "Third AWS/STACK Infrastructure campus in the Caddo-Bossier area, announced Aug 18, 2026 ($6B, part of an $18B total across 3 LA campuses). Distinct from the earlier two-campus, $12B Feb 2026 announcement (Louisiana Economic Development). Coordinates approximate, from a commercial real-estate listing for the 7340 Greenwood Road parcel, not an official filing — no capacity (MW) disclosed. No confirmation construction has started on this specific campus as of Sep 2026; re-check in ~6 months per 'Planned' cadence."
+    provenance: {
+      status: {
+        basis: "disclosed",
+        asOf: "2026-04-20",
+        evidence: [
+          { source: 2, cls: "R", note: "Caddo Parish District Court (Judge Ramon Lafitte) upheld the special-use permit for this site on Apr 20, 2026, dismissing a citizen/Sierra Club challenge to the City Council's permit approval — a judicial record, independent of AWS/STACK." },
+          { source: 0, cls: "T" },
+          { source: 1, cls: "G" }
+        ]
+      },
+      location: {
+        basis: "estimated",
+        asOf: "2026-09-14",
+        evidence: [
+          { source: 0, cls: "T" },
+          { source: 1, cls: "G", note: "Coordinates for 7340 Greenwood Road independently re-geocoded and match the stored point, but still sourced only via a commercial real-estate listing (class D), not a filing — no R/N-class source for location yet." }
+        ]
+      }
+    },
+    notes: "Third AWS/STACK Infrastructure campus in the Caddo-Bossier area, announced Aug 18, 2026 ($6B, part of an $18B total across 3 LA campuses). Distinct from the earlier two-campus, $12B Feb 2026 announcement (Louisiana Economic Development). This site's special-use permit had already been through a legal challenge predating the Aug 2026 announcement: the Shreveport City Council's approval was challenged by a citizen/Sierra Club-backed suit, and on Apr 20, 2026 the Caddo Parish District Court (Judge Ramon Lafitte) upheld the permit, dismissing the challenge — plaintiffs' attorney said they were considering an appeal, not confirmed filed as of this check. Coordinates (7340 Greenwood Road) independently geocoded to the same point already on file — the commercial-listing approximation checks out. No LDEQ air permit or MISO interconnection queue entry found for this site yet; no capacity (MW) disclosed. No confirmation vertical construction has started as of Sep 2026; re-check in ~6 months per 'Planned' cadence."
   },
   {
     id: "aws-boling",
