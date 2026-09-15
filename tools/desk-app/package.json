@@ -1,0 +1,13 @@
+{
+  "name": "site-atlas-desk",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Local viewer for the Site Atlas research desk. Internal tooling, not part of the deployed site.",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "^32.0.0"
+  }
+}

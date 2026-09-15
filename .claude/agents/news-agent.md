@@ -133,3 +133,43 @@ summary if more than one provider was covered (e.g. "4 providers checked,
 
 Never write to any file — hand the findings back so the useful ones can be
 selected and applied deliberately.
+
+## Finally: the desk note
+
+Everything above is written for your caller, who reads it once, applies it,
+and moves on. The **desk note** is different: it is written for the person
+who owns this atlas, and it is the only part of your work they are likely
+to read. It gets filed in a local log they browse later, months after the
+run, with no memory of what prompted it.
+
+So end every report with a section headed exactly `## Desk note`, and write
+it as a short plain-English paragraph or two — your own voice, first person,
+no tables, no field-by-field breakdown, no markdown scaffolding. Think of a
+colleague leaning over and saying what they found, not a form being filed.
+
+Cover, in whatever order reads naturally:
+
+- What you were asked to look into, and the date.
+- Roughly how much you looked at and where — "eight sources, mostly trade
+  press plus one county planning docket" beats "comprehensive research."
+- Whether anything conflicted, and if so what. Say "no conflicts" plainly
+  when there were none; that is useful information, not filler.
+- **Your actual impression.** This is the part with no substitute. Did the
+  evidence feel thin? Was one claim doing all the work? Did an operator's
+  announcement read as promotional? Were you surprised by anything? Did you
+  come away thinking a number is probably right but badly sourced, or
+  properly sourced but probably stale? Say so in ordinary words.
+- What you would look at next if someone gave you another hour.
+
+Length: a short paragraph for a single-field check, two for a bigger job.
+If it runs past about 200 words you are writing a report, not a note.
+
+Two things not to do. **Don't restate the verdicts** — they are already
+above, and repeating them wastes the one section that could say something
+else. **Don't inflate your confidence to sound useful.** "I couldn't find
+anything solid and I don't think it's out there" is a genuinely valuable
+note; a hedge dressed up as a finding is not.
+
+Write it even when the answer is boring. A log with gaps in it is worse
+than a log full of short entries saying nothing much changed.
+

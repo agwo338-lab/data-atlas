@@ -1,24 +1,33 @@
 #!/usr/bin/env node
 'use strict';
 
-// The research desk: a local, gitignored record of what the research
-// subagents actually reported, written by a SubagentStop hook rather than
-// by the model that dispatched them.
+// The research desk — a local, gitignored record of what the research
+// subagents actually found, kept in their own words.
 //
-// Why a hook: research-agent and news-agent have no Write/Edit/Bash tool
-// on purpose (see CLAUDE.md — they read arbitrary web pages, and a write
-// path from there into data/sites.js is a prompt-injection path into a
-// file index.html loads as a plain script). They therefore cannot keep
-// this log themselves. The caller could, but a caller-written log is a
-// self-report: the same process that decided what to apply also decides
-// what to record about it. The harness runs this on agent completion, so
-// the report is captured verbatim whether or not anyone wants it captured.
+// Subagent work is otherwise invisible: an agent runs, a report scrolls
+// past, findings land in data/, and the only durable trace is a commit
+// message written by the process that decided what to apply. Since the
+// human review gate was removed (see CLAUDE.md) nothing else records what
+// an agent thought, as opposed to what it concluded.
 //
-//   capture    read a SubagentStop hook payload on stdin, file a brief
-//   list [n]   print the most recent n briefs (default 10)
-//   backfill   recover past runs from .claude/agent-trace.jsonl
+// Two layers, on purpose:
 //
-// Everything it writes lands in research-log/, which is gitignored.
+//   notes/   The desk note: a short paragraph the agent writes in its own
+//            voice at the end of every report, plus one line from the
+//            caller saying what was actually done with it. This is the
+//            layer meant to be read.
+//   runs/    The agent full final message, verbatim, filed automatically by
+//            the SubagentStop hook. The backstop — consulted when a note
+//            raises a question, not browsed.
+//
+//   file            read a complete note on stdin, validate it, file it
+//   list [n]        the most recent notes, newest first
+//   show <slug>     print one note in full
+//   json            every note as JSON, for the viewer
+//   capture         (hook) archive a subagent verbatim report to runs/
+//   backfill        recover past runs from .claude/agent-trace.jsonl
+//
+// Everything lands in research-log/, which is gitignored.
 
 const fs = require('fs');
 const path = require('path');
@@ -26,159 +35,190 @@ const path = require('path');
 const NL = String.fromCharCode(10);
 const ROOT = path.resolve(__dirname, '..');
 const DESK = path.join(ROOT, 'research-log');
+const NOTES = path.join(DESK, 'notes');
 const RUNS = path.join(DESK, 'runs');
-const INDEX = path.join(DESK, 'INDEX.md');
 
-// Only the research agents get a desk entry. Explore/general-purpose runs
-// are plumbing, not research, and would bury the signal.
+// Only the research agents get a desk entry. Explore and general-purpose
+// runs are plumbing and would bury the signal.
 const WATCHED = new Set(['research-agent', 'news-agent']);
 
-const INDEX_HEADER = `# Research desk
-
-Auto-filed by \`tools/desk.js\` from a SubagentStop hook. Newest first.
-Each line links the agent's full verbatim report in \`runs/\`.
-
-Not in git. Read it with \`node tools/desk.js list\`.
-
----
-`;
+// Required on every note. `applied` is the caller line, and the reason the
+// note is worth keeping: it is the only place an agent impression sits next
+// to what was actually done about it.
+const REQUIRED = ['date', 'agent', 'topic', 'asked', 'applied'];
 
 function warn(msg) {
-  process.stderr.write('[desk] ' + msg + String.fromCharCode(10));
+  process.stderr.write('[desk] ' + msg + NL);
 }
 
-function tally(text, re) {
-  const out = {};
-  let m;
-  while ((m = re.exec(text)) !== null) {
-    const k = m[1].toUpperCase();
-    out[k] = (out[k] || 0) + 1;
+function die(msg) {
+  warn(msg);
+  process.exit(1);
+}
+
+const slugify = (s) =>
+  s
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 60) || 'untitled';
+
+// Deliberately minimal: flat `key: value` pairs between two `---` fences.
+// No nesting, no YAML library, no dependency. If a value needs a colon it
+// can be quoted, and that is the whole grammar.
+function parseFrontmatter(text) {
+  const lines = text.split(NL);
+  if (lines[0].trim() !== '---') return null;
+  const end = lines.indexOf('---', 1);
+  if (end === -1) return null;
+  const meta = {};
+  for (const line of lines.slice(1, end)) {
+    if (!line.trim()) continue;
+    const i = line.indexOf(':');
+    if (i === -1) continue;
+    const key = line.slice(0, i).trim();
+    let val = line.slice(i + 1).trim();
+    const quoted =
+      (val.startsWith('"') && val.endsWith('"')) ||
+      (val.startsWith("'") && val.endsWith("'"));
+    if (quoted && val.length > 1) val = val.slice(1, -1);
+    meta[key] = val;
   }
-  return out;
+  return { meta, body: lines.slice(end + 1).join(NL).trim() };
 }
 
-// Verdict lines are meant to be a short enum, but older reports (and any
-// future drift) put prose there, which would otherwise blow the one-line
-// brief out to several hundred characters. Clip hard; the full text is one
-// click away in runs/.
-const clip = (k) => (k.length > 22 ? k.slice(0, 21).trimEnd() + '…' : k);
-
-const fmtTally = (t, max = 4) => {
-  const e = Object.entries(t).sort((a, b) => b[1] - a[1]);
-  const shown = e.slice(0, max).map(([k, n]) => `${n} ${clip(k)}`);
-  if (e.length > max) shown.push(`+${e.length - max} more`);
-  return shown.join(', ');
-};
-
-// The hook has no model, so the brief has to be derived mechanically from
-// the report's documented shape (Verdict: / Confidence: / Apply: lines).
-// If an agent drifts from that format the counts read 0 — which is itself
-// worth seeing, so it is not papered over with a fallback guess.
-function summarize(report) {
-  const lines = report.split('\n');
-  const heading = lines.find((l) => /^#{1,3}\s+\S/.test(l));
-  const firstProse = lines.find((l) => l.trim() && !/^[#*_\-=\s]*$/.test(l));
-  let topic = (heading || firstProse || 'untitled')
-    .replace(/^#+\s*/, '')
-    .replace(/\*\*/g, '')
-    .trim();
-  if (topic.length > 90) topic = topic.slice(0, 87) + '...';
-
-  return {
-    topic,
-    verdicts: tally(report, /(?:^|\n)\s*(?:[-*]\s*)?(?:\*\*)?Verdict(?:\*\*)?:\s*(?:\*\*)?\s*([^\n*]+?)\s*(?:\*\*)?\s*(?:\n|$)/g),
-    confidence: tally(report, /(?:\*\*)?Confidence(?:\*\*)?:\s*(?:\*\*)?\s*(High|Medium|Low|Unverifiable)/gi),
-    apply: tally(report, /(?:\*\*)?Apply(?:\*\*)?:\s*(?:\*\*)?\s*(APPLY-IF-EMPTY|APPLY|NO-VALUE|NONE)/g),
-  };
+function readNotes() {
+  if (!fs.existsSync(NOTES)) return [];
+  return fs
+    .readdirSync(NOTES)
+    .filter((f) => f.endsWith('.md'))
+    .map((f) => {
+      const parsed = parseFrontmatter(fs.readFileSync(path.join(NOTES, f), 'utf8'));
+      if (!parsed) {
+        warn('skipping ' + f + ': no readable frontmatter');
+        return null;
+      }
+      return { slug: f.replace(/\.md$/, ''), file: f, ...parsed };
+    })
+    .filter(Boolean)
+    .sort((a, b) => String(b.meta.date).localeCompare(String(a.meta.date)));
 }
 
-function file(entry) {
-  const { ts, agent, agentId, report, sessionId, transcript } = entry;
+function fileNote(raw) {
+  const parsed = parseFrontmatter(raw);
+  if (!parsed) die('note needs a --- frontmatter block at the top');
+
+  const missing = REQUIRED.filter((k) => !parsed.meta[k]);
+  if (missing.length) die('note is missing required field(s): ' + missing.join(', '));
+  if (!parsed.body.trim()) die('note has frontmatter but no body, and the body is the point');
+
+  // The one check worth enforcing: the body should be the agent prose, not a
+  // pasted report. A wall of headings means the wrong thing got copied.
+  const headings = parsed.body.split(NL).filter((l) => l.trim().startsWith('#')).length;
+  if (headings > 2) {
+    warn('body has ' + headings + ' headings; did a full report get pasted instead of the desk note?');
+  }
+
+  fs.mkdirSync(NOTES, { recursive: true });
+  const slug = parsed.meta.date + '-' + slugify(parsed.meta.topic);
+  const out = path.join(NOTES, slug + '.md');
+  const existed = fs.existsSync(out);
+  fs.writeFileSync(out, raw.trim() + NL);
+  console.log((existed ? 'Updated' : 'Filed') + ' research-log/notes/' + slug + '.md');
+  return slug;
+}
+
+function list(n) {
+  const notes = readNotes();
+  if (!notes.length) {
+    console.log('Desk is empty. No notes filed yet.');
+    return;
+  }
+  const shown = notes.slice(0, n);
+  console.log('research desk — ' + shown.length + ' of ' + notes.length + ' notes' + NL);
+  for (const note of shown) {
+    const m = note.meta;
+    console.log(m.date + '  ' + m.topic);
+    console.log('  asked:   ' + m.asked);
+    console.log('  applied: ' + m.applied);
+    const first = note.body.split(NL).find((l) => l.trim());
+    if (first) console.log('  ' + (first.length > 92 ? first.slice(0, 89) + '...' : first));
+    console.log('  (' + m.agent + ' · node tools/desk.js show ' + note.slug + ')' + NL);
+  }
+}
+
+function show(slug) {
+  if (!slug) die('usage: node tools/desk.js show <slug>');
+  const notes = readNotes();
+  const note = notes.find((x) => x.slug === slug) || notes.find((x) => x.slug.includes(slug));
+  if (!note) die('no note matching ' + slug + ' (try: node tools/desk.js list)');
+  console.log(fs.readFileSync(path.join(NOTES, note.file), 'utf8'));
+}
+
+// Everything the viewer needs, so the UI never has to re-implement the
+// frontmatter grammar or go hunting through the filesystem itself.
+function json() {
+  const notes = readNotes().map((n) => ({
+    slug: n.slug,
+    date: n.meta.date,
+    agent: n.meta.agent,
+    topic: n.meta.topic,
+    asked: n.meta.asked,
+    applied: n.meta.applied,
+    commit: n.meta.commit || null,
+    run: n.meta.run || null,
+    body: n.body,
+  }));
+  console.log(JSON.stringify({ deskPath: DESK, notes }, null, 2));
+}
+
+// --- the verbatim backstop, written by the SubagentStop hook -------------
+
+function archive(entry) {
   fs.mkdirSync(RUNS, { recursive: true });
-
-  const stamp = ts.replace(/[:.]/g, '-').replace(/-\d{3}Z$/, 'Z');
-  const name = `${stamp}-${agent}.md`;
-  const s = summarize(report);
-
-  const bits = [];
-  if (Object.keys(s.apply).length) bits.push(`apply ${fmtTally(s.apply)}`);
-  if (Object.keys(s.confidence).length) bits.push(`confidence ${fmtTally(s.confidence)}`);
-  if (Object.keys(s.verdicts).length) bits.push(`verdicts ${fmtTally(s.verdicts)}`);
-  const detail = bits.length ? bits.join(' · ') : 'no per-field lines found in report';
-
+  const stamp = entry.ts.replace(/[:.]/g, '-').replace(/-[0-9]{3}Z$/, 'Z');
+  const name = stamp + '-' + entry.agent + '.md';
   fs.writeFileSync(
     path.join(RUNS, name),
-    `# ${agent} — ${ts}\n\n` +
-      `- agent id: \`${agentId || 'unknown'}\`\n` +
-      `- session: \`${sessionId || 'unknown'}\`\n` +
-      `- agent transcript: \`${transcript || 'unknown'}\`\n\n` +
-      `Report below is the agent's final message, verbatim and unedited.\n` +
-      `Compare it against what actually landed in \`data/\` — that diff is\n` +
-      `the point of keeping this.\n\n---\n\n${report}\n`
+    '# ' + entry.agent + ' — ' + entry.ts + NL + NL +
+      '- agent id: `' + (entry.agentId || 'unknown') + '`' + NL +
+      '- session: `' + (entry.sessionId || 'unknown') + '`' + NL + NL +
+      'The agent final message, verbatim. The readable version of this run' + NL +
+      'lives in ../notes/; this copy exists so that note can be checked' + NL +
+      'against what the agent actually said.' + NL + NL +
+      '---' + NL + NL + entry.report + NL
   );
-
-  const line = `- **${ts.slice(0, 16).replace('T', ' ')}** · ${agent} · ${s.topic}\n  ${detail} · [full report](runs/${name})\n`;
-
-  let existing = '';
-  if (fs.existsSync(INDEX)) {
-    const cur = fs.readFileSync(INDEX, 'utf8');
-    const cut = cur.indexOf('---' + NL);
-    existing = cut === -1 ? cur : cur.slice(cut + 4);
-    // Filing the same run twice (a re-run of backfill, a replayed hook
-    // payload) should refresh that run in place rather than stack a
-    // duplicate line on top of it.
-    existing = existing
-      .split(new RegExp(NL + '(?=- \\*\\*)'))
-      .filter((e) => e.trim() && !e.includes('(runs/' + name + ')'))
-      .join(NL);
-    if (existing) existing += NL;
-  }
-  fs.writeFileSync(INDEX, INDEX_HEADER + '\n' + line + existing.replace(/^\n+/, ''));
   return name;
 }
 
 function capture(raw) {
-  let p;
+  let payload;
   try {
-    p = JSON.parse(raw);
+    payload = JSON.parse(raw);
   } catch (e) {
-    // A silent desk is the worst failure mode this thing has: an empty log
-    // reads as "no research ran" rather than "the log broke." Hooks capture
-    // stderr, so complain loudly and still exit 0 so the agent run is
-    // unaffected.
+    // A silent desk is the worst failure mode here: an empty log reads as
+    // "no research ran" rather than "the log broke." Hooks capture stderr,
+    // so complain — but still exit 0 so an agent run is never affected.
     warn('could not parse the hook payload: ' + e.message);
     return;
   }
-  const agent = p.agent_type || '';
+  const agent = payload.agent_type || '';
   if (!WATCHED.has(agent)) return; // not research; nothing to file, not an error
-  const report = p.last_assistant_message || '';
+  const report = payload.last_assistant_message || '';
   if (!report.trim()) {
-    warn(agent + ' finished with an empty final message; nothing filed');
+    warn(agent + ' finished with an empty final message; nothing archived');
     return;
   }
-  file({
-    ts: p.ts || new Date().toISOString(),
+  const name = archive({
+    ts: payload.ts || new Date().toISOString(),
     agent,
-    agentId: p.agent_id,
-    sessionId: p.session_id,
-    transcript: p.agent_transcript_path,
+    agentId: payload.agent_id,
+    sessionId: payload.session_id,
     report,
   });
-}
-
-function list(n) {
-  if (!fs.existsSync(INDEX)) {
-    console.log('Desk is empty — no research runs filed yet.');
-    return;
+  if (!report.includes('## Desk note')) {
+    warn(agent + ' returned no "## Desk note" section (archived as ' + name + ')');
   }
-  const body = fs.readFileSync(INDEX, 'utf8').split('---\n').slice(1).join('---\n').trim();
-  if (!body) {
-    console.log('Desk is empty — no research runs filed yet.');
-    return;
-  }
-  const entries = body.split(/\n(?=- \*\*)/).slice(0, n);
-  console.log(`research desk — ${entries.length} most recent\n`);
-  console.log(entries.join('\n'));
 }
 
 function backfill() {
@@ -190,7 +230,7 @@ function backfill() {
   const rows = fs
     .readFileSync(trace, 'utf8')
     .trim()
-    .split('\n')
+    .split(NL)
     .map((l) => {
       try {
         return JSON.parse(l);
@@ -204,41 +244,50 @@ function backfill() {
   let n = 0;
   for (const r of rows) {
     if (!(r.last_assistant_message || '').trim()) continue;
-    file({
+    archive({
       ts: r.ts,
       agent: r.agent_type,
       agentId: r.agent_id,
       sessionId: r.session_id,
-      transcript: r.agent_transcript_path,
       report: r.last_assistant_message,
     });
     n++;
   }
-  console.log(`Backfilled ${n} run(s) from the old trace.`);
+  console.log('Archived ' + n + ' past run(s) to research-log/runs/.');
+  if (n) console.log('These predate the note format, so they have no desk note.');
 }
 
-const cmd = process.argv[2];
-if (cmd === 'capture') {
+function readStdin(then) {
   let buf = '';
   process.stdin.setEncoding('utf8');
   process.stdin.on('data', (d) => (buf += d));
   process.stdin.on('error', (e) => warn('stdin error: ' + e.message));
-  process.stdin.on('end', () => {
-    if (!buf.trim()) {
-      warn('no hook payload arrived on stdin');
-      return;
-    }
+  process.stdin.on('end', () => then(buf));
+}
+
+const cmd = process.argv[2];
+if (cmd === 'capture') {
+  readStdin((buf) => {
+    if (!buf.trim()) return warn('no hook payload arrived on stdin');
     try {
       capture(buf);
     } catch (e) {
-      // A broken desk must never break an agent run, but it must say so.
-      warn('failed to file a brief: ' + (e && e.stack ? e.stack : e));
+      warn('failed to archive a run: ' + (e && e.stack ? e.stack : e));
     }
+  });
+} else if (cmd === 'file') {
+  readStdin((buf) => {
+    if (!buf.trim()) die('no note arrived on stdin');
+    fileNote(buf);
   });
 } else if (cmd === 'list') {
   list(parseInt(process.argv[3], 10) || 10);
+} else if (cmd === 'show') {
+  show(process.argv[3]);
+} else if (cmd === 'json') {
+  json();
 } else if (cmd === 'backfill') {
   backfill();
 } else {
-  console.log('usage: node tools/desk.js <capture|list [n]|backfill>');
+  console.log('usage: node tools/desk.js <file|list [n]|show SLUG|json|capture|backfill>');
 }

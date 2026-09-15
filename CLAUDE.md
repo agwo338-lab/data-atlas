@@ -248,43 +248,70 @@ of the dataset without reviewing anything case by case.
 
 ## The research desk
 
-Subagent activity is invisible to the user — an agent runs, a report is
-produced, findings land in `data/`, and the only surviving trace is a
-commit message written by the same process that decided what to apply.
-Since Sep 2026 there is no human review gate either, so nothing else
-records what was actually claimed versus what was written.
+Subagent work is invisible to the user — an agent runs, a report scrolls
+past, findings land in `data/`, and the only durable trace is a commit
+message written by the same process that decided what to apply. Since the
+review gate was removed there is no other record of what an agent *thought*,
+as opposed to what it concluded.
 
 `research-log/` is that record. It is **gitignored on purpose** — a local
-desk, not a published artifact.
+desk, not a published artifact. Two layers:
 
-- Filed automatically by a `SubagentStop` hook (`.claude/settings.json`)
-  that runs `node tools/desk.js capture`. It fires for `research-agent`
-  and `news-agent` only; other subagents are plumbing and would bury the
-  signal.
-- `research-log/INDEX.md` — newest first, one short brief per run: topic,
-  and a mechanical tally of the report's `Apply:`, `Confidence:` and
-  `Verdict:` lines. Read it with `node tools/desk.js list`.
-- `research-log/runs/` — the agent's **final message, verbatim**. This is
-  the part worth having: it lets the report be compared against what was
-  actually written to `data/`, which is the one check the auto-apply
-  policy no longer performs anywhere else.
-- `node tools/desk.js backfill` recovers past runs from the older
-  `.claude/agent-trace.jsonl` if that hook is ever re-enabled.
+- **`research-log/notes/`** — the layer meant to be read. One short note per
+  run, written by the agent *in its own voice* (see the `## Desk note`
+  section both agent files end with: what it was asked, roughly what it
+  looked at, whether anything conflicted, and its actual impression —
+  whether the evidence felt thin, whether one claim was doing all the work,
+  what it would chase next). The caller adds one line, `applied:`, saying
+  what was actually done with it. That pairing is the whole point: an
+  agent's impression sitting next to the action taken on it.
+- **`research-log/runs/`** — the agent's full final message, verbatim, filed
+  automatically by a `SubagentStop` hook (`.claude/settings.json`). The
+  backstop, not the reading layer. It exists so a note can be checked
+  against what the agent actually said.
 
-**Why a hook rather than the agent or the caller.** The agents have no
-Write/Edit/Bash tool and must not get one — that separation is the whole
-prompt-injection guard described above, and a logging convenience is not
-worth reopening it. The caller *could* write the log, but a caller-written
-log is a self-report: the process that chose what to apply also chooses
-what to record about it. The harness runs the hook regardless, so the
-report is captured whether or not anyone wants it captured.
+Filing a note is part of applying a finding, not a separate chore:
 
-The brief is derived by regex from the report's documented output format.
-If an agent drifts from that format the tallies read `no per-field lines
-found in report` — that is deliberate, and it is a signal about the agent,
-not a bug in the desk. Likewise the hook complains on stderr rather than
-failing silently: an empty desk must never be ambiguous between "no
-research ran" and "the log broke."
+```
+node tools/desk.js file < note.md     # validates frontmatter, files it
+node tools/desk.js list               # the desk, newest first
+node tools/desk.js show <slug>        # one note in full
+```
+
+Frontmatter is flat `key: value` between `---` fences; `date`, `agent`,
+`topic`, `asked` and `applied` are required and `file` refuses a note
+missing any of them. The body is the agent's prose, pasted unedited — do
+not summarize it, and do not paste the whole report in its place (`file`
+warns when the body looks like a pasted report).
+
+**Why the agent writes the note and the caller writes only the `applied:`
+line.** The agents have no Write/Edit/Bash tool and must not get one — that
+separation is the prompt-injection guard described above, and a logging
+convenience is not worth reopening it. But the *impression* has to be the
+agent's, because the caller did not do the research and a caller-written
+summary of someone else's judgment is just a second-hand paraphrase. So the
+agent writes it into its report, the hook archives the report verbatim, and
+the caller copies the note across and appends what it did.
+
+**The viewer.** `tools/desk-app/` is a small Electron app for sifting the
+pile — search across topics, impressions and dispositions, with the archived
+report one click away. It reuses the atlas's Nocturne tokens so the two read
+as one product; that palette is a *copy*, not an import, so a change to
+`index.html`'s tokens needs mirroring there.
+
+```
+cd tools/desk-app && npm install && npm start
+```
+
+Electron is a dev dependency of that folder only — the deployed site still
+has no package manager and no build step, and this does not change that.
+`tools/desk-app/` can also be served as a plain static folder to check the
+layout without booting Electron; `dev-preview.js` supplies obviously-labelled
+sample notes in that case and does nothing at all inside the app.
+
+The hook complains on stderr rather than failing quietly, including when an
+agent returns no `## Desk note` section. An empty desk must never be
+ambiguous between "no research ran" and "the log broke."
 
 ## Research cost
 
