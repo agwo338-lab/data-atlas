@@ -39,7 +39,7 @@ cycle) — not the full global region footprint.
 | Operator | Tracked | Missing (high conf.) | Missing (medium conf.) | Watch-only / not actionable |
 |---|---|---|---|---|
 | CoreWeave | 24 | 3 | 5 | 4 |
-| Nebius | 11 | 5 | 0 | 2 |
+| Nebius | 16 | 1 | 0 | 2 |
 | AWS | 6 | 6 | 1 | 2 |
 | SpaceXAI (xAI) | 3 | 1 | 1 | 2 |
 | OpenAI | 1 | — | — | — |
@@ -86,24 +86,28 @@ GA (Flexential) · Las Vegas NV (Switch) · Weehawken NJ (LGA1)
 
 ---
 
-## Nebius — 11 tracked
+## Nebius — 16 tracked
 
 <details><summary>Currently tracked (click to expand)</summary>
 
 Mäntsälä I &amp; II FI · Lappeenranta FI · Béthune FR · Longcross UK (Ark
 DC) · Harlow UK (Kao Data) · Hüüru EE (Greenergy) · Vineland NJ (DataOne) ·
-Modi'in IL (Mega DC) · Masmiyya IL (Mega DC) · Beit Shemesh IL (Mega DC)
+Modi'in IL (Mega DC) · Masmiyya IL (Mega DC) · Beit Shemesh IL (Mega DC) ·
+Independence MO · Butler Twp/Highridge PA · Kansas City MO (Patmos KC2) ·
+Keflavík IS (Verne) · Saint-Denis FR (Equinix PA10)
 
 </details>
 
 ### Missing — high confidence
 
-- [ ] **Independence, MO** ("Nebius Independence Campus") — Approved Mar 2026 (Chapter 100 incentive), ~400 acres up to 4 buildings, ~800MW power via a new dedicated plant. [Nebius](https://nebius.com/independencemo) · [DCD](https://www.datacenterdynamics.com/en/news/nebius-plans-800mw-data-center-campus-in-kansas-city-missouri/) · [City of Independence FAQ](https://www.independencemo.gov/data-center-faqs) *(quasi-regulatory, municipal page — worth checking if it counts as R)*
-- [ ] **Schuylkill County (Butler Twp), PA** ("Highridge Business Park AI Factory") — Land closed May 2026 ($187.5M), ~600 acres, 1.2GW full buildout, phase 1 (260MW) targeting Oct 2027. [Nebius factsheet (PDF)](https://assets.nebius.com/assets/6fdfadaf-20c9-4a67-a7c0-df1a5795ec90/Nebius%20Schuylkill%20County,%20PA%20Factsheet.pdf) · [DCD](https://www.datacenterdynamics.com/en/news/nebius-details-plans-for-12gw-data-center-campus-in-pennsylvania/)
-- [ ] **Kansas City, MO** (Patmos, former KC Star printing plant) — Operational since Q1 2025, Nebius's first US GPU cluster, 5MW expandable to 40MW. [Businesswire](https://www.businesswire.com/news/home/20241119926895/en/Patmos-Announces-Nebius-as-First-Tenant-in-New-Kansas-City-Data-Center) · [DCD](https://www.datacenterdynamics.com/en/news/nebius-to-deploy-5mw-nvidia-h200-cluster-at-patmos-data-center-in-kansas-city-missouri/)
+- [x] **Independence, MO** ("Nebius Independence Campus") — Approved Mar 2026 (Chapter 100 incentive), ~400 acres up to 4 buildings, ~800MW power via a new dedicated plant. [Nebius](https://nebius.com/independencemo) · [DCD](https://www.datacenterdynamics.com/en/news/nebius-plans-800mw-data-center-campus-in-kansas-city-missouri/) · [City of Independence FAQ](https://www.independencemo.gov/data-center-faqs) *(quasi-regulatory, municipal page — worth checking if it counts as R)*
+- [x] **Schuylkill County (Butler Twp), PA** ("Highridge Business Park AI Factory") — Land closed May 2026 ($187.5M), ~600 acres, 1.2GW full buildout, phase 1 (260MW) targeting Oct 2027. [Nebius factsheet (PDF)](https://assets.nebius.com/assets/6fdfadaf-20c9-4a67-a7c0-df1a5795ec90/Nebius%20Schuylkill%20County,%20PA%20Factsheet.pdf) · [DCD](https://www.datacenterdynamics.com/en/news/nebius-details-plans-for-12gw-data-center-campus-in-pennsylvania/)
+- [x] **Kansas City, MO** (Patmos, former KC Star printing plant) — Operational since Q1 2025, Nebius's first US GPU cluster, 5MW expandable to 40MW. [Businesswire](https://www.businesswire.com/news/home/20241119926895/en/Patmos-Announces-Nebius-as-First-Tenant-in-New-Kansas-City-Data-Center) · [DCD](https://www.datacenterdynamics.com/en/news/nebius-to-deploy-5mw-nvidia-h200-cluster-at-patmos-data-center-in-kansas-city-missouri/)
 - [x] **Modi'in, Israel** (Mega Or/Mega DC) — Operational since Oct 2025, 8MW, $300M facility. [Nebius newsroom](https://nebius.com/newsroom/nebius-brings-nvidia-blackwell-to-israel-with-one-of-the-country-s-first-ai-infrastructure-deployments) · [DCD](https://www.datacenterdynamics.com/en/news/first-phase-of-israels-nvidia-b200-powered-national-ai-supercomputer-goes-live/)
-- [ ] **Keflavik, Iceland** (Verne Global) — Operational since ~Mar 2025, 10MW within Verne's 140MW campus. [DCD](https://www.datacenterdynamics.com/en/news/nebius-to-build-300mw-data-center-in-new-jersey-will-launch-icelandic-colocation-deployment-in-q2-2025/) · [Verne Global](https://www.businesswire.com/news/home/20250311595160/en/Verne-Strikes-10MW-Deal-with-Nebius-to-Further-Expand-Europes-AI-Capacity)
-- [ ] **Paris (Saint-Denis), France** (Equinix PA10) — Live since Nov 2024. Distinct from the tracked Béthune greenfield campus. [Nebius blog](https://nebius.com/blog/posts/nebius-launches-gpu-cluster-in-paris-france) · [DCD](https://www.datacenterdynamics.com/en/news/nebius-deploys-ai-cluster-at-equinix-data-center-in-paris/)
+- [x] **Keflavik, Iceland** (Verne Global) — Operational since ~Mar 2025, 10MW within Verne's 140MW campus. [DCD](https://www.datacenterdynamics.com/en/news/nebius-to-build-300mw-data-center-in-new-jersey-will-launch-icelandic-colocation-deployment-in-q2-2025/) · [Verne Global](https://www.businesswire.com/news/home/20250311595160/en/Verne-Strikes-10MW-Deal-with-Nebius-to-Further-Expand-Europes-AI-Capacity)
+- [x] **Paris (Saint-Denis), France** (Equinix PA10) — Live since Nov 2024. Distinct from the tracked Béthune greenfield campus. [Nebius blog](https://nebius.com/blog/posts/nebius-launches-gpu-cluster-in-paris-france) · [DCD](https://www.datacenterdynamics.com/en/news/nebius-deploys-ai-cluster-at-equinix-data-center-in-paris/)
+
+- [ ] **Newport, South Wales, UK** (Vantage Data Centers CWL1) — **new lead, found 2026-09-15 mid-sweep, not from the original gap search.** Vantage's own release names Nebius and ties the capacity to the Jun 2026 £1.7B UK commitment; deployment size explicitly undisclosed, built on Nvidia's DSX reference design. Dispatched to research-agent for vetting 2026-09-15.
 
 ### Missing — medium confidence
 
@@ -112,7 +116,7 @@ Modi'in IL (Mega DC) · Masmiyya IL (Mega DC) · Beit Shemesh IL (Mega DC)
 
 ### Watch-only — investigated, not currently actionable
 
-- **UK "three new NVIDIA deployments"** (Jun 2026, £1.7B/65MW) — no city/site names disclosed anywhere found; may turn out to be a Harlow expansion or entirely new locations.
+- **UK "three new NVIDIA deployments"** (Jun 2026, £1.7B/65MW across four UK sites total) — **two of three now identified** (2026-09-15): Harlow/Kao Data, already tracked, tied to the £1.7B figure by Kao's own release and local coverage; and Newport/Vantage CWL1, the new lead above. The THIRD remains genuinely unnamed. An anonymous X account asserts it is Green Mountain's LON-East campus in Romford, but DCD's own reporting on that same Green Mountain deal calls the customer an "unnamed neocloud operator" — that is U-class and unusable. Do not close this gap by inference from the 65MW arithmetic.
 - **Meta $27B deal ($12B dedicated capacity)** — no specific facility named; likely draws on Independence MO/Highridge PA rather than being its own site.
 
 ---

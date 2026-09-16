@@ -1299,5 +1299,235 @@ var SITES = [
       }
     },
     notes: "Colocation tenancy with Mega Or (TASE: MGOR) via Mega DC, the larger half of the ~$880M / 80MW combined lease with Masmiyya. Unlike Masmiyya this is a fit-out of an EXISTING building rather than ground-up construction — \"Under construction\" here means capacity buildout, not a building going up. Same staleness warning as Masmiyya, and it matters just as much: the only coverage is the Jan 2026 announcement, the first delivery stage was targeted at Q3 2026, that window has now arrived, and no follow-up reporting was found. Re-check before relying on the status. CONTESTED and excluded from capacityMW: a 222MW figure appears in one account and looks like a conflation with the ~220MW substation Globes reports at Beit Shemesh — a substation rating is not IT capacity, so only the disclosed initial 58MW is recorded. The directory listing (source 2) is D-class and can never support a number; it is kept only because re-fetching it would give a street address to replace the centroid coordinate. Searched and came up empty: EDGAR, PeeringDB Israel (no Mega DC presence), and the underlying TASE/Maya immediate report. An Israel Electric Corporation grid-connection record for that substation would be R-class and could also support a derived capacity ceiling, kept separate from the disclosed figure."
+  },
+  {
+    id: "nebius-independence-mo",
+    provider: "Nebius",
+    site: "Nebius Independence AI Factory",
+    city: "Independence, MO",
+    country: "United States",
+    lat: 39.045,
+    lon: -94.335,
+    status: "Planned",
+    capacityMW: 800,
+    lastUpdated: "2026-09-15",
+    sources: [
+      { label: "Nebius Group N.V. — exhibit 99.2 to Form 6-K, filed with the SEC 2026-05-13", url: "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=nebius&type=6-K&dateb=&owner=include&count=40", cls: "P" },
+      { label: "City of Independence, MO — Data Center FAQs (Chapter 100 vote, 5-2, Mar 2, 2026)", url: "https://www.independencemo.gov/data-center-faqs", cls: "G" },
+      { label: "Data Center Dynamics — \"Nebius plans 800MW data center campus in Kansas City, Missouri\"", url: "https://www.datacenterdynamics.com/en/news/nebius-plans-800mw-data-center-campus-in-kansas-city-missouri/", cls: "T" }
+    ],
+    provenance: {
+      capacityMW: {
+        basis: "disclosed",
+        asOf: "2026-09-15",
+        evidence: [
+          { source: 1, cls: "G", note: "City page states 'at least 800 megawatts (MW) of power' — a floor, which is the figure recorded here." },
+          { source: 0, cls: "P", note: "Nebius's own SEC-furnished exhibit calls it a '1.2 GW AI factory'. Compatible with the 800MW floor rather than contradicting it, but no source found states the phase breakdown that would reconcile them explicitly." },
+          { source: 2, cls: "T" }
+        ],
+        conflicting: false
+      },
+      status: {
+        basis: "disclosed",
+        asOf: "2026-09-15",
+        evidence: [
+          { source: 1, cls: "G", note: "City records its own Chapter 100 tax-abatement vote (5-2, Mar 2 2026) and the power arrangement with Independence Power Partners at the retired Blue Valley Power Plant site." },
+          { source: 0, cls: "P" },
+          { source: 2, cls: "T", note: "Groundbreaking held May 2026; no building shell reported complete, so this stays Planned." }
+        ],
+        conflicting: false
+      },
+      location: {
+        basis: "estimated",
+        asOf: "2026-09-15",
+        evidence: [
+          { source: 1, cls: "G", note: "Eastgate Commerce Center, MO-78 / Little Blue Parkway area in eastern Independence. The stored lat/lon is an estimate built from named roads, NOT a geocoded parcel — good to city-quadrant precision only." }
+        ],
+        conflicting: false
+      }
+    },
+    notes: "TWO SOURCE RECLASSES made when applying, both against the researching agent's recommendation, and both worth challenging if you disagree. (1) The agent classed the Nebius 6-K exhibit R because it is a mandatory SEC disclosure. Recorded here as P instead: an exhibit furnished to a 6-K is routinely the operator's own press release or investor deck, and this project has already ruled once that an SEC-hosted operator marketing document stays P — sources.js maps any sec.gov host to R, which would otherwise promote a company describing itself into an independent class. (2) The agent classed the City of Independence FAQ page R, reasoning that it documents the city's own legislative act. Recorded here as G: R means permits, queues, filings and dockets, and a municipal FAQ page is an explainer about a vote, not the ordinance or the minutes. Pulling the actual Chapter 100 ordinance would be R and is the obvious lift. Consequence of both: this entry has NO independent class and therefore cannot exceed Medium, which is the honest reading. CAPACITY, stated carefully: the city says 'at least 800MW', Nebius's own exhibit says '1.2 GW'. These do not contradict — a floor and a target — so this is not logged as a conflict, and the conservative floor both sources support is what is recorded. Do not read 800 as a settled nameplate. Power is to come from a dedicated ~800MW plant at the retired Blue Valley Power Plant site via Independence Power Partners; no Missouri PSC, Evergy or SPP interconnection filing for that generator was found, only secondary reporting — an 800MW generator should not be findable only through press, so that filing is the single best next target and would corroborate capacity and status at once. Searched and empty, so don't redo it: EDGAR full-text for 'Independence Missouri Chapter 100' and 'Highridge Business Park' (0 hits); EPA ECHO NAICS 518210 across all 6,905 Missouri air facilities (clean complete negative, expected pre-construction); PeeringDB for a distinct Independence MO facility (0 hits). Separately confirmed real but deliberately NOT attached to this site: the Meta capacity deal (~$27B) is named in press and in a 6-K exhibit, but no source — including the filing — ties it to a named facility, so it is not recorded here or anywhere."
+  },
+  {
+    id: "nebius-schuylkill-pa",
+    provider: "Nebius",
+    site: "Highridge Business Park AI Factory",
+    city: "Butler Township (Pottsville), PA",
+    country: "United States",
+    lat: 40.734,
+    lon: -76.296,
+    status: "Under construction",
+    capacityMW: 260,
+    lastUpdated: "2026-09-15",
+    sources: [
+      { label: "Nebius — Schuylkill County, PA factsheet (PDF)", url: "https://assets.nebius.com/assets/6fdfadaf-20c9-4a67-a7c0-df1a5795ec90/Nebius%20Schuylkill%20County,%20PA%20Factsheet.pdf", cls: "P" },
+      { label: "Data Center Dynamics — \"Nebius details plans for 1.2GW data center campus in Pennsylvania\"", url: "https://www.datacenterdynamics.com/en/news/nebius-details-plans-for-12gw-data-center-campus-in-pennsylvania/", cls: "T" },
+      { label: "Skook News — Butler Township zoning votes on the data center overlay, Aug 31, 2026", url: "https://www.skooknews.com/", cls: "G" },
+      { label: "Data Center Map — Highridge Business Park lot listing (adjacent parcel)", url: "https://www.datacentermap.com/usa/pennsylvania/pottsville/", cls: "D" }
+    ],
+    provenance: {
+      capacityMW: {
+        basis: "disclosed",
+        asOf: "2026-09-15",
+        evidence: [
+          { source: 0, cls: "P", note: "Operator factsheet: 260MW phase 1 targeting Oct 2027, within a 1.2GW full buildout. Phase 1 is the figure recorded; the full-buildout number is a target, not current capacity." },
+          { source: 1, cls: "T" }
+        ],
+        conflicting: false
+      },
+      status: {
+        basis: "disclosed",
+        asOf: "2026-09-15",
+        evidence: [
+          { source: 1, cls: "T", note: "Land closed May 1, 2026 for $187.5M, ~600 acres." },
+          { source: 2, cls: "G", note: "Butler Township passed Ordinance 2026-2 (expanding the data center overlay, 2-1) and 2026-3 (tightening noise limits, 3-0) on Aug 31, 2026 — the township is still legislating around a project already underway." }
+        ],
+        conflicting: false
+      },
+      location: {
+        basis: "estimated",
+        asOf: "2026-09-15",
+        evidence: [
+          { source: 3, cls: "D", note: "Directory coordinate for a DIFFERENT lot inside the same business park, not Nebius's ~600-acre parcel. Business-park-level precision at best, and a directory can never support more than that." }
+        ],
+        conflicting: false
+      }
+    },
+    notes: "Weakest-sourced of the three US Nebius sites, which is the opposite of what the coverage volume suggests — this is the most actively reported of them (a live zoning fight as of Aug 31, 2026) and yet has ZERO independent-class corroboration. Everything is the operator, trade press, or a local outlet's write-up of a public meeting whose primary minutes were never fetched. Notably, Nebius names Independence MO in an SEC filing but has NOT named Schuylkill or Highridge in one — searched 'Highridge', 'Schuylkill', 'Butler Township Pennsylvania' and 'Pennsylvania AI factory' across its 6-K/20-F filings, 0 hits. 'Pottsville' in the city field is the nearest post office, not the municipality; the site is in Butler Township. Best next step by some distance: the Schuylkill County recorder of deeds should hold the May 1, 2026 land closing at $187.5M — a real R-class record that would fix location and corroborate status in one go. After that, Butler Township's own ordinance text and minutes (rather than a news write-up of them), and a PPL Electric or PJM interconnection entry for the reported dedicated Energy Service Agreement. Searched and empty, don't redo: EPA ECHO NAICS 518210 across all 11,457 Pennsylvania air facilities (clean complete negative; 6 unrelated NAICS 2211 generation facilities exist in the county); PeeringDB Pottsville/Schuylkill (0 hits); PJM queue via interconnection.fyi and PJM directly (no entry found naming Highridge, Nebius or Butler Township, though this was not exhaustive)."
+  },
+  {
+    id: "nebius-patmos-kc",
+    provider: "Nebius",
+    site: "Patmos KC2 (former Kansas City Star printing plant)",
+    city: "Kansas City, MO",
+    country: "United States",
+    lat: 39.094739,
+    lon: -94.579376,
+    status: "Operational",
+    capacityMW: 5,
+    lastUpdated: "2026-09-15",
+    sources: [
+      { label: "Businesswire — \"Patmos Announces Nebius as First Tenant in New Kansas City Data Center\"", url: "https://www.businesswire.com/news/home/20241119926895/en/Patmos-Announces-Nebius-as-First-Tenant-in-New-Kansas-City-Data-Center", cls: "P" },
+      { label: "Data Center Dynamics — \"Nebius to deploy 5MW Nvidia H200 cluster at Patmos data center in Kansas City, Missouri\"", url: "https://www.datacenterdynamics.com/en/news/nebius-to-deploy-5mw-nvidia-h200-cluster-at-patmos-data-center-in-kansas-city-missouri/", cls: "T" },
+      { label: "PeeringDB — facility 16830, \"Patmos KC2\", 1601 McGee St, Kansas City MO (record updated 2026-01-14)", url: "https://www.peeringdb.com/fac/16830", cls: "N" }
+    ],
+    provenance: {
+      capacityMW: {
+        basis: "disclosed",
+        asOf: "2026-09-15",
+        evidence: [
+          { source: 0, cls: "P", note: "5MW H200 cluster, described as expandable to 40MW. 5MW is the disclosed live figure and the only one recorded; 40MW is a target." },
+          { source: 1, cls: "T" }
+        ],
+        conflicting: false
+      },
+      status: {
+        basis: "disclosed",
+        asOf: "2026-09-15",
+        evidence: [
+          { source: 0, cls: "P" },
+          { source: 1, cls: "T", note: "First GPU cluster reported live from Q1 2025." }
+        ],
+        conflicting: false
+      },
+      location: {
+        basis: "observed",
+        asOf: "2026-09-15",
+        evidence: [
+          { source: 2, cls: "N", note: "PeeringDB facility record gives 1601 McGee St and coords 39.094739, -94.579376, matching the press-reported address exactly. An independently maintained registry entry, not a geocoded press address — the strongest location fix in this batch." },
+          { source: 1, cls: "T", note: "Names the same 1601 McGee St address." }
+        ],
+        conflicting: false
+      }
+    },
+    notes: "Colocation tenancy: the building is owned and operated by Patmos Hosting, Inc.; Nebius is the GPU-cluster tenant — same pattern as the Ark DC, Kao Data, Greenergy and Mega DC entries. Nebius's first US GPU cluster. Location is the one field in this batch that clears High, on an independent PeeringDB record verified directly at apply time (facility 16830). Two cautions attached to that same record, both important. First, it shows 0 networks and 0 exchanges, so it confirms the facility EXISTS at that address but says nothing about whether racks are live and serving — which is why status stays Medium rather than riding the N-class source up. A repeat PeeringDB check in six months, looking for network count growth, is the cheapest way to firm up Operational. Second, Patmos operates a SEPARATE, older facility, 'Patmos KC1' at 1325 Tracy Ave (facility 3634, 7 networks, 1 exchange). That is a different building and must not be conflated with this one or used as corroboration for it; both were confirmed as distinct records with distinct IDs. Capacity figures to keep straight: 5MW is the live Nebius cluster, 40MW is the disclosed expansion target for that cluster, and a ~100MW figure that appears in coverage is the BUILDING's ambition under Patmos, not Nebius's tenancy — only the 5MW is recorded. Searched and empty: EDGAR for 'Patmos' (all hits are unrelated Form D shell-LLC filings, ruled out); EPA ECHO NAICS 518210 for Jackson County MO (no hit — a printing-plant retrofit at 5MW may simply not trigger an air permit, which is a plausible explanation rather than a confirmed one)."
+  },
+  {
+    id: "nebius-keflavik",
+    provider: "Nebius",
+    site: "Verne Iceland",
+    city: "Keflavík (Reykjanesbær)",
+    country: "Iceland",
+    lat: 63.972036,
+    lon: -22.583679,
+    status: "Operational",
+    capacityMW: 10,
+    lastUpdated: "2026-09-15",
+    sources: [
+      { label: "Verne — \"Verne Strikes 10MW Deal with Nebius to Further Expand Europe's AI Capacity\"", url: "https://www.verne.co/news/news-verne-strikes-10mw-deal-with-nebius-to-further-expand-europes-ai-capacity", cls: "P" },
+      { label: "Data Center Dynamics — Nebius New Jersey build and Icelandic colocation deployment", url: "https://www.datacenterdynamics.com/en/news/nebius-to-build-300mw-data-center-in-new-jersey-will-launch-icelandic-colocation-deployment-in-q2-2025/", cls: "T" },
+      { label: "Nebius documentation — regions list, eu-north2 (Iceland) shown as a live private region", url: "https://docs.nebius.com/overview/regions", cls: "P" },
+      { label: "PeeringDB — facility 2339, \"Verne Iceland\", Valhallarbraut 868, Reykjanesbær (15 networks, record updated 2025-09-26)", url: "https://www.peeringdb.com/fac/2339", cls: "N" }
+    ],
+    provenance: {
+      capacityMW: {
+        basis: "disclosed",
+        asOf: "2025-03-11",
+        evidence: [
+          { source: 0, cls: "P", note: "Host operator's release: a 10MW compute cluster, described as the largest single implementation in Verne Iceland's history. This is Nebius's slice, not Verne's ~140MW campus total." },
+          { source: 1, cls: "T", note: "Trade coverage of the same announcement — derivative of it." }
+        ],
+        conflicting: false
+      },
+      status: {
+        basis: "disclosed",
+        asOf: "2026-09-15",
+        evidence: [
+          { source: 0, cls: "P", note: "Names the site and targets end-March 2025 for operation." },
+          { source: 2, cls: "P", note: "Nebius's own live docs still list eu-north2 (Iceland) as an available private region as of 2026-09-15 — current evidence of liveness, but the same class as the release above, so it adds recency and not corroboration." }
+        ],
+        conflicting: false
+      },
+      location: {
+        basis: "disclosed",
+        asOf: "2026-09-15",
+        evidence: [
+          { source: 3, cls: "N", note: "PeeringDB facility record gives the surveyed street address and coordinates for the host building, independent of any Nebius announcement." },
+          { source: 0, cls: "P", note: "Identifies Verne Iceland as the deployment site." }
+        ],
+        conflicting: false
+      }
+    },
+    notes: "Colocation tenancy inside Verne's Keflavík campus — same pattern as the Ark DC, Kao Data, Greenergy, Mega DC and Patmos entries. The 10MW is Nebius's deployment; Verne's campus is roughly 140MW and those two figures must not be conflated. Important limit on the N-class source, and it applies to the Paris entry too: PeeringDB confirms the HOST FACILITY is real and at that address, which is why location scores High — but Nebius's own PeeringDB network object (AS213291, NebiusCloud) lists only four peering facilities (Equinix FR5 Frankfurt, Equinix AM7 Amsterdam, Digita Helsinki, Elisa Helsinki), and Verne Iceland is not among them. So PeeringDB does NOT independently confirm Nebius's tenancy here, only the building. A rack-level compute deployment plausibly has no reason to peer publicly, so this is not evidence against the tenancy either — it just means status cannot ride the N-class source upward and stays on the operator's word. To lift capacity or status: an Icelandic grid connection record (Landsvirkjun publishes connection announcements; searched superficially, nothing Nebius-specific found, worth a dedicated pass) or an EDGAR 20-F capacity breakdown naming Iceland. Searched and empty: EDGAR for 'Verne Global' (90 hits, all unrelated — an infrastructure fund and a 2018 shell filing) and 'Nebius Iceland' (0 hits)."
+  },
+  {
+    id: "nebius-paris",
+    provider: "Nebius",
+    site: "Equinix PA10",
+    city: "Saint-Denis, Paris",
+    country: "France",
+    lat: 48.92817,
+    lon: 2.352084,
+    status: "Operational",
+    capacityMW: null,
+    lastUpdated: "2026-09-15",
+    sources: [
+      { label: "Nebius blog — \"Nebius launches GPU cluster in Paris, France\"", url: "https://nebius.com/blog/posts/nebius-launches-gpu-cluster-in-paris-france", cls: "P" },
+      { label: "Data Center Dynamics — \"Nebius deploys AI cluster at Equinix data center in Paris\"", url: "https://www.datacenterdynamics.com/en/news/nebius-deploys-ai-cluster-at-equinix-data-center-in-paris/", cls: "T" },
+      { label: "PeeringDB — facility 14220, \"Equinix PA10\", 114 Rue Ambroise Croizat, Seine-Saint-Denis (18 networks, 3 exchanges, record updated 2025-09-26)", url: "https://www.peeringdb.com/fac/14220", cls: "N" },
+      { label: "Nebius documentation — regions list, eu-west1 (France) shown as a public region", url: "https://docs.nebius.com/overview/regions", cls: "P" }
+    ],
+    provenance: {
+      status: {
+        basis: "disclosed",
+        asOf: "2026-09-15",
+        evidence: [
+          { source: 0, cls: "P", note: "Operator's launch post: first client workloads November 2024." },
+          { source: 1, cls: "T", note: "Trade coverage of the same launch." },
+          { source: 3, cls: "P", note: "Nebius's live docs list eu-west1 (France) as a public, generally-available region as of 2026-09-15." }
+        ],
+        conflicting: false
+      },
+      location: {
+        basis: "disclosed",
+        asOf: "2026-09-15",
+        evidence: [
+          { source: 2, cls: "N", note: "PeeringDB facility record gives the surveyed street address and coordinates for Equinix PA10, independent of any Nebius announcement." },
+          { source: 0, cls: "P", note: "Nebius names Equinix PA10, Saint-Denis, as the deployment site." }
+        ],
+        conflicting: false
+      }
+    },
+    notes: "CAPACITY DELIBERATELY LEFT NULL — no source discloses one. Neither Nebius's own post nor the trade coverage gives an MW figure. A '~5MW, tripling to ~15MW' figure circulates widely across aggregator summaries and search synthesis; the researching agent fetched the page it traces to (northwiseproject.com) and found it explicitly labelled as that site's own reverse-engineered rack math ('at 40kW per rack, a 5MW deployment implies roughly 125 racks'), attributed to no named report and disclosed by nobody. It is excluded rather than recorded with a caveat. Do not reintroduce it — it collapsed on contact with its own citation, and two separate searches served it up as if it were reported fact. Distinctness from nebius-bethune, checked and confirmed: PA10 is a rack lease inside an existing multi-tenant Equinix building in urban Saint-Denis; Béthune is a Nebius-built 240MW greenfield campus about 200km north in Hauts-de-France, still under construction. Different addresses, different project types, different status — not a mislabel or an earlier phase. Nebius's docs also list a separate eu-west2 (France) private region which is plausibly Béthune, but nothing ties that label to Béthune by name, so that is an inference and is not recorded as fact. Same N-class limit as the Keflavík entry: PeeringDB confirms the host building, and Nebius's own network object (AS213291) does not list PA10 among its four peering facilities, so location scores High while status stays on the operator's word. To lift status: an RTE (French grid) connection filing, or an EDGAR 20-F capacity table naming France. Searched and empty: EDGAR for 'Equinix Paris' (31 hits, all pre-2011 Equinix corporate filings) and 'Nebius Equinix' (0 hits)."
   }
 ];
