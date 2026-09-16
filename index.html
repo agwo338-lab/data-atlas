@@ -38,6 +38,11 @@
        rather than as a theme. */
     --font-display:"Instrument Serif", "Iowan Old Style", Georgia, "Times New Roman", serif;
 
+    /* Height the floating chrome (rail, dashboard, detail card) clears to sit
+       below the top bar. The bar is one row of tabs now that the masthead has
+       moved down into the rail, so this is measured from that, not guessed. */
+    --top-offset:52px;
+
     /* Rail + panel geometry.
        The provider panel opens like a drawer: the operator list slides to the
        right and the dashboard is revealed in the space it vacates, with the
@@ -90,7 +95,22 @@
   #shell{ position:relative; height:100vh; min-height:560px; }
 
   /* the map is the page; everything else floats over it */
-  #mapwrap{ position:absolute; inset:0; }
+  /* With the dashboard open the left of the window is covered, so the globe is
+     slid right by half the covered width — that puts its centre in the middle
+     of what's actually visible. The canvas keeps its full size and is only
+     transformed, so this is a compositor move: no resize, no reprojection, and
+     the click target stays under the pixel the user is looking at. The strip it
+     vacates on the left is narrower than the dashboard covering it, and the
+     overhang on the right is clipped by body's overflow, so nothing tears. */
+  #mapwrap{
+    position:absolute; inset:0; --map-shift:0px;
+    transform:translateX(var(--map-shift));
+    transition:transform .42s cubic-bezier(.22,.68,.32,1);
+  }
+  #mapwrap.no-anim{ transition:none; }
+  /* Attribution would ride off the right edge with everything else. It has to
+     stay readable, so it's pushed back by the same amount. */
+  #mapwrap .maplibregl-ctrl-bottom-right{ transform:translateX(calc(-1 * var(--map-shift))); }
   #map{ width:100%; height:100%; display:block; background:#0e0f1a; }
   .maplibregl-ctrl-attrib{ font-size:10px !important; }
   .map-loading{
@@ -113,9 +133,19 @@
   }
   #bar::after{ content:""; position:absolute; left:var(--space-8); right:var(--space-8); bottom:0; height:1px;
     background:linear-gradient(to right, transparent, var(--color-divider) 48px, var(--color-divider) calc(100% - 48px), transparent); }
-  .brand{ display:flex; align-items:baseline; gap:var(--space-3); white-space:nowrap;
-    font-family:var(--font-display); font-weight:400; font-size:32px; line-height:1; letter-spacing:.004em; }
-  .brand span{ font:400 11px/1 var(--font-body); letter-spacing:.11em; text-transform:uppercase; color:var(--color-neutral-500); }
+  /* The masthead sits in the rail, directly above the operator tabs, rather
+     than in the top bar — so the wordmark heads the column it belongs to and
+     the bar is left as pure navigation. It travels with the rail when the
+     dashboard opens, staying glued to the tabs it titles. */
+  .brand{ display:flex; flex-direction:column; gap:var(--space-1); white-space:nowrap;
+    font-family:var(--font-display); font-weight:400; font-size:30px; line-height:1.05; letter-spacing:.004em;
+    padding-bottom:var(--space-4); margin-bottom:var(--space-6);
+    border-bottom:1px solid var(--color-divider); }
+  .brand span{ font:400 10.5px/1 var(--font-body); letter-spacing:.11em; text-transform:uppercase; color:var(--color-neutral-500); }
+  /* Below the rail's breakpoint the rail is hidden outright, and the masthead
+     with it — so a compact one takes its place back in the bar. Only ever one
+     of the two is displayed, so neither is read out twice. */
+  .brand-bar{ display:none; }
   nav.tabs{ display:flex; gap:var(--space-6); }
   nav.tabs button{
     appearance:none; background:none; border:0; cursor:pointer; padding:0 0 2px;
@@ -133,7 +163,7 @@
 
   /* ---- left rail ---- */
   #rail{
-    position:absolute; z-index:30; top:92px; bottom:222px; left:0; width:var(--rail-w);
+    position:absolute; z-index:30; top:var(--top-offset); bottom:222px; left:0; width:var(--rail-w);
     padding:var(--space-8); background:linear-gradient(to right, rgba(22,24,38,.94) 0%, rgba(22,24,38,.9) 62%, rgba(22,24,38,0) 100%);
     overflow-y:auto; overflow-x:hidden;
     transform:translateX(0);
@@ -172,6 +202,11 @@
     content:""; position:absolute; inset:0; pointer-events:none;
     border:1px solid var(--color-divider); border-left:0;
     border-radius:0 var(--radius-md) var(--radius-md) 0;
+    /* Dissolve the hairline as it approaches the dashboard. Both surfaces are
+       --color-surface, so with the border gone the tab and the panel are one
+       continuous field and the join disappears instead of being drawn. */
+    -webkit-mask-image:linear-gradient(to right, transparent 0, #000 34px);
+    mask-image:linear-gradient(to right, transparent 0, #000 34px);
   }
   .prov.is-tab + .prov, .prov:has(+ .prov.is-tab){ border-top-color:transparent; }
   .prov.is-tab .pname{ color:var(--color-accent-300); }
@@ -244,7 +279,7 @@
 
   /* ---- detail panel ---- */
   #detail{
-    position:absolute; z-index:28; top:92px; right:0; bottom:222px; width:372px;
+    position:absolute; z-index:28; top:var(--top-offset); right:0; bottom:222px; width:372px;
     padding:var(--space-8); background:linear-gradient(to left, rgba(22,24,38,.96) 0%, rgba(22,24,38,.93) 70%, rgba(22,24,38,0) 100%);
     overflow-y:auto; display:none;
   }
@@ -343,7 +378,7 @@
      Everything past --panel-w is clipped here rather than on the panel, so the
      panel itself only ever animates transform. */
   #providerDock{
-    position:absolute; z-index:26; top:92px; bottom:222px; left:0;
+    position:absolute; z-index:26; top:var(--top-offset); bottom:222px; left:0;
     width:var(--panel-w); overflow:hidden; pointer-events:none;
   }
   #providerDock.on{ pointer-events:auto; }
@@ -365,7 +400,12 @@
   #providerDock.on #providerPanel{ transform:translateX(0); }
   @media (prefers-reduced-motion: reduce){ #providerPanel{ transition:none; } }
   @media (prefers-reduced-motion: reduce){ #providerPanel{ transition:none; } }
-  .pp-body{ flex:1; min-height:0; overflow-y:auto; padding:var(--space-8) var(--space-8) 56px; }
+  /* Scrollbar on the FAR LEFT. On the right it lands exactly on the seam with
+     the operator tabs and cuts a grey stripe through the join. direction:rtl
+     moves the scrollbar to the other edge; the content is flipped back to ltr
+     one level down so nothing else about the layout changes. */
+  .pp-body{ flex:1; min-height:0; overflow-y:auto; padding:var(--space-8) var(--space-8) 56px; direction:rtl; }
+  .pp-body > *{ direction:ltr; }
   .pp-body::-webkit-scrollbar{ width:6px; }
   .pp-body::-webkit-scrollbar-thumb{ background:var(--color-neutral-800); border-radius:3px; }
   .pp-close{
@@ -378,7 +418,7 @@
   /* The provider markup was written for a 1040px full-screen page; inside a
      ~520px panel it collapses to a single column. Content is unchanged. */
   #providerPanel .wrap{ max-width:none; }
-  #providerPanel .p-body{ grid-template-columns:1fr; gap:56px; margin-top:var(--space-8); }
+  #providerPanel .p-body{ gap:40px; }
   #providerPanel .p-head h1{ font-size:23px; }
   #providerPanel .p-stats{ gap:var(--space-8); padding-top:var(--space-4); }
   #providerPanel .p-stat-value{ font-size:22px; }
@@ -442,8 +482,12 @@
   .p-stats{ display:flex; gap:var(--space-8); flex-wrap:wrap; padding:var(--space-6) 0 0; }
   .p-stat-value{ font:500 26px var(--font-heading); font-variant-numeric:tabular-nums; }
   .p-stat-label{ font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--color-neutral-500); margin-top:3px; }
-  .p-body{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:var(--space-8); margin-top:56px; }
-  @media (max-width:860px){ .p-body{ grid-template-columns:1fr; } }
+  /* One column, read top to bottom: who they are, who they work with, what's
+     happened lately, and only then the site-by-site list — which is the long
+     part, and the part the map is already showing. */
+  .p-body{ display:grid; grid-template-columns:1fr; gap:40px; margin-top:var(--space-8); }
+  .p-summary{ margin:var(--space-6) 0 0; padding-top:var(--space-4); font-size:13.5px; line-height:1.62;
+    color:var(--color-neutral-300); max-width:64ch; border-top:1px solid var(--color-divider); }
   .p-section h2{ font-size:14px; font-weight:600; margin-bottom:var(--space-3); }
   .p-locations{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; }
   .p-loc-item{ display:flex; align-items:center; gap:var(--space-3); padding:.4rem 0; font-size:13px; cursor:pointer;
@@ -530,6 +574,12 @@
     #detail{ width:320px; }
   }
   @media (max-width:760px){
+    /* The bar carries the masthead again here, so it's two rows tall. */
+    :root{ --top-offset:78px; }
+    #bar{ flex-wrap:wrap; gap:var(--space-2) var(--space-6); }
+    .brand{ display:none; }
+    .brand-bar{ display:flex; flex-direction:row; align-items:baseline; flex-basis:100%;
+      gap:var(--space-3); font-size:21px; padding:0; margin:0; border-bottom:0; }
     #rail{ display:none; }
     /* No list to slide — the dashboard just takes the screen. */
     #providerPanel{ width:100%; }
@@ -548,7 +598,7 @@
   </div>
 
   <header id="bar">
-    <div class="brand">Site Atlas <span>/ data center buildout</span></div>
+    <div class="brand brand-bar">Site Atlas <span>/ data center buildout</span></div>
     <nav class="tabs" role="tablist">
       <button data-view="atlas" aria-current="true">Atlas</button>
       <button data-view="sources">Sources &amp; method</button>
@@ -560,6 +610,7 @@
   </header>
 
   <aside id="rail">
+    <div class="brand">Site Atlas <span>/ data center buildout</span></div>
     <div class="eyebrow" style="margin-bottom:var(--space-2)">Operators</div>
     <div id="provList"></div>
   </aside>
@@ -784,19 +835,31 @@
   // Scrolling/pinching out closes the detail card, treating it as the user
   // backing out to look at the wider map again. Only reacts to genuine user
   // gestures (flyTo/fitBounds calls leave originalEvent unset).
-  var lastZoom = map.getZoom();
+  //
+  // But it needs slack: a single wheel notch is a fraction of a zoom level, so
+  // reacting to the first backwards tick meant the card vanished while the user
+  // was still looking at the same site — nudging the view out to see what is
+  // next door read as "done with this". The card now holds until the user has
+  // pulled back a real distance from the furthest in they got.
+  var DETAIL_ZOOM_LEEWAY = 2.2;
+  var detailZoomAnchor = null;
   map.on("zoom", function(e){
+    if (!e.originalEvent) return;               // camera commands are not gestures
+    if (!detailEl.classList.contains("on")) return;
     var z = map.getZoom();
-    if (e.originalEvent && z < lastZoom && detailEl.classList.contains("on")) closeDetail();
-    lastZoom = z;
+    if (detailZoomAnchor == null || z > detailZoomAnchor) detailZoomAnchor = z;
+    else if (z < detailZoomAnchor - DETAIL_ZOOM_LEEWAY) closeDetail();
   });
 
   function zoomToSite(site, targetZoom){
     map.flyTo({ center: [site.lon, site.lat], zoom: targetZoom || DEFAULT_SITE_ZOOM, duration: 650 });
   }
   document.getElementById("resetView").addEventListener("click", function(){
+    // The shift leaves the visible slice centred on the canvas, so the margin
+    // it costs is the same on both sides rather than all on the left.
+    var slack = openProvider ? mapShift() : 0;
     map.fitBounds(fitBoundsArg, {
-      padding: { top: 60, right: 60, bottom: 60, left: 60 + occludedLeft() },
+      padding: { top: 60, right: 60 + slack, bottom: 60, left: 60 + slack },
       duration: 500
     });
   });
@@ -948,6 +1011,9 @@
       if (k === id) rowEls[k].setAttribute("aria-selected", "true"); else rowEls[k].removeAttribute("aria-selected");
     });
     zoomToSite(site);
+    // Measure the leeway from where the card is about to land, not from
+    // wherever the map happened to be sitting when the site was picked.
+    detailZoomAnchor = DEFAULT_SITE_ZOOM;
     detailEl.classList.add("on");
 
     var color = colorFor(site.provider);
@@ -1162,6 +1228,11 @@
         : '<p class="empty-note">No sourced coverage logged yet — see data/sites.js.</p>';
     }
 
+    // Optional per-operator orientation, from data/providers.js. Qualitative
+    // by design — see that file's header for why no figures live in it.
+    var summary = providerLookup[p] && providerLookup[p].summary;
+    var summaryHtml = summary ? '<p class="p-summary">' + esc(summary) + '</p>' : '';
+
     var el = document.getElementById("providerPanelBody");
     el.innerHTML = '<div class="wrap">' +
       '<div class="p-head"><span class="dot" style="background:' + color + '"></span><h1>' + esc(p) + '</h1></div>' +
@@ -1170,14 +1241,13 @@
         '<div><div class="p-stat-value">' + stats.siteCount + '</div><div class="p-stat-label">total site' + (stats.siteCount === 1 ? '' : 's') + '</div></div>' +
         '<div><div class="p-stat-value">' + stats.operationalCount + '</div><div class="p-stat-label">operational</div></div>' +
       '</div>' +
+      summaryHtml +
       '<div class="p-body">' +
-        '<div class="p-section-col">' +
-          '<div class="p-section"><h2>Locations</h2><ul class="p-locations">' + locationsHtml + '</ul></div>' +
-          '<div class="p-section p-partners"><h2>Partnerships</h2>' + partnersHtml + '</div>' +
-        '</div>' +
+        '<div class="p-section p-partners"><h2>Partnerships</h2>' + partnersHtml + '</div>' +
         '<div class="p-section"><h2>Latest headlines</h2>' + headlinesHtml +
           '<a class="p-search-link" href="https://www.google.com/search?tbm=nws&q=' + encodeURIComponent(p + " data center") + '" target="_blank" rel="noopener">Search for more coverage of ' + esc(p) + ' →</a>' +
         '</div>' +
+        '<div class="p-section"><h2>Locations</h2><ul class="p-locations">' + locationsHtml + '</ul></div>' +
       '</div>' +
     '</div>';
 
@@ -1193,10 +1263,17 @@
 
   // ── Recentering the globe ───────────────────────────────────────────
   // With the dashboard open, the left of the canvas is covered by the panel and
-  // the operator list. MapLibre's own viewport padding is the right tool: it
-  // moves the *camera* so the globe sits centred in what's actually visible,
-  // while the canvas keeps filling the window. Transforming #mapwrap instead
-  // would drag its right edge inward and tear a gap open beside it.
+  // the operator list, so the globe has to move out from under them.
+  //
+  // This used to be done with MapLibre's camera padding, which does nothing at
+  // all under the globe projection — the sphere is drawn centred on the canvas
+  // and padding never reaches it. easeTo accepted the option and returned
+  // without error, so the globe simply never moved, in either direction. It
+  // only appeared to half-work because the projection falls back to Mercator
+  // when you zoom in far enough, and padding does apply there; closing the
+  // dashboard back at globe zoom left the map sitting where it was.
+  //
+  // So the offset is applied to the container instead — see #mapwrap's CSS.
   var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   var MIN_MAP_STRIP = 380; // px of canvas the globe always keeps
 
@@ -1217,30 +1294,19 @@
     return Math.max(0, Math.min(want, avail - MIN_MAP_STRIP));
   }
 
-  // The last padding asked for, so a request that arrives before the style is
-  // ready isn't lost — easeTo is a camera command and a camera that doesn't
-  // exist yet quietly ignores it, which would leave the globe parked under the
-  // dashboard with nothing to show why.
-  var wantPadLeft = 0;
+  // Half the occluded width: sliding by that much centres the map in the strip
+  // that's left, rather than pushing it clear of the dashboard entirely.
+  function mapShift(){ return Math.round(occludedLeft() / 2); }
 
-  function setMapPadding(left, animate){
-    if (!map) return;
-    wantPadLeft = left;
-    var apply = function(){
-      try {
-        map.easeTo({
-          padding: { top: 0, right: 0, bottom: 0, left: wantPadLeft },
-          duration: (animate === false || reduceMotion.matches) ? 0 : 420
-        });
-      } catch (e) { console.warn("Site Atlas: map padding failed", e); }
-    };
-    if (map.isStyleLoaded && map.isStyleLoaded()) apply();
-    else map.once("load", apply);
+  function setMapShift(px, animate){
+    var wrap = document.getElementById("mapwrap");
+    wrap.classList.toggle("no-anim", animate === false || reduceMotion.matches);
+    wrap.style.setProperty("--map-shift", px + "px");
   }
 
   // Keep the globe centred if the window is resized while the panel is open.
   window.addEventListener("resize", function(){
-    if (openProvider) setMapPadding(occludedLeft(), false);
+    setMapShift(openProvider ? mapShift() : 0, false);
   });
 
   function openProviderView(p){
@@ -1254,7 +1320,7 @@
     document.getElementById("providerPanel").setAttribute("aria-label", p + " — operator overview");
     document.getElementById("shell").classList.add("panel-open");
     document.getElementById("providerPanelBody").scrollTop = 0;
-    setMapPadding(occludedLeft(), true);
+    setMapShift(mapShift(), true);
     renderRail();
   }
 
@@ -1265,7 +1331,7 @@
     dock.classList.remove("on");
     dock.setAttribute("aria-hidden", "true");
     document.getElementById("shell").classList.remove("panel-open");
-    setMapPadding(0, true);
+    setMapShift(0, true);
     renderRail();
   }
 

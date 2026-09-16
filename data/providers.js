@@ -12,6 +12,16 @@
 //            pins, table dot, and provider page. Optional — omit the field
 //            (or leave the provider out of this file entirely) to fall
 //            back to the next unused color in index.html's shared palette.
+//   summary  2-3 sentences of plain-language orientation: who this company
+//            is and what it's doing in the buildout, shown directly under
+//            the headline stats on the provider page. Optional — a provider
+//            without one simply shows no summary block.
+//            Deliberately QUALITATIVE: no capacity figures, deal sizes or
+//            dates belong here. Every hard number on this site is scored by
+//            data/sources.js and carries a verdict; prose restating one
+//            would launder an unscored claim past that machinery. Describe
+//            the shape of the business and let the stats, partnerships and
+//            headlines below carry the numbers, each with its own citation.
 //   partners array of the labs/companies this provider has a disclosed
 //            relationship with (compute deals, equity stakes, etc.),
 //            shown on the provider page. Optional. Each item:
@@ -56,6 +66,9 @@ var PROVIDERS = [
     // doesn't collide with AWS's orange or the auto-palette on the map,
     // not scraped from any brand asset.
     name: "SpaceXAI",
+    summary: "SpaceX's AI division, formed when xAI folded entirely into SpaceX rather " +
+      "than continuing as a separate company. Its compute buildout is tracked here " +
+      "as part of the merged entity; the atlas holds no confirmed SpaceXAI site yet.",
     color: "#9AA5B1"
   },
   {
@@ -68,10 +81,19 @@ var PROVIDERS = [
     // assignment in index.html only considers providers that actually have
     // sites.
     name: "AWS",
+    summary: "Amazon's cloud arm and the largest incumbent hyperscaler — it was building " +
+      "data centers at scale for a decade before the current AI cycle. Distinct from " +
+      "the neoclouds here in that it designs its own accelerators and rents capacity " +
+      "to AI labs rather than only reselling Nvidia hardware.",
     color: "#E0A752"
   },
   {
     name: "Nebius",
+    summary: "An Amsterdam-headquartered AI cloud — the business that remained after " +
+      "Yandex's Russian operations were divested. It builds and operates its own GPU " +
+      "capacity and sells it on long multi-year contracts, so its disclosed pipeline " +
+      "is driven by a handful of very large customer commitments rather than by broad " +
+      "demand.",
     color: "#4CAF6D",
     partners: [
       {
@@ -111,6 +133,11 @@ var PROVIDERS = [
   },
   {
     name: "CoreWeave",
+    summary: "A GPU-specialist cloud, originally an Ethereum mining operation, now one of " +
+      "the largest dedicated AI compute providers. It leases and fits out sites fast " +
+      "rather than building slowly from the ground up, which is why its footprint here " +
+      "turns over quicker — and is more exposed to local siting politics — than a " +
+      "hyperscaler's.",
     color: "#4C6FE5",
     partners: [
       {
