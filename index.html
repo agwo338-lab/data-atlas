@@ -48,12 +48,14 @@
        right and the dashboard is revealed in the space it vacates, with the
        list ending up docked against the dashboard's right edge as its tab
        column. The rail's buttons are inset --tab-inset from its own left edge
-       (padding --space-8, pulled back --space-2 by their negative margin), so
-       shifting the rail by (panel width - that inset) lands the active
-       operator's left edge exactly on the panel's right edge. */
+       so shifting the rail by (panel width - that inset) lands the active
+       operator's left edge exactly on the panel's right edge. The tab handles
+       now bleed all the way to the rail's own left edge, so the inset is zero
+       and the rail travels exactly the card's width — which is what stops a
+       lighter strip being left over between handle and card. */
     --rail-w:272px;
     --panel-w:520px;
-    --tab-inset:calc(var(--space-8) - var(--space-2));
+    --tab-inset:0px;
     --rail-shift:calc(var(--panel-w) - var(--tab-inset));
 
     --space-1:2.8px; --space-2:5.6px; --space-3:8.4px; --space-4:11.2px; --space-6:16.8px; --space-8:22.4px;
@@ -92,7 +94,10 @@
   a:hover{ text-decoration-color:currentColor; }
   h1,h2,h3,h4{ font-family:var(--font-heading); font-weight:500; letter-spacing:-0.015em; margin:0; }
 
-  #shell{ position:relative; height:100vh; min-height:560px; }
+  /* --shoulder: the dark band across the top of the operator dashboard,
+     measured from the masthead's rule in JS (see setShoulder) so the card's
+     lighter field begins on exactly that line. */
+  #shell{ position:relative; height:100vh; min-height:560px; --shoulder:0px; }
 
   /* ---- sky ----
      The globe's canvas is transparent everywhere outside the sphere, and its
@@ -187,14 +192,15 @@
     transform:translateX(0);
     transition:transform .42s cubic-bezier(.22,.68,.32,1), background .3s ease, box-shadow .3s ease;
   }
-  /* Open: the list slides right off the dashboard it was covering, and stops
-     being a floating overlay — solid ground from its buttons' left edge
-     rightward, so the seam with the panel is exact and the strip left of that
-     edge stays transparent rather than painting a gutter over the panel. The
-     shadow falls leftward, onto the surface the list just uncovered. */
+  /* Open: the list slides right off the card it was covering. Dark ground,
+     with a hairline where it meets the card's lighter field — the only mark on
+     that join. Across the shoulder both sides are the same dark, so the
+     hairline stops there and the band reads as one continuous piece. */
   #shell.panel-open #rail{
     transform:translateX(var(--rail-shift));
-    background:linear-gradient(to right, transparent 0, transparent var(--tab-inset), var(--color-bg) var(--tab-inset), var(--color-bg) 100%);
+    background:
+      linear-gradient(var(--color-bg), var(--color-bg)) no-repeat 0 0 / 100% var(--shoulder),
+      linear-gradient(to right, var(--color-divider) 0, var(--color-divider) 1px, var(--color-bg) 1px, var(--color-bg) 100%);
     box-shadow:-16px 0 38px rgba(0,0,0,.42);
   }
   @media (prefers-reduced-motion: reduce){ #rail{ transition:background .3s ease; } }
@@ -202,8 +208,9 @@
   .stat-sub{ font-size:12px; color:var(--color-neutral-500); margin-top:var(--space-2); }
 
   .prov{ position:relative; display:grid; grid-template-columns:8px 1fr auto; align-items:center; gap:var(--space-2) var(--space-3);
-    padding:var(--space-3) var(--space-2); margin:0 calc(var(--space-2) * -1); border-radius:6px;
-    cursor:pointer; border:0; background:none; width:calc(100% + var(--space-4)); text-align:left; color:inherit;
+    padding:var(--space-3) var(--space-2) var(--space-3) var(--space-8);
+    margin:0 calc(var(--space-2) * -1) 0 calc(var(--space-8) * -1); border-radius:0 6px 6px 0;
+    cursor:pointer; border:0; background:none; width:calc(100% + var(--space-8) + var(--space-2)); text-align:left; color:inherit;
     transition:background .12s ease; }
   .prov:hover{ background:color-mix(in srgb, var(--color-text) 5%, transparent); }
   .prov + .prov{ border-top:1px solid color-mix(in srgb, var(--color-text) 8%, transparent); }
@@ -402,8 +409,19 @@
   #providerDock.on{ pointer-events:auto; }
   #providerPanel{
     position:absolute; inset:0;
-    background:var(--color-surface);
-    border-top:1px solid var(--color-divider); border-bottom:1px solid var(--color-divider);
+    /* The band across the top is --shoulder tall, taken from the masthead's own
+       rule so the card's lighter field starts on that exact line and the band
+       reads as one piece over card and tabs alike.
+       The card's ground has to END on exactly the fill the tab handle is
+       painted in, or the join is a colour step no radius can hide — so the
+       gradient resolves to --color-surface well before the right edge and only
+       darkens away from the seam, leftward. */
+    background:
+      linear-gradient(var(--color-bg), var(--color-bg)) no-repeat 0 0 / 100% var(--shoulder),
+      linear-gradient(to right, #1e202d 0%, var(--color-surface) 62%, var(--color-surface) 100%);
+    /* The band is real estate, not padding: the operator's name sits in it and
+       the scroller starts below it, so content can never ride up onto the dark
+       ground or under the close button. */
     display:flex; flex-direction:column;
     /* Revealed, not flown in. The panel and the rail translate by the SAME
        distance on the SAME curve, so the panel's right edge stays glued to the
@@ -417,17 +435,34 @@
   }
   #providerDock.on #providerPanel{ transform:translateX(0); }
   @media (prefers-reduced-motion: reduce){ #providerPanel{ transition:none; } }
-  @media (prefers-reduced-motion: reduce){ #providerPanel{ transition:none; } }
+  /* One rule where the shoulder ends and the card's field begins — collinear
+     with the masthead's rule in the tab column, so a single line crosses the
+     whole dashboard instead of two meeting near the seam. The panel's own top
+     edge carries nothing. */
+  #providerPanel::before, #providerPanel::after{
+    content:""; position:absolute; left:0; right:0; height:1px; pointer-events:none; z-index:3;
+    background:linear-gradient(to right, transparent 0, var(--color-divider) 56px, var(--color-divider) 100%);
+  }
+  #providerPanel::before{ top:var(--shoulder); }
+  #providerPanel::after{ bottom:0; }
+  /* The name is chrome, not content — it holds still in the shoulder while the
+     card scrolls under it. */
+  .pp-head{ flex:none; height:var(--shoulder); display:flex; align-items:center; gap:var(--space-3);
+    padding:0 52px 0 var(--space-8); }
+  .pp-head .dot{ width:11px; height:11px; border-radius:50%; flex:none; }
+  .pp-head h1{ font-size:20px; letter-spacing:-.02em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   /* Scrollbar on the FAR LEFT. On the right it lands exactly on the seam with
      the operator tabs and cuts a grey stripe through the join. direction:rtl
      moves the scrollbar to the other edge; the content is flipped back to ltr
      one level down so nothing else about the layout changes. */
-  .pp-body{ flex:1; min-height:0; overflow-y:auto; padding:var(--space-8) var(--space-8) 56px; direction:rtl; }
+  .pp-body{ flex:1; min-height:0; overflow-y:auto; overflow-x:hidden;
+    padding:var(--space-6) var(--space-8) 56px; direction:rtl; }
   .pp-body > *{ direction:ltr; }
   .pp-body::-webkit-scrollbar{ width:6px; }
   .pp-body::-webkit-scrollbar-thumb{ background:var(--color-neutral-800); border-radius:3px; }
+  /* Sits in the shoulder, beside the name, clear of the card's content. */
   .pp-close{
-    position:absolute; top:var(--space-4); right:var(--space-4); z-index:2;
+    position:absolute; top:calc(var(--shoulder) / 2 - 13px); right:var(--space-6); z-index:2;
     background:none; border:0; cursor:pointer; padding:var(--space-2);
     line-height:1; font-size:15px; color:var(--color-neutral-500); border-radius:var(--radius-sm);
   }
@@ -436,11 +471,7 @@
   /* The provider markup was written for a 1040px full-screen page; inside a
      ~520px panel it collapses to a single column. Content is unchanged. */
   #providerPanel .wrap{ max-width:none; }
-  #providerPanel .p-body{ gap:40px; }
-  #providerPanel .p-head h1{ font-size:23px; }
-  #providerPanel .p-stats{ gap:var(--space-8); padding-top:var(--space-4); }
-  #providerPanel .p-stat-value{ font-size:22px; }
-  #providerPanel .partner-list{ gap:var(--space-2); }
+  #providerPanel .p-body{ gap:36px; }
   .wrap{ max-width:1040px; margin:0 auto; }
   .lede{ font-size:15px; color:var(--color-neutral-300); max-width:66ch; }
   .back-link{ background:none; border:0; color:var(--color-neutral-500); font:500 12px var(--font-heading); letter-spacing:.03em; cursor:pointer; padding:0 0 var(--space-6); display:block; }
@@ -493,41 +524,79 @@
   .method-figure{ background:var(--color-surface); border:1px solid var(--color-divider); border-radius:var(--radius-lg); padding:20px; overflow-x:auto; margin-top:var(--space-4); }
   .method-figure svg{ display:block; min-width:940px; width:100%; height:auto; }
 
-  /* ---- provider page ---- */
-  .p-head{ display:flex; align-items:center; gap:var(--space-3); }
-  .p-head .dot{ width:14px; height:14px; border-radius:50%; flex-shrink:0; }
-  .p-head h1{ font-size:28px; }
-  .p-stats{ display:flex; gap:var(--space-8); flex-wrap:wrap; padding:var(--space-6) 0 0; }
-  .p-stat-value{ font:500 26px var(--font-heading); font-variant-numeric:tabular-nums; }
-  .p-stat-label{ font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--color-neutral-500); margin-top:3px; }
+  /* ---- operator card content ---- */
+  .p-summary{ margin:var(--space-4) 0 0; font-size:13.5px; line-height:1.62;
+    color:var(--color-neutral-300); max-width:60ch; }
+
+  /* Headline figure. One number the tab already showed, taken apart. The split
+     bar and its key use the map's own pin treatments — filled, ringed, dashed —
+     so the card reads as a close-up of the pins, not a second chart language. */
+  .p-figure{ margin-top:var(--space-8); }
+  .p-cap{ display:flex; align-items:baseline; gap:var(--space-3); }
+  .p-cap b{ font:500 42px/1 var(--font-heading); letter-spacing:-.035em; font-variant-numeric:tabular-nums; }
+  .p-cap em{ font-style:normal; font:500 11px var(--font-heading); letter-spacing:.09em; text-transform:uppercase; color:var(--color-neutral-500); }
+  .p-cap-meta{ margin-top:var(--space-3); font-size:12px; color:var(--color-neutral-500); }
+  .p-split{ display:flex; gap:3px; height:9px; margin-top:var(--space-6); }
+  .p-split i{ display:block; min-width:3px; border-radius:2px; box-sizing:border-box; }
+  .p-split i.s-operational{ background:var(--pc); }
+  .p-split i.s-under-construction{ background:color-mix(in srgb, var(--pc) 24%, transparent); border:1.4px solid var(--pc); }
+  .p-split i.s-planned{ background:transparent; border:1.3px dashed color-mix(in srgb, var(--pc) 70%, transparent); }
+  .p-key{ list-style:none; margin:var(--space-4) 0 0; padding:0;
+    display:grid; grid-template-columns:repeat(auto-fit, minmax(108px,1fr)); gap:var(--space-4); }
+  .p-key li{ display:grid; grid-template-rows:2.3em auto auto; gap:2px; padding-top:var(--space-3);
+    border-top:1px solid color-mix(in srgb, var(--color-text) 10%, transparent); }
+  .p-key .kl{ display:flex; align-items:flex-start; gap:5px; font:500 10px/1.25 var(--font-heading); letter-spacing:.07em; text-transform:uppercase; color:var(--color-neutral-500); }
+  .p-key .sw{ width:9px; height:9px; border-radius:50%; flex:none; box-sizing:border-box; margin-top:2px; }
+  .p-key .sw.s-operational{ background:var(--pc); }
+  .p-key .sw.s-under-construction{ background:color-mix(in srgb, var(--pc) 24%, transparent); border:1.4px solid var(--pc); }
+  .p-key .sw.s-planned{ border:1.2px dashed color-mix(in srgb, var(--pc) 70%, transparent); }
+  .p-key .kv{ font:500 15px var(--font-heading); font-variant-numeric:tabular-nums; }
+  .p-key .kn{ font-size:11.5px; color:var(--color-neutral-500); }
+
+  /* Evidence strip — the drawer's weakest-link verdict, tallied per operator. */
+  .p-ev{ margin-top:var(--space-8); }
+  .p-ev-meter{ display:flex; gap:3px; height:4px; margin:var(--space-3) 0; }
+  .p-ev-meter i{ display:block; min-width:3px; }
+  .p-ev-meter i.independent{ background:var(--color-accent); }
+  .p-ev-meter i.operator{ background:var(--color-neutral-700); }
+  .p-ev-meter i.unsourced{ background:repeating-linear-gradient(to right, var(--color-neutral-700) 0 3px, transparent 3px 6px); }
+  .p-ev-key{ display:flex; flex-wrap:wrap; gap:var(--space-2) var(--space-6); }
+  .p-ev-key .vd b{ font-weight:500; font-variant-numeric:tabular-nums; }
+
   /* One column, read top to bottom: who they are, who they work with, what's
      happened lately, and only then the site-by-site list — which is the long
      part, and the part the map is already showing. */
-  .p-body{ display:grid; grid-template-columns:1fr; gap:40px; margin-top:var(--space-8); }
-  .p-summary{ margin:var(--space-6) 0 0; padding-top:var(--space-4); font-size:13.5px; line-height:1.62;
-    color:var(--color-neutral-300); max-width:64ch; border-top:1px solid var(--color-divider); }
-  .p-section h2{ font-size:14px; font-weight:600; margin-bottom:var(--space-3); }
+  .p-body{ display:grid; grid-template-columns:minmax(0,1fr); gap:40px; margin-top:var(--space-8); }
+  .p-section h2{ font:500 10.5px/1 var(--font-heading); letter-spacing:.12em; text-transform:uppercase;
+    color:var(--color-neutral-500); margin-bottom:var(--space-4); }
   .p-locations{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; }
   .p-loc-item{ display:flex; align-items:center; gap:var(--space-3); padding:.4rem 0; font-size:13px; cursor:pointer;
     border-top:1px solid color-mix(in srgb, var(--color-text) 7%, transparent); }
   .p-loc-item:first-child{ border-top:0; }
   .p-loc-item:hover{ color:var(--color-accent-300); }
   .p-loc-name{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .p-loc-place{ color:var(--color-neutral-500); font-size:12px; flex-shrink:0; }
+  .p-loc-place{ color:var(--color-neutral-500); font-size:12px; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .p-loc-cap{ color:var(--color-neutral-500); font-size:12px; font-variant-numeric:tabular-nums; flex-shrink:0; width:5em; text-align:right; }
   .status-dot{ width:6px; height:6px; border-radius:50%; flex-shrink:0; }
   .status-dot.status-operational{ background:#4ADE80; }
   .status-dot.status-under-construction{ background:#FBBF24; }
   .status-dot.status-planned{ background:#94A3B8; }
 
+  /* Hairline rows, not cards. Boxed entries inside a boxed panel inside a
+     boxed rail was three frames deep; the relationship rides above the name as
+     its own line so long labels never fight the name for the row. */
   .p-partners{ margin-top:var(--space-8); }
-  .partner-list{ list-style:none; margin:0; padding:0; display:grid; gap:var(--space-3); }
-  .partner-card{ border:1px solid var(--color-divider); border-radius:8px; padding:var(--space-4); }
-  .partner-top{ display:flex; align-items:baseline; justify-content:space-between; gap:var(--space-2); }
-  .partner-name{ font-weight:600; font-size:13.5px; }
-  .partner-relationship{ font-size:10.5px; letter-spacing:.05em; text-transform:uppercase; color:var(--color-accent-300); white-space:nowrap; }
-  .partner-detail{ margin:.4rem 0 0; font-size:12.5px; color:var(--color-neutral-400); line-height:1.5; }
+  .partner-list{ list-style:none; margin:0; padding:0; display:grid; gap:0; }
+  .partner-card{ border:0; border-radius:0; padding:var(--space-4) 0;
+    border-top:1px solid color-mix(in srgb, var(--color-text) 8%, transparent); }
+  .partner-card:first-child{ border-top:0; padding-top:0; }
+  .partner-top{ display:flex; align-items:baseline; gap:var(--space-3); margin-top:1px; }
+  .partner-name{ font:500 14px var(--font-heading); }
+  .partner-since{ margin-left:auto; font-size:11px; color:var(--color-neutral-500); font-variant-numeric:tabular-nums; }
+  .partner-relationship{ display:block; font:500 10px var(--font-heading); letter-spacing:.09em; text-transform:uppercase; color:var(--color-accent-300); }
+  .partner-detail{ margin:.3rem 0 0; font-size:12.5px; color:var(--color-neutral-400); line-height:1.55; max-width:56ch; }
   .partner-meta{ display:block; margin-top:.4rem; font-size:11px; color:var(--color-neutral-500); }
+  .partner-meta, .partner-detail, .partner-relationship{ min-width:0; overflow-wrap:break-word; }
   .partner-meta a{ color:var(--color-neutral-500); }
   .partner-meta a:hover{ color:var(--color-accent-300); }
   .empty-note{ color:var(--color-neutral-500); font-size:13px; font-style:italic; }
@@ -537,7 +606,7 @@
   .headline-item:first-child{ border-top:0; }
   .headline-top{ display:flex; align-items:center; gap:var(--space-2); margin-bottom:2px; }
   .headline-date{ font-size:11px; color:var(--color-neutral-500); white-space:nowrap; }
-  .headline-category{ font-size:10px; letter-spacing:.04em; text-transform:uppercase; padding:.1rem .4rem; border-radius:999px; border:1px solid var(--color-divider); color:var(--color-neutral-500); }
+  .headline-category{ font:500 10px var(--font-heading); letter-spacing:.09em; text-transform:uppercase; color:var(--color-neutral-500); }
   .headline-title{ display:block; color:var(--color-text); font-weight:500; }
   .headline-why{ margin:.25rem 0 0; color:var(--color-neutral-400); font-size:12px; line-height:1.5; }
   .headline-meta{ display:block; margin-top:.3rem; font-size:11px; color:var(--color-neutral-500); }
@@ -663,6 +732,7 @@
   <div id="providerDock" aria-hidden="true">
     <aside id="providerPanel">
       <button class="pp-close" type="button" aria-label="Close operator panel">&#10005;</button>
+      <div class="pp-head" id="providerPanelHead"></div>
       <div class="pp-body" id="providerPanelBody"></div>
     </aside>
   </div>
@@ -1296,15 +1366,6 @@
   function renderProviderView(p){
     var stats = providerStats(p);
     var color = colorFor(p);
-    var capacityLabel, capacitySub;
-    if (stats.operationalCount === 0) { capacityLabel = "—"; capacitySub = "no operational sites yet"; }
-    else if (stats.disclosedCount === 0) { capacityLabel = "—"; capacitySub = "operational capacity undisclosed"; }
-    else {
-      capacityLabel = stats.totalGW.toFixed(2);
-      capacitySub = stats.disclosedCount < stats.operationalCount
-        ? "GW (" + stats.disclosedCount + "/" + stats.operationalCount + " operational disclosed)"
-        : "GW operational";
-    }
 
     var providerSites = SITES.filter(function(s){ return s.provider === p; }).sort(tableSortCompare);
     var locationsHtml = providerSites.map(function(s){
@@ -1320,9 +1381,13 @@
     var partnersHtml = partners.length
       ? '<ul class="partner-list">' + partners.map(function(partner){
           var sourceLinks = (partner.sources || []).map(function(s){ return '<a href="' + s.url + '" target="_blank" rel="noopener">' + esc(s.label) + '</a>'; }).join(', ');
-          return '<li class="partner-card"><div class="partner-top"><span class="partner-name">' + esc(partner.name) + '</span><span class="partner-relationship">' + esc(partner.relationship) + '</span></div>' +
+          return '<li class="partner-card">' +
+            '<span class="partner-relationship">' + esc(partner.relationship) + '</span>' +
+            '<div class="partner-top"><span class="partner-name">' + esc(partner.name) + '</span>' +
+              (partner.since ? '<span class="partner-since">' + esc(partner.since) + '</span>' : '') +
+            '</div>' +
             (partner.detail ? '<p class="partner-detail">' + esc(partner.detail) + '</p>' : '') +
-            (sourceLinks ? '<span class="partner-meta">' + (partner.since ? esc(partner.since) + ' · ' : '') + sourceLinks + '</span>' : '') +
+            (sourceLinks ? '<span class="partner-meta">' + sourceLinks + '</span>' : '') +
           '</li>';
         }).join('') + '</ul>'
       : '<p class="empty-note">No disclosed partnerships logged yet — see data/providers.js.</p>';
@@ -1356,17 +1421,71 @@
     // Optional per-operator orientation, from data/providers.js. Qualitative
     // by design — see that file's header for why no figures live in it.
     var summary = providerLookup[p] && providerLookup[p].summary;
-    var summaryHtml = summary ? '<p class="p-summary">' + esc(summary) + '</p>' : '';
+    var summaryHtml = summary ? '<p class="p-summary" style="margin-top:0">' + esc(summary) + '</p>' : '';
 
     var el = document.getElementById("providerPanelBody");
-    el.innerHTML = '<div class="wrap">' +
-      '<div class="p-head"><span class="dot" style="background:' + color + '"></span><h1>' + esc(p) + '</h1></div>' +
-      '<div class="p-stats">' +
-        '<div><div class="p-stat-value">' + capacityLabel + '</div><div class="p-stat-label">' + esc(capacitySub) + '</div></div>' +
-        '<div><div class="p-stat-value">' + stats.siteCount + '</div><div class="p-stat-label">total site' + (stats.siteCount === 1 ? '' : 's') + '</div></div>' +
-        '<div><div class="p-stat-value">' + stats.operationalCount + '</div><div class="p-stat-label">operational</div></div>' +
-      '</div>' +
+    document.getElementById("providerPanelHead").innerHTML =
+      '<span class="dot" style="background:' + color + '"></span><h1>' + esc(p) + '</h1>';
+
+    // ── The headline figure ─────────────────────────────────────────────
+    // The number is the one the operator's tab already shows, taken apart by
+    // status. Same figure, same place on screen — the card reads as the tab
+    // opening up rather than as a second, differently-scoped summary.
+    var mwFmt = function(v){ return v.toLocaleString(undefined, { maximumFractionDigits: 1 }); };
+    var split = ["Operational", "Under construction", "Planned"].map(function(st){
+      var list = providerSites.filter(function(x){ return x.status === st; });
+      var disc = list.filter(function(x){ return x.capacityMW != null; });
+      return {
+        status: st, slug: statusSlug(st), n: list.length,
+        mw: disc.reduce(function(t, x){ return t + x.capacityMW; }, 0),
+        undis: list.length - disc.length
+      };
+    }).filter(function(g){ return g.n; });
+    var totalMW = split.reduce(function(t, g){ return t + g.mw; }, 0);
+    var undisclosed = providerSites.filter(function(x){ return x.capacityMW == null; }).length;
+    var countries = [];
+    providerSites.forEach(function(x){ if (x.country && countries.indexOf(x.country) === -1) countries.push(x.country); });
+
+    var splitBar = totalMW > 0
+      ? '<div class="p-split">' + split.filter(function(g){ return g.mw > 0; }).map(function(g){
+          return '<i class="s-' + g.slug + '" style="flex:' + g.mw + '"></i>';
+        }).join('') + '</div>'
+      : '';
+    var splitKey = '<ul class="p-key">' + split.map(function(g){
+      return '<li>' +
+        '<span class="kl"><span class="sw s-' + g.slug + '"></span>' + esc(g.status) + '</span>' +
+        '<span class="kv">' + (g.mw > 0 ? mwFmt(g.mw) + ' MW' : '—') + '</span>' +
+        '<span class="kn">' + g.n + ' site' + (g.n === 1 ? '' : 's') + '</span>' +
+      '</li>';
+    }).join('') + '</ul>';
+
+    // ── Evidence across this operator's sites ───────────────────────────
+    // The same weakest-link verdict the drawer prints per row, tallied — so the
+    // card answers "how much of this is the company's own word" for the
+    // operator as a whole, in the atlas's existing vocabulary.
+    var EV = [["independent", "independently verified"], ["operator", "operator's word"], ["unsourced", "unsourced"]];
+    var evCounts = { independent: 0, operator: 0, unsourced: 0 };
+    providerSites.forEach(function(x){ var k = siteVerdict(x).key; evCounts[k] = (evCounts[k] || 0) + 1; });
+    var evHtml = '<div class="p-ev">' +
+      '<div class="eyebrow">Evidence across these sites</div>' +
+      '<div class="p-ev-meter">' + EV.filter(function(e){ return evCounts[e[0]]; }).map(function(e){
+        return '<i class="' + e[0] + '" style="flex:' + evCounts[e[0]] + '"></i>';
+      }).join('') + '</div>' +
+      '<div class="p-ev-key">' + EV.filter(function(e){ return evCounts[e[0]]; }).map(function(e){
+        return '<span class="vd ' + e[0] + '"><i></i><b>' + evCounts[e[0]] + '</b>&nbsp;' + e[1] + '</span>';
+      }).join('') + '</div>' +
+    '</div>';
+
+    el.innerHTML = '<div class="wrap" style="--pc:' + color + '">' +
       summaryHtml +
+      '<div class="p-figure">' +
+        '<div class="p-cap"><b>' + (totalMW > 0 ? mwFmt(totalMW) : '—') + '</b><em>MW disclosed</em></div>' +
+        '<div class="p-cap-meta">' + stats.siteCount + ' site' + (stats.siteCount === 1 ? '' : 's') +
+          ' · ' + stats.operationalCount + ' operational · ' + undisclosed + ' disclose no figure · ' +
+          countries.length + ' countr' + (countries.length === 1 ? 'y' : 'ies') + '</div>' +
+        splitBar + splitKey +
+      '</div>' +
+      evHtml +
       '<div class="p-body">' +
         '<div class="p-section p-partners"><h2>Partnerships</h2>' + partnersHtml + '</div>' +
         '<div class="p-section"><h2>Latest headlines</h2>' + headlinesHtml +
@@ -1409,7 +1528,7 @@
     if (getComputedStyle(rail).display === "none") return 0;
     var cs = getComputedStyle(document.documentElement);
     var px = function(name){ return parseFloat(cs.getPropertyValue(name)) || 0; };
-    var want = px("--panel-w") - (px("--space-8") - px("--space-2")) + rail.getBoundingClientRect().width;
+    var want = px("--panel-w") - px("--tab-inset") + rail.getBoundingClientRect().width;
     // Between the rail's breakpoint (760px) and a comfortable desktop, the
     // panel plus the list can claim nearly the whole window — at 900px wide
     // they want 645 of it. Padding the camera by that much squeezes the globe
@@ -1417,6 +1536,25 @@
     // that means it isn't perfectly centred in what's left.
     var avail = document.getElementById("mapwrap").getBoundingClientRect().width;
     return Math.max(0, Math.min(want, avail - MIN_MAP_STRIP));
+  }
+
+  // The dark band across the top of the dashboard. Measured from the masthead's
+  // own rule in the tab column so the card's lighter field starts on that exact
+  // line — one rule crossing the whole width, instead of the panel's top edge
+  // and the masthead's rule clashing beside the seam.
+  function setShoulder(){
+    var shell = document.getElementById("shell");
+    var panel = document.getElementById("providerPanel");
+    var rail = document.getElementById("rail");
+    var brand = rail.querySelector(".brand");
+    // Below the rail's breakpoint there is no masthead to measure against, so
+    // the band falls back to something that just fits the name and the ✕.
+    if (!brand || getComputedStyle(rail).display === "none") {
+      shell.style.setProperty("--shoulder", "44px");
+      return;
+    }
+    var h = Math.round(brand.getBoundingClientRect().bottom - panel.getBoundingClientRect().top);
+    shell.style.setProperty("--shoulder", Math.max(0, h) + "px");
   }
 
   // Half the occluded width: sliding by that much centres the map in the strip
@@ -1432,6 +1570,7 @@
   // Keep the globe centred if the window is resized while the panel is open.
   window.addEventListener("resize", function(){
     setMapShift(openProvider ? mapShift() : 0, false);
+    if (openProvider) setShoulder();
   });
 
   function openProviderView(p){
@@ -1443,6 +1582,7 @@
     if (!openProvider) providerFilterSnapshot = Object.assign({}, activeProviders);
     soloProvider(p);
     openProvider = p;
+    setShoulder();          // before render: .pp-head is sized from it
     renderProviderView(p);
     var dock = document.getElementById("providerDock");
     dock.classList.add("on");
