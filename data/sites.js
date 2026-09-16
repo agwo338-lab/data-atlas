@@ -1160,5 +1160,144 @@ var SITES = [
       }
     },
     notes: "OpenAI's first self-developed campus, and as of Sep 2026 the only site in this atlas where OpenAI is the developer rather than a tenant. Built through Octans GA LLC, a Delaware affiliate of OpenAI. The Effingham County Industrial Development Authority holds legal title to each phase and leases it back to OpenAI across a 15-year PILOT — that is Georgia's standard tax-abatement vehicle for large industrial projects, not a landlord/tenant relationship with an independent developer, and the distinction matters for how this entry is filed. One blog (measuredai on Substack) claims a $10 per-phase buyback option at the end of the PILOT; unattributed by this project's standards and not corroborated anywhere else, so recorded here as an unverified lead only, not used. Announced Jul 22, 2026; site-plan and tax approvals cleared in early Sep 2026; construction partner not yet named; construction targeted early 2027. Capacity of 3.2GW is OpenAI's own disclosed figure, corroborated only by derivative classes so far. Note that OpenAI's newsroom page (source 0) returned HTTP 403 to direct fetch — its content was confirmed via search-engine summary and cross-checked against the independent local reporting, not read directly. Searched and came up empty, so it needn't be re-searched from scratch: EDGAR full-text for \"Project Camellia\", \"Octans GA\" and \"Effingham County OpenAI\" (no filing yet names the project — plausible, since Southern Company/Georgia Power has had no intervening 10-Q since the Aug 27 power contract); EPA ECHO for Effingham County GA under NAICS 518210 (0 of 7,478 GA air facilities, full coverage, consistent with a site that has not filed an air permit); PeeringDB for Rincon (no presence, as expected pre-construction). The single highest-value thing to chase next is the Development of Regional Impact filing Effingham submitted to the state on 2026-07-29 — it is an R-class government record that AJC's reporters clearly read, and it would likely lift both status and capacity to High in one go. A Georgia PSC filing covering Georgia Power's 25-year, up-to-3.21GW contract would do the same. Re-check inside the 180-day Planned window. Coordinates are a ZIP-centroid estimate for Rincon, not a geocoded parcel."
+  },
+  {
+    id: "nebius-modiin",
+    provider: "Nebius",
+    site: "Mega DC Modi'in",
+    city: "Modi'in",
+    country: "Israel",
+    lat: 31.8969,
+    lon: 35.0095,
+    status: "Operational",
+    capacityMW: 8,
+    lastUpdated: "2026-09-15",
+    sources: [
+      { label: "Nebius newsroom — \"Nebius brings NVIDIA Blackwell to Israel\"", url: "https://nebius.com/newsroom/nebius-brings-nvidia-blackwell-to-israel-with-one-of-the-country-s-first-ai-infrastructure-deployments", cls: "P" },
+      { label: "Data Center Dynamics — \"First phase of Israel's NVIDIA B200-powered national AI supercomputer goes live\"", url: "https://www.datacenterdynamics.com/en/news/first-phase-of-israels-nvidia-b200-powered-national-ai-supercomputer-goes-live/", cls: "T" },
+      { label: "Jerusalem Post — Modi'in AI data center launch, Oct 22, 2025", url: "https://www.jpost.com/business-and-innovation/article-871239", cls: "G" }
+    ],
+    provenance: {
+      capacityMW: {
+        basis: "disclosed",
+        asOf: "2025-10-22",
+        evidence: [
+          { source: 1, cls: "T", note: "8MW, reported alongside the national-supercomputer framing." },
+          { source: 2, cls: "G", note: "Most detailed account: 8MW, ~$300M of GPUs, ~$80M construction, and the 75/25 split between Nebius's commercial capacity and the Israel Innovation Authority's allocation." }
+        ],
+        conflicting: false
+      },
+      status: {
+        basis: "disclosed",
+        asOf: "2025-10-22",
+        evidence: [
+          { source: 0, cls: "P", note: "Operator's launch announcement — confirms the date and the 4,000 HGX B200 count, but states no MW figure." },
+          { source: 1, cls: "T" },
+          { source: 2, cls: "G" }
+        ],
+        conflicting: false
+      },
+      location: {
+        basis: "estimated",
+        asOf: "2026-09-15",
+        evidence: [
+          { source: 2, cls: "G", note: "City name only — no street address found in any source. The stored lat/lon is a Modi'in city-centroid estimate, not a parcel coordinate." }
+        ],
+        conflicting: false
+      }
+    },
+    notes: "Colocation tenancy: Mega Or (TASE: MGOR) owns and operates the building through its Mega DC subsidiary; Nebius is the customer, the same structural pattern as this atlas's Ark DC, Kao Data and Greenergy entries. ~4,000 NVIDIA HGX B200 GPUs. Settled on re-check (2026-09-15): the \"national AI supercomputer\" in the trade-press headline is NOT a separate deployment — it is this same building, with roughly 75% of the GPUs being Nebius's commercially leased capacity and roughly 25% allocated to the Israel Innovation Authority. One site, two framings, not two sites. Trap worth recording: PeeringDB lists a facility called \"SDS1 Modiin\" in the same city, operated by SDS Data Service Ltd — a DIFFERENT company, tied to a separate B200 deployment. It is not corroboration for this entry and must not be cited as such. Searched and came up empty, so it needn't be re-searched from scratch: EDGAR full-text for Israel/Mega Or/Modi'in (Nebius Group's US filings cover convertible notes and AGM business, nothing site-level for Israel); PeeringDB for Israel (10 facilities, none operated by Mega DC) and for a Nebius network presence (no match). To lift this past the operator's word: an Israel Land Authority or Modi'in municipal planning record for the parcel, or a PeeringDB/OSM footprint under Mega DC — either would also replace the centroid coordinate."
+  },
+  {
+    id: "nebius-masmiyya",
+    provider: "Nebius",
+    site: "Mega DC Masmiyya",
+    city: "Masmiyya (Bnei Re'em Junction)",
+    country: "Israel",
+    lat: 31.7194,
+    lon: 34.7761,
+    status: "Under construction",
+    capacityMW: 22,
+    lastUpdated: "2026-09-15",
+    sources: [
+      { label: "Data Center Dynamics — \"Nebius signs 80MW data center lease with Mega Or in Israel\"", url: "https://www.datacenterdynamics.com/en/news/nebius-signs-80mw-data-center-lease-with-mega-or-in-israel/", cls: "T" },
+      { label: "Globes — \"Mega Or to provide data center services to Nebius\"", url: "https://en.globes.co.il/en/article-mega-or-to-provide-data-center-services-to-nebius-1001531296", cls: "G" },
+      { label: "Bizportal — Mega Or / Nebius lease, Jan 6, 2026 (Hebrew)", url: "https://www.bizportal.co.il/capitalmarket/news/article/20025930", cls: "G" }
+    ],
+    provenance: {
+      capacityMW: {
+        basis: "disclosed",
+        asOf: "2026-01-22",
+        evidence: [
+          { source: 0, cls: "T", note: "22MW initial phase." },
+          { source: 1, cls: "G", note: "22MW with Q3 2026 delivery target." }
+        ],
+        conflicting: false
+      },
+      status: {
+        basis: "disclosed",
+        asOf: "2026-01-22",
+        evidence: [
+          { source: 0, cls: "T" },
+          { source: 1, cls: "G" }
+        ],
+        conflicting: false
+      },
+      location: {
+        basis: "estimated",
+        asOf: "2026-09-15",
+        evidence: [
+          { source: 1, cls: "G", note: "Named as Masmiyya / Bnei Re'em Junction, Yoav Regional Council; no street address found. Coordinate is a junction-area approximation." }
+        ],
+        conflicting: false
+      }
+    },
+    notes: "Colocation tenancy in a Mega Or (TASE: MGOR) new-build, operated through its Mega DC subsidiary. Part of an ~$880M / 80MW combined lease with Beit Shemesh. Settled on re-check (2026-09-15): Masmiyya and Beit Shemesh are two genuinely distinct, separately named facilities, not one lease that press split in two — every source fetched names both consistently, and the 22MW + 58MW = 80MW split is real rather than an artefact of rounding. STALENESS WARNING, and it is the main thing wrong with this entry: the only coverage anywhere is the Jan 2026 announcement, the disclosed delivery target was Q3 2026, and that window has now arrived with no follow-up reporting found. Status may already be wrong in the direction of Operational. Re-check this before relying on it. CONTESTED and deliberately excluded from capacityMW: sources disagree on the site's ultimate expanded size — separate accounts give \"up to 64MW\", an implied ~44MW (from describing the initial 22MW as half the planned capacity), and a 222MW figure that appears to conflate IT capacity with the ~240MW substation Globes describes at Bnei Re'em. Only the consistently-stated initial 22MW is recorded. Searched and came up empty: EDGAR (no site-level Israel disclosure), PeeringDB Israel (no Mega DC presence), and the underlying TASE/Maya immediate report, which Israeli financial press describes but which could not be retrieved and read directly — reading that filing is the single highest-value next step, since it would be R-class."
+  },
+  {
+    id: "nebius-beitshemesh",
+    provider: "Nebius",
+    site: "Mega DC Beit Shemesh",
+    city: "Beit Shemesh",
+    country: "Israel",
+    lat: 31.7454,
+    lon: 34.9924,
+    status: "Under construction",
+    capacityMW: 58,
+    lastUpdated: "2026-09-15",
+    sources: [
+      { label: "Data Center Dynamics — \"Nebius signs 80MW data center lease with Mega Or in Israel\"", url: "https://www.datacenterdynamics.com/en/news/nebius-signs-80mw-data-center-lease-with-mega-or-in-israel/", cls: "T" },
+      { label: "Globes — \"Mega Or to provide data center services to Nebius\"", url: "https://en.globes.co.il/en/article-mega-or-to-provide-data-center-services-to-nebius-1001531296", cls: "G" },
+      { label: "Data Center Map — Mega DC Beit Shemesh (MDC-IL4) directory listing", url: "https://www.datacentermap.com/israel/jerusalem/mega-dc-beit-shemesh-mdcil-4/", cls: "D" }
+    ],
+    provenance: {
+      capacityMW: {
+        basis: "disclosed",
+        asOf: "2026-01-22",
+        evidence: [
+          { source: 0, cls: "T", note: "58MW, delivered in stages Q3 2026 to Q1 2027." },
+          { source: 1, cls: "G", note: "58MW, in an existing Mega Or building rather than a new-build." }
+        ],
+        conflicting: false
+      },
+      status: {
+        basis: "disclosed",
+        asOf: "2026-01-22",
+        evidence: [
+          { source: 0, cls: "T" },
+          { source: 1, cls: "G" }
+        ],
+        conflicting: false
+      },
+      location: {
+        basis: "estimated",
+        asOf: "2026-09-15",
+        evidence: [
+          { source: 1, cls: "G", note: "City name only. A directory listing exists (source 2, code MDC-IL4) and would supply a real address, but it returned HTTP 429 and was never read — so the coordinate remains a Beit Shemesh city-centroid estimate." }
+        ],
+        conflicting: false
+      }
+    },
+    notes: "Colocation tenancy with Mega Or (TASE: MGOR) via Mega DC, the larger half of the ~$880M / 80MW combined lease with Masmiyya. Unlike Masmiyya this is a fit-out of an EXISTING building rather than ground-up construction — \"Under construction\" here means capacity buildout, not a building going up. Same staleness warning as Masmiyya, and it matters just as much: the only coverage is the Jan 2026 announcement, the first delivery stage was targeted at Q3 2026, that window has now arrived, and no follow-up reporting was found. Re-check before relying on the status. CONTESTED and excluded from capacityMW: a 222MW figure appears in one account and looks like a conflation with the ~220MW substation Globes reports at Beit Shemesh — a substation rating is not IT capacity, so only the disclosed initial 58MW is recorded. The directory listing (source 2) is D-class and can never support a number; it is kept only because re-fetching it would give a street address to replace the centroid coordinate. Searched and came up empty: EDGAR, PeeringDB Israel (no Mega DC presence), and the underlying TASE/Maya immediate report. An Israel Electric Corporation grid-connection record for that substation would be R-class and could also support a derived capacity ceiling, kept separate from the disclosed figure."
   }
 ];

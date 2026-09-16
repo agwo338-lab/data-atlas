@@ -39,7 +39,7 @@ cycle) — not the full global region footprint.
 | Operator | Tracked | Missing (high conf.) | Missing (medium conf.) | Watch-only / not actionable |
 |---|---|---|---|---|
 | CoreWeave | 24 | 3 | 5 | 4 |
-| Nebius | 8 | 6 | 2 | 2 |
+| Nebius | 11 | 5 | 0 | 2 |
 | AWS | 6 | 6 | 1 | 2 |
 | SpaceXAI (xAI) | 3 | 1 | 1 | 2 |
 | OpenAI | 1 | — | — | — |
@@ -86,12 +86,13 @@ GA (Flexential) · Las Vegas NV (Switch) · Weehawken NJ (LGA1)
 
 ---
 
-## Nebius — 8 tracked
+## Nebius — 11 tracked
 
 <details><summary>Currently tracked (click to expand)</summary>
 
 Mäntsälä I &amp; II FI · Lappeenranta FI · Béthune FR · Longcross UK (Ark
-DC) · Harlow UK (Kao Data) · Hüüru EE (Greenergy) · Vineland NJ (DataOne)
+DC) · Harlow UK (Kao Data) · Hüüru EE (Greenergy) · Vineland NJ (DataOne) ·
+Modi'in IL (Mega DC) · Masmiyya IL (Mega DC) · Beit Shemesh IL (Mega DC)
 
 </details>
 
@@ -100,14 +101,14 @@ DC) · Harlow UK (Kao Data) · Hüüru EE (Greenergy) · Vineland NJ (DataOne)
 - [ ] **Independence, MO** ("Nebius Independence Campus") — Approved Mar 2026 (Chapter 100 incentive), ~400 acres up to 4 buildings, ~800MW power via a new dedicated plant. [Nebius](https://nebius.com/independencemo) · [DCD](https://www.datacenterdynamics.com/en/news/nebius-plans-800mw-data-center-campus-in-kansas-city-missouri/) · [City of Independence FAQ](https://www.independencemo.gov/data-center-faqs) *(quasi-regulatory, municipal page — worth checking if it counts as R)*
 - [ ] **Schuylkill County (Butler Twp), PA** ("Highridge Business Park AI Factory") — Land closed May 2026 ($187.5M), ~600 acres, 1.2GW full buildout, phase 1 (260MW) targeting Oct 2027. [Nebius factsheet (PDF)](https://assets.nebius.com/assets/6fdfadaf-20c9-4a67-a7c0-df1a5795ec90/Nebius%20Schuylkill%20County,%20PA%20Factsheet.pdf) · [DCD](https://www.datacenterdynamics.com/en/news/nebius-details-plans-for-12gw-data-center-campus-in-pennsylvania/)
 - [ ] **Kansas City, MO** (Patmos, former KC Star printing plant) — Operational since Q1 2025, Nebius's first US GPU cluster, 5MW expandable to 40MW. [Businesswire](https://www.businesswire.com/news/home/20241119926895/en/Patmos-Announces-Nebius-as-First-Tenant-in-New-Kansas-City-Data-Center) · [DCD](https://www.datacenterdynamics.com/en/news/nebius-to-deploy-5mw-nvidia-h200-cluster-at-patmos-data-center-in-kansas-city-missouri/)
-- [ ] **Modi'in, Israel** (Mega Or/Mega DC) — Operational since Oct 2025, 8MW, $300M facility. [Nebius newsroom](https://nebius.com/newsroom/nebius-brings-nvidia-blackwell-to-israel-with-one-of-the-country-s-first-ai-infrastructure-deployments) · [DCD](https://www.datacenterdynamics.com/en/news/first-phase-of-israels-nvidia-b200-powered-national-ai-supercomputer-goes-live/)
+- [x] **Modi'in, Israel** (Mega Or/Mega DC) — Operational since Oct 2025, 8MW, $300M facility. [Nebius newsroom](https://nebius.com/newsroom/nebius-brings-nvidia-blackwell-to-israel-with-one-of-the-country-s-first-ai-infrastructure-deployments) · [DCD](https://www.datacenterdynamics.com/en/news/first-phase-of-israels-nvidia-b200-powered-national-ai-supercomputer-goes-live/)
 - [ ] **Keflavik, Iceland** (Verne Global) — Operational since ~Mar 2025, 10MW within Verne's 140MW campus. [DCD](https://www.datacenterdynamics.com/en/news/nebius-to-build-300mw-data-center-in-new-jersey-will-launch-icelandic-colocation-deployment-in-q2-2025/) · [Verne Global](https://www.businesswire.com/news/home/20250311595160/en/Verne-Strikes-10MW-Deal-with-Nebius-to-Further-Expand-Europes-AI-Capacity)
 - [ ] **Paris (Saint-Denis), France** (Equinix PA10) — Live since Nov 2024. Distinct from the tracked Béthune greenfield campus. [Nebius blog](https://nebius.com/blog/posts/nebius-launches-gpu-cluster-in-paris-france) · [DCD](https://www.datacenterdynamics.com/en/news/nebius-deploys-ai-cluster-at-equinix-data-center-in-paris/)
 
 ### Missing — medium confidence
 
-- [ ] **Masmiyya, Israel** (Mega Or/Mega DC) — 22MW initial, delivery targeted Q3 2026; part of an $880M/80MW combined deal with Beit Shemesh below. [DCD](https://www.datacenterdynamics.com/en/news/nebius-signs-80mw-data-center-lease-with-mega-or-in-israel/)
-- [ ] **Beit Shemesh, Israel** (Mega Or/Mega DC) — 58MW initial, delivery staged Q3 2026–Q1 2027. Same deal as Masmiyya.
+- [x] **Masmiyya, Israel** (Mega Or/Mega DC) — 22MW initial, delivery targeted Q3 2026; part of an $880M/80MW combined deal with Beit Shemesh below. [DCD](https://www.datacenterdynamics.com/en/news/nebius-signs-80mw-data-center-lease-with-mega-or-in-israel/)
+- [x] **Beit Shemesh, Israel** (Mega Or/Mega DC) — 58MW initial, delivery staged Q3 2026–Q1 2027. Same deal as Masmiyya.
 
 ### Watch-only — investigated, not currently actionable
 
