@@ -1109,5 +1109,56 @@ var SITES = [
       { label: "WREG — \"The ongoing development of xAI's 'Colossus 2' supercomputer\"", url: "https://wreg.com/news-3-at-3/the-ongoing-development-of-xais-colossus-2-supercomputer/" }
     ],
     notes: "5420 Tulane Road, Whitehaven, Memphis — a 1M sq ft site (existing warehouse + two adjacent parcels, ~100 acres total), ~$80M acquisition, ~Feb/Mar 2025. Only one of these sources (Data Center Dynamics) is trade press proper; the rest of this site's extensive coverage (WREG's ongoing local reporting, Bloomberg via Kurt Wagner, Yahoo, Climate and Capital Media) is general/regional press rather than industry-specialist trade press, so strictly it falls just short of this project's usual \"2 independent trade/primary-grade sources\" bar for auto-adding — logged anyway given how many independent, named, dated outlets converge on the same facts over months; that's a case where source-type grading undersells real-world confidence. First cluster reported online ~Jan 2026 (~110,000 GB200-class GPUs, ~210MW); by mid-2026 multiple outlets converge on a 300,000-350,000+ GPU range as more defensible than the higher-end figures floating around. A separate, single-sourced claim (vendor blog Introl, plus a SemiAnalysis newsletter piece) of 555,000 GPUs/$18B/2GW is NOT used here — that figure is more properly tied to the campus's later third building (see spacexai-colossus1's notes) and reads as a forward target rather than this site's built capacity. In Jun 2026, Google reportedly agreed to pay ~$920M/month (Oct 2026-Jun 2029, ~$30B total) for ~110,000 GPUs of capacity somewhere on the Memphis campus — the specific facility wasn't identified in any source found, so not attributed here. Coordinates are a Whitehaven-area approximation, not geocoded to the exact parcel."
+  },
+  {
+    id: "openai-effingham",
+    provider: "OpenAI",
+    site: "Project Camellia",
+    city: "Effingham County, GA",
+    country: "United States",
+    lat: 32.296,
+    lon: -81.235,
+    status: "Planned",
+    capacityMW: 3200,
+    lastUpdated: "2026-09-15",
+    sources: [
+      { label: "OpenAI — \"Building AI infrastructure with the Effingham County community\"", url: "https://openai.com/index/building-ai-infrastructure-with-the-effingham-county-community/", cls: "P" },
+      { label: "Data Center Dynamics — \"OpenAI reveals 3.2GW data center project in Effingham County, Georgia\"", url: "https://www.datacenterdynamics.com/en/news/openai-reveals-32gw-data-center-project-in-effingham-county-georgia/", cls: "T" },
+      { label: "Atlanta Journal-Constitution — \"OpenAI in Georgia: How $20B data center plan secretly took root in Effingham\"", url: "https://www.ajc.com/news/2026/08/openai-in-georgia-how-20b-data-center-plan-secretly-took-root-in-effingham/", cls: "G" },
+      { label: "The Current GA — \"Anatomy of a secret Coastal Georgia data center deal\"", url: "https://thecurrentga.org/2026/08/08/anatomy-of-a-secret-coastal-georgia-data-center-deal/", cls: "G" },
+      { label: "Effingham Herald — \"Effingham Industrial Authority Approves OpenAI Tax Relief, $90M Deal\"", url: "https://www.effinghamherald.net/data-centers/effingham-industrial-authority-approves-openai-tax-relief-90m-deal-project-camellia-data-center-property-tax/", cls: "G" },
+      { label: "Effingham County, GA — Project Camellia (OpenAI Data Center) information page", url: "https://www.effinghamcounty.org/902/Project-Camellia-OpenAI-Data-Center", cls: "G" }
+    ],
+    provenance: {
+      capacityMW: {
+        basis: "disclosed",
+        asOf: "2026-08-27",
+        evidence: [
+          { source: 0, cls: "P", note: "OpenAI's own announcement of the campus." },
+          { source: 1, cls: "T", note: "Trade-press write-up of the same announcement — derivative of it, not a second confirmation." },
+          { source: 2, cls: "G", note: "AJC: 3.2GW draw with ~1GW returned to the grid at peak, citing the Development of Regional Impact filing Effingham submitted to the state. The DRI itself would be R-class; this is a reporter's account of it, so it is classed G until the filing is pulled directly." }
+        ],
+        conflicting: false
+      },
+      status: {
+        basis: "disclosed",
+        asOf: "2026-09-15",
+        evidence: [
+          { source: 5, cls: "G", note: "County information page: PILOT and site-plan approvals complete, construction partner not yet selected, construction targeted for early 2027. A county-run explainer, not a docket — held to G rather than R for that reason." },
+          { source: 1, cls: "T" },
+          { source: 3, cls: "G", note: "Local investigative account of how the deal was assembled, consistent on the pre-construction stage." }
+        ],
+        conflicting: false
+      },
+      location: {
+        basis: "estimated",
+        asOf: "2026-09-15",
+        evidence: [
+          { source: 3, cls: "G", note: "Places the campus on ~1,400 acres inside the 2,600-acre Savannah Gateway Industrial Hub near Rincon. The stored lat/lon is a ZIP-centroid estimate, NOT a surveyed parcel coordinate — Effingham County GIS or an OSM footprint would replace it with a real one." }
+        ],
+        conflicting: false
+      }
+    },
+    notes: "OpenAI's first self-developed campus, and as of Sep 2026 the only site in this atlas where OpenAI is the developer rather than a tenant. Built through Octans GA LLC, a Delaware affiliate of OpenAI. The Effingham County Industrial Development Authority holds legal title to each phase and leases it back to OpenAI across a 15-year PILOT — that is Georgia's standard tax-abatement vehicle for large industrial projects, not a landlord/tenant relationship with an independent developer, and the distinction matters for how this entry is filed. One blog (measuredai on Substack) claims a $10 per-phase buyback option at the end of the PILOT; unattributed by this project's standards and not corroborated anywhere else, so recorded here as an unverified lead only, not used. Announced Jul 22, 2026; site-plan and tax approvals cleared in early Sep 2026; construction partner not yet named; construction targeted early 2027. Capacity of 3.2GW is OpenAI's own disclosed figure, corroborated only by derivative classes so far. Note that OpenAI's newsroom page (source 0) returned HTTP 403 to direct fetch — its content was confirmed via search-engine summary and cross-checked against the independent local reporting, not read directly. Searched and came up empty, so it needn't be re-searched from scratch: EDGAR full-text for \"Project Camellia\", \"Octans GA\" and \"Effingham County OpenAI\" (no filing yet names the project — plausible, since Southern Company/Georgia Power has had no intervening 10-Q since the Aug 27 power contract); EPA ECHO for Effingham County GA under NAICS 518210 (0 of 7,478 GA air facilities, full coverage, consistent with a site that has not filed an air permit); PeeringDB for Rincon (no presence, as expected pre-construction). The single highest-value thing to chase next is the Development of Regional Impact filing Effingham submitted to the state on 2026-07-29 — it is an R-class government record that AJC's reporters clearly read, and it would likely lift both status and capacity to High in one go. A Georgia PSC filing covering Georgia Power's 25-year, up-to-3.21GW contract would do the same. Re-check inside the 180-day Planned window. Coordinates are a ZIP-centroid estimate for Rincon, not a geocoded parcel."
   }
 ];

@@ -293,11 +293,23 @@ summary of someone else's judgment is just a second-hand paraphrase. So the
 agent writes it into its report, the hook archives the report verbatim, and
 the caller copies the note across and appends what it did.
 
-**The viewer.** `tools/desk-app/` is a small Electron app for sifting the
-pile — search across topics, impressions and dispositions, with the archived
-report one click away. It reuses the atlas's Nocturne tokens so the two read
-as one product; that palette is a *copy*, not an import, so a change to
-`index.html`'s tokens needs mirroring there.
+**The viewer.** `tools/desk-app/` is a small Electron app with two views.
+**Notes** sifts the pile — search across topics, impressions and
+dispositions, with the archived report one click away, newest first (by
+`date`, then by filing time, since several runs routinely share a date).
+**Coverage** renders `COVERAGE.md` — the roster of what is tracked versus
+what is publicly reported to exist, per operator. Note the split there: the
+tracked counts are recomputed live from `data/sites.js` on every read, so
+they cannot drift from the map, while the leads are the hand-kept list and
+are explicitly *not* vetted. When the counts written into `COVERAGE.md`
+disagree with the live ones the view says so rather than picking a winner,
+and an operator that has never had a gap search gets its own row saying that
+— an absent roster should look like an absent roster, not like zero work
+outstanding.
+
+It reuses the atlas's Nocturne tokens so the two read as one product; that
+palette is a *copy*, not an import, so a change to `index.html`'s tokens
+needs mirroring there.
 
 ```
 cd tools/desk-app && npm install && npm start

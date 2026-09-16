@@ -74,7 +74,78 @@
     font-size:11.5px; color:var(--color-neutral-500); letter-spacing:.02em; white-space:nowrap;
   }
 
+  /* ---- view toggle, borrowed from the atlas's .seg ---- */
+  .seg{ display:inline-flex; overflow:hidden; border:1px solid var(--color-divider); border-radius:var(--radius-sm); }
+  .seg button{
+    appearance:none; background:none; border:0; cursor:pointer; padding:3px 10px;
+    font:500 11px var(--font-heading); letter-spacing:.03em; color:var(--color-neutral-400);
+  }
+  .seg button + button{ border-left:1px solid var(--color-divider); }
+  .seg button[aria-pressed="true"]{ color:var(--color-accent-300); background:color-mix(in srgb, var(--color-accent) 14%, transparent); }
+  .seg button:not([aria-pressed="true"]):hover{ color:var(--color-text); }
+
   #main{ display:grid; grid-template-columns:336px 1fr; min-height:0; }
+  /* The roster is one wide column — it's a table of operators, not a pile
+     with a reading pane. */
+  #main.on-coverage{ grid-template-columns:1fr; }
+
+  /* ---- coverage roster ---- */
+  #coverage{ overflow-y:auto; min-height:0; padding:var(--space-8) 40px 60px; }
+  #coverage-inner{ max-width:92ch; }
+  #coverage h1{ font-size:22px; margin-bottom:var(--space-2); }
+  #coverage-sub{ font-size:12.5px; color:var(--color-neutral-500); margin-bottom:var(--space-4); }
+  #coverage-lede{ font-size:13px; color:var(--color-neutral-400); max-width:70ch; margin-bottom:var(--space-8); }
+  #coverage-warn{
+    margin-bottom:var(--space-8); padding:var(--space-4);
+    border:1px solid color-mix(in srgb, #FBBF24 45%, transparent); border-radius:var(--radius-md);
+    background:color-mix(in srgb, #FBBF24 8%, transparent); color:#FBBF24; font-size:12.5px;
+  }
+
+  .op{ border-top:1px solid var(--color-divider); padding:var(--space-8) 0; }
+  .op:first-of-type{ border-top:0; }
+  .op-head{ display:flex; align-items:baseline; gap:var(--space-3); }
+  .op-dot{ width:10px; height:10px; border-radius:50%; flex:none; align-self:center; background:var(--color-neutral-600); }
+  .op-name{ font:500 17px var(--font-heading); letter-spacing:-.01em; }
+  .op-drift{ font-size:11.5px; color:#FBBF24; }
+
+  .op-nums{ display:flex; flex-wrap:wrap; gap:var(--space-8); margin:var(--space-4) 0 var(--space-3); }
+  .op-num b{ display:block; font:500 22px var(--font-heading); font-variant-numeric:tabular-nums; }
+  .op-num span{ font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--color-neutral-500); }
+  .op-num.is-muted b{ color:var(--color-neutral-500); }
+
+  /* tracked vs. still-a-lead, in the same idiom as the atlas's verdict meter */
+  .op-meter{ display:flex; height:5px; border-radius:3px; overflow:hidden; margin-bottom:var(--space-2); max-width:560px; background:var(--color-surface); }
+  .op-meter i{ display:block; }
+  .op-meter i.lead{ background:repeating-linear-gradient(to right, var(--color-neutral-700) 0 3px, transparent 3px 6px); }
+  .op-ratio{ font-size:11.5px; color:var(--color-neutral-500); margin-bottom:var(--space-4); }
+
+  .op-empty{ font-size:12.5px; color:var(--color-neutral-500); font-style:italic; max-width:66ch; }
+
+  details.sec{ margin-top:var(--space-3); }
+  details.sec > summary{
+    cursor:pointer; list-style:none; font:500 12px var(--font-heading);
+    color:var(--color-neutral-400); padding:var(--space-2) 0;
+  }
+  details.sec > summary::-webkit-details-marker{ display:none; }
+  /* The marker is drawn here rather than baked into the summary text, so it
+     tracks the open state instead of freezing at whatever it was when the
+     roster was rendered. */
+  details.sec > summary::before{
+    content:'▸'; display:inline-block; width:1em;
+    color:var(--color-neutral-600); transition:transform .16s ease;
+  }
+  details.sec[open] > summary::before{ transform:rotate(90deg); }
+  details.sec > summary:hover{ color:var(--color-accent-300); }
+  details.sec[open] > summary{ color:var(--color-text); }
+  .sec-list{ list-style:none; margin:0 0 var(--space-3); padding:0; }
+  .sec-list li{
+    display:grid; grid-template-columns:14px 1fr; gap:var(--space-3);
+    padding:var(--space-3) 0; font-size:12.5px; line-height:1.55; color:var(--color-neutral-400);
+    border-top:1px solid color-mix(in srgb, var(--color-text) 7%, transparent);
+  }
+  .sec-list li i{ font-style:normal; color:var(--color-neutral-600); }
+  .sec-list li.done i{ color:var(--color-accent-300); }
+  .sec-list li.done{ color:var(--color-neutral-600); text-decoration:line-through; }
 
   /* ---- left rail: the pile ---- */
   #rail{
@@ -162,6 +233,10 @@
 <body>
   <header id="bar">
     <div class="brand">Site Atlas <span>· research desk</span></div>
+    <div class="seg" id="viewSeg">
+      <button type="button" data-view="notes" aria-pressed="true">Notes</button>
+      <button type="button" data-view="coverage" aria-pressed="false">Coverage</button>
+    </div>
     <div class="bar-meta">
       <span id="meta-runs"></span>
       <span id="meta-path"></span>
@@ -206,6 +281,16 @@
             <div id="run" hidden></div>
           </div>
         </article>
+      </div>
+    </section>
+
+    <section id="coverage" hidden>
+      <div id="coverage-inner">
+        <h1>Coverage</h1>
+        <div id="coverage-sub"></div>
+        <p id="coverage-lede"></p>
+        <div id="coverage-warn" hidden></div>
+        <div id="coverage-list"></div>
       </div>
     </section>
   </div>

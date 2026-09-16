@@ -87,6 +87,12 @@ function parseFrontmatter(text) {
   return { meta, body: lines.slice(end + 1).join(NL).trim() };
 }
 
+// Newest first: declared research date, then actual filing time within a day.
+function byNewestFirst(a, b) {
+  const d = String(b.meta.date || '').localeCompare(String(a.meta.date || ''));
+  return d !== 0 ? d : (b.filed || 0) - (a.filed || 0);
+}
+
 function readNotes() {
   if (!fs.existsSync(NOTES)) return [];
   return fs
@@ -98,10 +104,20 @@ function readNotes() {
         warn('skipping ' + f + ': no readable frontmatter');
         return null;
       }
-      return { slug: f.replace(/\.md$/, ''), file: f, ...parsed };
+      return {
+        slug: f.replace(/\.md$/, ''),
+        file: f,
+        // When the note was actually filed. `date` is the day the research
+        // happened and several runs share one, so on its own it leaves
+        // same-day notes in readdir order — which is alphabetical, not
+        // chronological. mtime breaks the tie the way a desk does: the thing
+        // you put down last is on top.
+        filed: fs.statSync(path.join(NOTES, f)).mtimeMs,
+        ...parsed,
+      };
     })
     .filter(Boolean)
-    .sort((a, b) => String(b.meta.date).localeCompare(String(a.meta.date)));
+    .sort(byNewestFirst);
 }
 
 function fileNote(raw) {

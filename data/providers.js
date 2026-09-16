@@ -55,6 +55,23 @@
 
 var PROVIDERS = [
   {
+    // OpenAI's current brand identity is essentially monochrome, so there is no
+    // brand hex to take. The obvious candidate is the legacy "ChatGPT green"
+    // #10A37F, but a green that close to Nebius's #4CAF6D would be hard to tell
+    // apart as a 10px dot on the map, which is the whole job this color does.
+    // So: a teal that gestures at that legacy accent while sitting clear of
+    // every other pinned color. An interpretive choice, stated as one.
+    name: "OpenAI",
+    color: "#3EC4C0",
+    summary: "The AI lab behind ChatGPT, and the largest single driver of the " +
+      "current compute buildout — but almost entirely as a customer rather than " +
+      "an owner. Nearly every site described in the press as \"OpenAI's\" is a " +
+      "Stargate facility built and owned by a partner (Oracle, Crusoe, SB Energy, " +
+      "Related Digital) with OpenAI as tenant or offtaker, or capacity rented " +
+      "from Microsoft, CoreWeave, AWS and Google. Only sites OpenAI develops " +
+      "itself appear here under its own name."
+  },
+  {
     // Skeleton entry — color pinned ahead of time, no sites/partners yet.
     // SpaceX acquired xAI (Feb 2026); xAI folded entirely into SpaceX's
     // "SpaceXAI" AI division (May 2026) rather than remaining a separate

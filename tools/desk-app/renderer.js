@@ -9,6 +9,7 @@ const $ = (id) => document.getElementById(id);
 
 let notes = [];
 let selected = null;
+let coverage = null;
 
 // Same palette the atlas uses for provider pins, so the two agents read as
 // two "operators" here in the way providers do there.
@@ -118,6 +119,174 @@ $('run-btn').addEventListener('click', async () => {
 
 $('search').addEventListener('input', renderList);
 
+// ════════════════════════════════════════════════════════════════════
+// Coverage — the roster of what is known to exist versus what is tracked
+// ════════════════════════════════════════════════════════════════════
+// The notes view answers "what have we looked at". This answers "what is
+// left", which is the thing that was previously only visible by opening
+// COVERAGE.md in an editor.
+//
+// Everything here goes in via textContent, same rule as note bodies: the
+// roster's prose comes out of research runs, so it is treated as untrusted
+// text and never parsed as HTML or markdown.
+
+const SECTION_LABEL = {
+  high: 'Known to exist, not yet added — high confidence',
+  medium: 'Known to exist, not yet added — medium confidence',
+  watch: 'Watch-only — looked at, not currently actionable',
+};
+
+function el(tag, cls, text) {
+  const n = document.createElement(tag);
+  if (cls) n.className = cls;
+  if (text != null) n.textContent = text;
+  return n;
+}
+
+function countOf(op, kind) {
+  return op.sections
+    .filter((sec) => sec.kind === kind)
+    .reduce((t, sec) => t + sec.items.filter((i) => !i.done).length, 0);
+}
+
+function renderOperator(op) {
+  const card = el('section', 'op');
+
+  const head = el('div', 'op-head');
+  const dot = el('span', 'op-dot');
+  if (op.color) dot.style.background = op.color;
+  head.append(dot, el('span', 'op-name', op.name));
+
+  // The heading count in COVERAGE.md is written by hand; the live one is
+  // computed from data/sites.js. If they disagree the roster is stale, and
+  // saying so is more useful than silently preferring one.
+  const tracked = op.live ? op.live.total : 0;
+  if (op.listed != null && op.listed !== tracked) {
+    head.append(el('span', 'op-drift', 'roster says ' + op.listed + ', data says ' + tracked + ' — recompile'));
+  }
+  card.append(head);
+
+  const high = countOf(op, 'high');
+  const medium = countOf(op, 'medium');
+  const watch = countOf(op, 'watch');
+
+  const nums = el('div', 'op-nums');
+  const num = (value, label, muted) => {
+    const d = el('div', 'op-num' + (muted ? ' is-muted' : ''));
+    d.append(el('b', null, String(value)), el('span', null, label));
+    return d;
+  };
+  nums.append(
+    num(tracked, 'tracked'),
+    num(high, 'leads · high conf.', !high),
+    num(medium, 'leads · medium', !medium),
+    num(watch, 'watch-only', !watch)
+  );
+  if (op.live) {
+    nums.append(num(op.live.operational, 'of those, live', !op.live.operational));
+  }
+  card.append(nums);
+
+  const leads = high + medium;
+  const known = tracked + leads;
+  if (known) {
+    const meter = el('div', 'op-meter');
+    const a = el('i');
+    a.style.width = Math.round((tracked / known) * 100) + '%';
+    a.style.background = op.color || 'var(--color-accent)';
+    const b = el('i', 'lead');
+    b.style.width = Math.round((leads / known) * 100) + '%';
+    meter.append(a, b);
+    card.append(meter);
+    card.append(el('div', 'op-ratio',
+      tracked + ' of ' + known + ' currently-known sites are in the atlas' +
+      (leads ? ' · ' + leads + ' still only a lead' : ' · nothing outstanding')));
+  }
+
+  // Judged on items, not on section count: a roster can carry an empty
+  // '### Missing' heading as a placeholder, and that is still no worklist.
+  const hasItems = op.sections.some((sec) => sec.items.length);
+  if (!hasItems) {
+    card.append(el('p', 'op-empty',
+      'No gap search has been run for this operator yet, so there is no list of ' +
+      'what it might be missing — only what is already tracked. Point research-agent ' +
+      'at it and add a section to COVERAGE.md.'));
+    return card;
+  }
+
+  for (const sec of op.sections) {
+    if (!sec.items.length) continue;
+    const d = el('details', 'sec');
+    const open = sec.kind === 'high';
+    if (open) d.open = true;
+    const label = SECTION_LABEL[sec.kind] || sec.title;
+    d.append(el('summary', null, label + ' (' + sec.items.length + ')'));
+
+    const ul = el('ul', 'sec-list');
+    for (const item of sec.items) {
+      const li = el('li', item.done ? 'done' : '');
+      li.append(el('i', null, item.done ? '✓' : '○'), el('span', null, item.text));
+      ul.appendChild(li);
+    }
+    d.appendChild(ul);
+    card.appendChild(d);
+  }
+  return card;
+}
+
+function renderCoverage() {
+  const box = $('coverage-list');
+  box.textContent = '';
+  if (!coverage) return;
+
+  $('coverage-sub').textContent = coverage.hasFile
+    ? 'COVERAGE.md · compiled ' + (coverage.compiled || 'date not recorded')
+    : 'No COVERAGE.md found';
+
+  $('coverage-lede').textContent = coverage.hasFile
+    ? 'Tracked counts are read live from data/sites.js, so they are always what ' +
+      'the map actually shows. The leads below are not: they are a hand-kept list ' +
+      'of sites reported to exist that have not been vetted to the atlas’s ' +
+      'sourcing standard yet. Treat them as where to point research-agent next, ' +
+      'not as facts.'
+    : 'The roster lives in COVERAGE.md at the repo root. It is missing, so there ' +
+      'is nothing to show but the live tracked counts.';
+
+  const warn = $('coverage-warn');
+  if (coverage.tracked && !coverage.tracked.ok) {
+    warn.textContent =
+      'data/sites.js could not be parsed, so every tracked count below is 0. ' +
+      'That same error would take the live map down silently. ' + coverage.tracked.error;
+    warn.hidden = false;
+  } else {
+    warn.hidden = true;
+  }
+
+  for (const op of coverage.operators) box.appendChild(renderOperator(op));
+}
+
+function setView(view) {
+  const onCoverage = view === 'coverage';
+  $('main').classList.toggle('on-coverage', onCoverage);
+  $('rail').hidden = onCoverage;
+  $('detail').hidden = onCoverage;
+  $('coverage').hidden = !onCoverage;
+  for (const b of $('viewSeg').querySelectorAll('button')) {
+    b.setAttribute('aria-pressed', String(b.dataset.view === view));
+  }
+  if (onCoverage) loadCoverage();
+}
+
+async function loadCoverage() {
+  coverage = await window.desk.coverage();
+  renderCoverage();
+}
+
+$('viewSeg').addEventListener('click', (e) => {
+  const btn = e.target.closest('button[data-view]');
+  if (btn) setView(btn.dataset.view);
+});
+
 function renderWelcome(data) {
   $('welcome-title').textContent = notes.length
     ? 'No note selected'
@@ -168,5 +337,10 @@ async function load() {
   }
 }
 
-window.desk.onChange(load);
+window.desk.onChange(() => {
+  load();
+  // The watcher also fires for COVERAGE.md and data/sites.js, so refresh the
+  // roster if it's the thing on screen.
+  if (!$('coverage').hidden) loadCoverage();
+});
 load();

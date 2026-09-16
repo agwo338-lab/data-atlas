@@ -982,6 +982,21 @@
   // filter toggles, which would otherwise drop the tab marker.
   var openProvider = null;
 
+  // Opening an operator's tab solos it on the map: its dashboard is on screen,
+  // so the map should be showing the thing the dashboard is about. The filter
+  // state from before the tab was opened is stashed here and put back when it
+  // closes, so soloing is a temporary lens rather than something that quietly
+  // rewrites the user's filters.
+  //
+  // Null means "nothing to restore" — either no tab is open, or the user has
+  // since toggled a provider by hand, which is taken as them wanting control of
+  // the filter back. Their choice then survives the panel closing.
+  var providerFilterSnapshot = null;
+
+  function soloProvider(name){
+    providerOrder.forEach(function(p){ activeProviders[p] = (p === name); });
+  }
+
   function providerRailStats(p){
     var sites = SITES.filter(function(s){ return s.provider === p; });
     var disclosed = sites.filter(function(s){ return s.capacityMW != null; });
@@ -1016,6 +1031,9 @@
         }
         var name = btn.getAttribute("data-prov");
         activeProviders[name] = !activeProviders[name];
+        // A hand-made toggle takes precedence over the solo: stop tracking what
+        // to restore, so closing the panel doesn't undo what was just set.
+        providerFilterSnapshot = null;
         renderRail(); renderRows(); applyPinFilter();
       });
     });
@@ -1419,6 +1437,11 @@
   function openProviderView(p){
     if (openProvider === p) { closeProviderPanel(); return; }
     if (currentView !== "atlas") switchMainView("atlas");
+    // Snapshot only on the way in from nothing open — switching straight from
+    // one operator's tab to another should still restore the filter the user
+    // had before any of this started, not the previous solo.
+    if (!openProvider) providerFilterSnapshot = Object.assign({}, activeProviders);
+    soloProvider(p);
     openProvider = p;
     renderProviderView(p);
     var dock = document.getElementById("providerDock");
@@ -1428,18 +1451,22 @@
     document.getElementById("shell").classList.add("panel-open");
     document.getElementById("providerPanelBody").scrollTop = 0;
     setMapShift(mapShift(), true);
-    renderRail();
+    renderRail(); renderRows(); applyPinFilter();
   }
 
   function closeProviderPanel(){
     if (!openProvider) return;
     openProvider = null;
+    if (providerFilterSnapshot) {
+      activeProviders = providerFilterSnapshot;
+      providerFilterSnapshot = null;
+    }
     var dock = document.getElementById("providerDock");
     dock.classList.remove("on");
     dock.setAttribute("aria-hidden", "true");
     document.getElementById("shell").classList.remove("panel-open");
     setMapShift(0, true);
-    renderRail();
+    renderRail(); renderRows(); applyPinFilter();
   }
 
   document.querySelector(".pp-close").addEventListener("click", closeProviderPanel);

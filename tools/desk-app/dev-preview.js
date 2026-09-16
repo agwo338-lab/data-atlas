@@ -76,6 +76,35 @@ if (!window.desk) {
       notes: SAMPLE,
     }),
     run: async () => 'Sample archived report body.',
+    coverage: async () => ({
+      hasFile: true,
+      compiled: '2026-09-12',
+      tracked: { ok: true },
+      operators: [
+        {
+          name: 'SAMPLE Operator A',
+          listed: 4,
+          color: '#4C6FE5',
+          live: { total: 4, operational: 3, building: 1, planned: 0 },
+          sections: [
+            { kind: 'high', title: 'Missing — high confidence', items: [
+              { done: false, text: 'SAMPLE lead — a site reported to exist but not yet vetted.' },
+              { done: true, text: 'SAMPLE lead — already researched and added.' },
+            ] },
+            { kind: 'watch', title: 'Watch-only', items: [
+              { done: false, text: 'SAMPLE — looked at, no citable source, left alone.' },
+            ] },
+          ],
+        },
+        {
+          name: 'SAMPLE Operator B',
+          listed: null,
+          color: '#E0A752',
+          live: { total: 1, operational: 0, building: 0, planned: 1 },
+          sections: [],
+        },
+      ],
+    }),
     reveal: async () => {},
     onChange: () => {},
   };

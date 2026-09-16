@@ -1,11 +1,17 @@
 # Coverage gaps
 
-What's in `data/sites.js` for each of the atlas's four operators, versus
-what's publicly reported to exist. A worklist, not a data file — nothing
-here is loaded by `index.html`. Check items off (`- [x]`) as they get
-researched (via `research-agent`) and added to `data/sites.js`; re-run the
-gap search periodically, since new campuses get announced faster than this
-list gets updated.
+What's in `data/sites.js` for each of the atlas's operators, versus what's
+publicly reported to exist. A worklist, not a data file — nothing here is
+loaded by `index.html`. Check items off (`- [x]`) as they get researched
+(via `research-agent`) and added to `data/sites.js`; re-run the gap search
+periodically, since new campuses get announced faster than this list gets
+updated.
+
+This file is also the **Coverage** view in the research desk app
+(`tools/desk-app/`), which is the easiest way to read it. The desk recomputes
+the "tracked" column live from `data/sites.js` rather than trusting the
+counts written below, and says so out loud when the two disagree — so a
+stale roster shows up as a warning instead of as a wrong number.
 
 Last compiled: 2026-09-14, via four parallel `research-agent` passes (one
 per operator), each handed the exact tracked list below and asked to find
@@ -36,6 +42,7 @@ cycle) — not the full global region footprint.
 | Nebius | 8 | 6 | 2 | 2 |
 | AWS | 6 | 6 | 1 | 2 |
 | SpaceXAI (xAI) | 3 | 1 | 1 | 2 |
+| OpenAI | 1 | — | — | — |
 
 ---
 
@@ -167,6 +174,41 @@ Colossus 1, Memphis TN · Colossus 2, Memphis TN · Colossus 3
 
 ---
 
+## OpenAI — 1 tracked
+
+<details><summary>Currently tracked (click to expand)</summary>
+
+Effingham County GA (Project Camellia)
+
+</details>
+
+**No gap search has been run for this operator yet.** OpenAI was added on
+2026-09-15 off a single-site vetting run, not the four-provider sweep that
+produced everything above, so the missing/watch sections below every other
+operator simply don't exist here. That is a real hole in the roster, not an
+indication that OpenAI has nothing outstanding.
+
+Two things make the sweep unusually worth doing, and unusually easy to get
+wrong:
+
+- Almost every facility publicly described as "OpenAI's" is owned by
+  somebody else — Oracle, Crusoe, SB Energy, Vantage, Related Digital — with
+  OpenAI as tenant or offtaker. Those belong in this atlas under the owner's
+  name, if at all, with OpenAI named as a customer in `notes`. A gap search
+  that takes headlines at face value will produce a list of sites that are
+  not OpenAI's.
+- The one genuinely self-developed campus found so far (Project Camellia) is
+  built through an affiliate, Octans GA LLC, not under the OpenAI name. Other
+  self-builds would likely be structured the same way, so searching for
+  "OpenAI" alone will miss them — search the affiliate-style project names
+  and the county economic-development records too.
+
+### Missing — high confidence
+
+_(none identified — no sweep run)_
+
+---
+
 ## How to use this
 
 1. Pick an unchecked item.
@@ -175,5 +217,5 @@ Colossus 1, Memphis TN · Colossus 2, Memphis TN · Colossus 3
    above is a discovery lead, not vetted evidence.
 2. Add it to `data/sites.js` following the sourcing standard in that
    file's header comment, check the box here, and update the Summary table.
-3. Re-run the four-provider gap search every month or two — new campuses
+3. Re-run the per-provider gap search every month or two — new campuses
    get announced faster than this file gets updated by hand.
