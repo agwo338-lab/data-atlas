@@ -94,6 +94,22 @@
 
   #shell{ position:relative; height:100vh; min-height:560px; }
 
+  /* ---- sky ----
+     The globe's canvas is transparent everywhere outside the sphere, and its
+     atmosphere shader blends into whatever is behind it — so a layer underneath
+     the map reads as the space the globe is sitting in, halo and all. Kept
+     outside #mapwrap on purpose: the map slides sideways when the dashboard
+     opens and the sky does not, which gives the globe a little parallax against
+     a fixed field of stars. */
+  #sky{ position:absolute; inset:0; z-index:0; overflow:hidden; pointer-events:none;
+    background:
+      /* two very restrained washes, so the field isn't a flat black rectangle */
+      radial-gradient(60% 55% at 18% 12%, color-mix(in srgb, var(--color-accent) 13%, transparent) 0%, transparent 70%),
+      radial-gradient(52% 48% at 88% 82%, color-mix(in srgb, #4FC2C9 8%, transparent) 0%, transparent 72%),
+      radial-gradient(120% 90% at 50% 45%, #12131f 0%, #0b0c14 55%, #07070d 100%);
+  }
+  #starfield{ position:absolute; inset:0; display:block; width:100%; height:100%; }
+
   /* the map is the page; everything else floats over it */
   /* With the dashboard open the left of the window is covered, so the globe is
      slid right by half the covered width — that puts its centre in the middle
@@ -111,7 +127,9 @@
   /* Attribution would ride off the right edge with everything else. It has to
      stay readable, so it's pushed back by the same amount. */
   #mapwrap .maplibregl-ctrl-bottom-right{ transform:translateX(calc(-1 * var(--map-shift))); }
-  #map{ width:100%; height:100%; display:block; background:#0e0f1a; }
+  /* Transparent, not the old flat navy — the sky behind it is the background
+     now, and an opaque colour here would hide it. */
+  #map{ width:100%; height:100%; display:block; background:transparent; }
   .maplibregl-ctrl-attrib{ font-size:10px !important; }
   .map-loading{
     position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
@@ -592,6 +610,8 @@
 </style>
 
 <div id="shell">
+  <div id="sky" aria-hidden="true"><canvas id="starfield"></canvas></div>
+
   <div id="mapwrap">
     <div id="map" role="img" aria-label="World map with data center site markers"></div>
     <p class="map-loading" id="mapLoading">Loading map…</p>
@@ -748,6 +768,76 @@
   }
 
   // ════════════════════════════════════════════════════════════════════
+  // Sky — a still starfield behind the globe
+  // ════════════════════════════════════════════════════════════════════
+  // Drawn to a canvas rather than assembled from CSS gradients or a pile of
+  // box-shadows: a few hundred dots with varying size, brightness and colour
+  // cost one paint and stay crisp on a HiDPI screen, where a tiled gradient
+  // would visibly repeat.
+  //
+  // Deliberately NOT animated. A twinkle would mean a permanent rAF loop
+  // running alongside a WebGL globe for decoration, and the globe is what the
+  // frame budget is for.
+  (function sky(){
+    var cv = document.getElementById("starfield");
+    if (!cv || !cv.getContext) return;
+    var ctx = cv.getContext("2d");
+
+    // Seeded, so the same sky comes back after a resize instead of the stars
+    // reshuffling themselves every time the window moves.
+    function rng(seed){
+      return function(){
+        seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+        var t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+        t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+        return ((t ^ t >>> 14) >>> 0) / 4294967296;
+      };
+    }
+
+    // Starlight isn't white — most stars read faintly blue, a few warm.
+    var TINTS = ["255,255,255", "214,226,255", "186,205,255", "255,236,214"];
+
+    function draw(){
+      var w = cv.clientWidth, h = cv.clientHeight;
+      if (!w || !h) return;
+      var dpr = Math.min(window.devicePixelRatio || 1, 2);
+      cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, w, h);
+
+      var rand = rng(20260915);
+      var count = Math.round(w * h / 5200); // density, not a fixed count
+      for (var i = 0; i < count; i++) {
+        var x = rand() * w, y = rand() * h;
+        // Cube the roll so the big bright stars stay rare.
+        var t = Math.pow(rand(), 3);
+        var r = 0.35 + t * 1.25;
+        var a = 0.22 + Math.pow(rand(), 1.6) * 0.62;
+        var tint = TINTS[Math.floor(rand() * TINTS.length)];
+
+        // The handful of largest stars get a soft bloom, which is most of what
+        // sells this as a sky rather than as noise.
+        if (t > 0.55) {
+          var g = ctx.createRadialGradient(x, y, 0, x, y, r * 5.5);
+          g.addColorStop(0, "rgba(" + tint + "," + (a * 0.5) + ")");
+          g.addColorStop(1, "rgba(" + tint + ",0)");
+          ctx.fillStyle = g;
+          ctx.beginPath(); ctx.arc(x, y, r * 5.5, 0, 6.2832); ctx.fill();
+        }
+        ctx.fillStyle = "rgba(" + tint + "," + a + ")";
+        ctx.beginPath(); ctx.arc(x, y, r, 0, 6.2832); ctx.fill();
+      }
+    }
+
+    draw();
+    var pending;
+    window.addEventListener("resize", function(){
+      clearTimeout(pending);
+      pending = setTimeout(draw, 150);
+    });
+  })();
+
+  // ════════════════════════════════════════════════════════════════════
   // Map — MapLibre GL, CARTO Dark Matter vector basemap, globe projection
   // ════════════════════════════════════════════════════════════════════
   var pinEls = {};
@@ -777,7 +867,24 @@
   // the data level regardless, but rendering them onto a sphere removes the
   // flat projection's area/distance distortion since a globe has no
   // projection to distort in the first place.
-  map.on("style.load", function(){ map.setProjection({ type: "globe" }); });
+  map.on("style.load", function(){
+    map.setProjection({ type: "globe" });
+    // The default atmosphere is tuned for a bright sky and hazes the whole
+    // sphere to a pale grey disc — which, over a starfield, reads as fog rather
+    // than as a planet. Darkened, and faded out entirely by the zoom at which
+    // the projection stops being a globe anyway.
+    try {
+      map.setSky({
+        "sky-color": "#0a0b13",
+        "horizon-color": "#1d2440",
+        "fog-color": "#0c0e1a",
+        "sky-horizon-blend": 0.5,
+        "horizon-fog-blend": 0.6,
+        "fog-ground-blend": 0.2,
+        "atmosphere-blend": ["interpolate", ["linear"], ["zoom"], 0, 0.6, 5, 0.25, 7, 0]
+      });
+    } catch (e) { console.warn("Site Atlas: sky styling unavailable", e); }
+  });
 
   var CAP_MAX = Math.max.apply(null, SITES.map(function(s){ return s.capacityMW || 0; })) || 1;
   function pinDiameter(mw){
