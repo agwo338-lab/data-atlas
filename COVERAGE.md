@@ -39,7 +39,7 @@ cycle) — not the full global region footprint.
 | Operator | Tracked | Missing (high conf.) | Missing (medium conf.) | Watch-only / not actionable |
 |---|---|---|---|---|
 | CoreWeave | 24 | 3 | 5 | 4 |
-| Nebius | 16 | 1 | 0 | 2 |
+| Nebius | 17 | 0 | 0 | 2 |
 | AWS | 6 | 6 | 1 | 2 |
 | SpaceXAI (xAI) | 3 | 1 | 1 | 2 |
 | OpenAI | 1 | — | — | — |
@@ -86,7 +86,7 @@ GA (Flexential) · Las Vegas NV (Switch) · Weehawken NJ (LGA1)
 
 ---
 
-## Nebius — 16 tracked
+## Nebius — 17 tracked
 
 <details><summary>Currently tracked (click to expand)</summary>
 
@@ -94,7 +94,7 @@ Mäntsälä I &amp; II FI · Lappeenranta FI · Béthune FR · Longcross UK (Ark
 DC) · Harlow UK (Kao Data) · Hüüru EE (Greenergy) · Vineland NJ (DataOne) ·
 Modi'in IL (Mega DC) · Masmiyya IL (Mega DC) · Beit Shemesh IL (Mega DC) ·
 Independence MO · Butler Twp/Highridge PA · Kansas City MO (Patmos KC2) ·
-Keflavík IS (Verne) · Saint-Denis FR (Equinix PA10)
+Keflavík IS (Verne) · Saint-Denis FR (Equinix PA10) · Newport GB (Vantage CWL1)
 
 </details>
 
@@ -107,7 +107,7 @@ Keflavík IS (Verne) · Saint-Denis FR (Equinix PA10)
 - [x] **Keflavik, Iceland** (Verne Global) — Operational since ~Mar 2025, 10MW within Verne's 140MW campus. [DCD](https://www.datacenterdynamics.com/en/news/nebius-to-build-300mw-data-center-in-new-jersey-will-launch-icelandic-colocation-deployment-in-q2-2025/) · [Verne Global](https://www.businesswire.com/news/home/20250311595160/en/Verne-Strikes-10MW-Deal-with-Nebius-to-Further-Expand-Europes-AI-Capacity)
 - [x] **Paris (Saint-Denis), France** (Equinix PA10) — Live since Nov 2024. Distinct from the tracked Béthune greenfield campus. [Nebius blog](https://nebius.com/blog/posts/nebius-launches-gpu-cluster-in-paris-france) · [DCD](https://www.datacenterdynamics.com/en/news/nebius-deploys-ai-cluster-at-equinix-data-center-in-paris/)
 
-- [ ] **Newport, South Wales, UK** (Vantage Data Centers CWL1) — **new lead, found 2026-09-15 mid-sweep, not from the original gap search.** Vantage's own release names Nebius and ties the capacity to the Jun 2026 £1.7B UK commitment; deployment size explicitly undisclosed, built on Nvidia's DSX reference design. Dispatched to research-agent for vetting 2026-09-15.
+- [x] **Newport, South Wales, UK** (Vantage Data Centers CWL1) — **new lead, found 2026-09-15 mid-sweep, not from the original gap search.** Vantage's own release names Nebius and ties the capacity to the Jun 2026 £1.7B UK commitment; deployment size explicitly undisclosed, built on Nvidia's DSX reference design. Dispatched to research-agent for vetting 2026-09-15.
 
 ### Missing — medium confidence
 

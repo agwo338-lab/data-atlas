@@ -1529,5 +1529,40 @@ var SITES = [
       }
     },
     notes: "CAPACITY DELIBERATELY LEFT NULL — no source discloses one. Neither Nebius's own post nor the trade coverage gives an MW figure. A '~5MW, tripling to ~15MW' figure circulates widely across aggregator summaries and search synthesis; the researching agent fetched the page it traces to (northwiseproject.com) and found it explicitly labelled as that site's own reverse-engineered rack math ('at 40kW per rack, a 5MW deployment implies roughly 125 racks'), attributed to no named report and disclosed by nobody. It is excluded rather than recorded with a caveat. Do not reintroduce it — it collapsed on contact with its own citation, and two separate searches served it up as if it were reported fact. Distinctness from nebius-bethune, checked and confirmed: PA10 is a rack lease inside an existing multi-tenant Equinix building in urban Saint-Denis; Béthune is a Nebius-built 240MW greenfield campus about 200km north in Hauts-de-France, still under construction. Different addresses, different project types, different status — not a mislabel or an earlier phase. Nebius's docs also list a separate eu-west2 (France) private region which is plausibly Béthune, but nothing ties that label to Béthune by name, so that is an inference and is not recorded as fact. Same N-class limit as the Keflavík entry: PeeringDB confirms the host building, and Nebius's own network object (AS213291) does not list PA10 among its four peering facilities, so location scores High while status stays on the operator's word. To lift status: an RTE (French grid) connection filing, or an EDGAR 20-F capacity table naming France. Searched and empty: EDGAR for 'Equinix Paris' (31 hits, all pre-2011 Equinix corporate filings) and 'Nebius Equinix' (0 hits)."
+  },
+  {
+    id: "nebius-newport",
+    provider: "Nebius",
+    site: "CWL1 (Vantage, formerly Next Generation Data Newport)",
+    city: "Newport",
+    country: "United Kingdom",
+    lat: 51.5675,
+    lon: -3.0810,
+    status: "Planned",
+    capacityMW: null,
+    lastUpdated: "2026-09-15",
+    sources: [
+      { label: "Vantage Data Centers newsroom — \"Vantage Data Centers and Nebius Expand UK AI Infrastructure with First Deployment in South Wales AI Growth Zone\" (Aug 13, 2026)", url: "https://vantage-dc.com/news/vantage-data-centers-and-nebius-expand-uk-ai-infrastructure-with-first-deployment-in-south-wales-ai-growth-zone/", cls: "P" },
+      { label: "address-data.co.uk — Next Generation Data, Celtic Technology Centre, Celtic Way, Newport NP10 8BE", url: "https://address-data.co.uk/27249437/next-generation-data-celtic-technology-centre-celtic-way-celtic-lakes-newport-gwent-np10-8be", cls: "D" }
+    ],
+    provenance: {
+      status: {
+        basis: "disclosed",
+        asOf: "2026-09-15",
+        evidence: [
+          { source: 0, cls: "P", note: "Vantage's release describes a signed capacity agreement in future tense — Nebius 'will deploy'. Nothing states the space is built, under construction for Nebius specifically, or live, so this is Planned rather than Under construction." }
+        ],
+        conflicting: false
+      },
+      location: {
+        basis: "estimated",
+        asOf: "2026-09-15",
+        evidence: [
+          { source: 1, cls: "D", note: "Postcode-level address (NP10 8BE, Celtic Way, Coedkernew) from a directory. A directory can never carry a coordinate, and no surveyed one was found — PeeringDB has no record for this campus under any of its names." }
+        ],
+        conflicting: false
+      }
+    },
+    notes: "CAPACITY GENUINELY UNDISCLOSED, not merely unfound — Vantage's own release says outright that the deployment size was not being disclosed, so there is nothing to look for and nothing to estimate. Do not fill it from the campus's grid tie: CWL1 has a dedicated 400kV SuperGrid connection reported elsewhere at ~150-180MW, and that is the WHOLE CAMPUS's draw under Vantage, not Nebius's allocation. Conflating those two would be the same rack-math error that produced the discredited Paris figure. This entry is a genuine single-class claim and the verdict should be read that way: Vantage naming Nebius in its own newsroom, tied to a named campus and to Nvidia's DSX reference design, is not the kind of thing a landlord fabricates — but every other outlet covering it is visibly relaying the same release, so there is no second class anywhere. Deliberately NOT applied to this entry: the campus is widely referenced as 'Next Generation Data Newport' (its pre-2020 name) or as 'Vantage Cardiff CWL1' despite sitting in Newport, not Cardiff — do not 'correct' the city. Also do not use this entry to imply anything about the unnamed fourth UK site in Nebius's Jun 2026 £1.7B announcement; an anonymous post names Green Mountain's Romford campus while DCD's own reporting on that deal calls the customer an unnamed neocloud operator, and that identification stays unused. Searched and empty, so don't redo: EDGAR full-text for 'Vantage Data Centers', 'CWL1', 'Newport, Wales' and 'South Wales AI Growth Zone' against Nebius Group's filings — nothing, which is informative given Nebius DOES name its Independence, Missouri site in an SEC filing; PeeringDB for CWL1, Vantage in GB, and Newport GB — no record under any name. The DCD write-up of the same announcement returned 403 and, being downstream of the same release, would add no class even if read. Best next steps: the Newport City Council planning portal (only reached via general web search this run, which surfaced a different Vantage campus's document) and NESO's connection register — a campus with its own 400kV substation leaves a real regulatory trail if Nebius's load appears in it."
   }
 ];
