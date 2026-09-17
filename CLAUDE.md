@@ -297,11 +297,20 @@ the caller copies the note across and appends what it did.
 **Notes** sifts the pile — search across topics, impressions and
 dispositions, with the archived report one click away, newest first (by
 `date`, then by filing time, since several runs routinely share a date).
-**Coverage** renders `COVERAGE.md` — the roster of what is tracked versus
-what is publicly reported to exist, per operator. Note the split there: the
-tracked counts are recomputed live from `data/sites.js` on every read, so
-they cannot drift from the map, while the leads are the hand-kept list and
-are explicitly *not* vetted. When the counts written into `COVERAGE.md`
+**Coverage** is the roster of what is tracked versus what is publicly
+reported to exist: one tab per operator, and inside it one table of every
+site claimed to exist under that name — the tracked ones and the roster's
+unvetted leads in the same table, each row carrying a confidence rating with
+its citations as superscript numbers footnoted under the table. The two
+ratings are deliberately not the same measure, and the group headings say
+so: a tracked row is scored by `data/sources.js` from the evidence on file
+(so it cannot disagree with the map), while a lead's high/medium grade is
+only the roster compiler's read on whether the site is real at all. A lead's
+status and capacity are sniffed out of its prose rather than recorded, and
+are set in a lighter weight for that reason. Note the split in where the
+numbers come from: the tracked counts are recomputed live from
+`data/sites.js` on every read, so they cannot drift from the map, while the
+leads are the hand-kept list and are explicitly *not* vetted. When the counts written into `COVERAGE.md`
 disagree with the live ones the view says so rather than picking a winner,
 and an operator that has never had a gap search gets its own row saying that
 — an absent roster should look like an absent roster, not like zero work

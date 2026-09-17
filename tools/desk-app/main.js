@@ -19,6 +19,7 @@ const NOTES = path.join(DESK, 'notes');
 const RUNS = path.join(DESK, 'runs');
 const COVERAGE = path.join(ROOT, 'COVERAGE.md');
 const SITES_FILE = path.join(ROOT, 'data', 'sites.js');
+const SOURCES_FILE = path.join(ROOT, 'data', 'sources.js');
 const PROVIDERS_FILE = path.join(ROOT, 'data', 'providers.js');
 
 const NL = String.fromCharCode(10);
@@ -103,45 +104,110 @@ function statMs(file) {
 // None of it has been fact-checked to the atlas's sourcing standard, which
 // is exactly why it lives here as a worklist and not in data/sites.js.
 
-// The atlas pins a display colour per operator. Reusing it here means an
-// operator is the same colour on the map and on the roster, which is the
-// whole reason the desk copies the atlas's tokens in the first place.
-function providerColors() {
+// Evaluate the browser's own data files in this process, exactly the way
+// tools/atlas.js does — one definition of the data and one definition of the
+// confidence rules, so a rating shown on the roster cannot disagree with the
+// same rating on the map. Wrapped because a syntax error in sites.js is the
+// failure this project actually fears: index.html loads that file as a plain
+// script, where a bad edit takes the map down with no message. The desk
+// saying so out loud is more useful than the desk going blank.
+function loadAtlas() {
   try {
-    const src = fs.readFileSync(PROVIDERS_FILE, 'utf8');
-    const list = new Function(src + NL + ';return PROVIDERS;')();
-    const by = {};
-    for (const p of list) if (p && p.name && p.color) by[p.name] = p.color;
-    return by;
-  } catch (e) { return {}; }
-}
-
-function liveTracked() {
-  // Evaluated the same way tools/atlas.js does it, so one definition of the
-  // data serves both. Wrapped because a syntax error in sites.js is the
-  // failure this project actually fears — index.html loads that file as a
-  // plain script, where a bad edit takes the map down with no message. The
-  // desk saying so out loud is more useful than the desk going blank.
-  try {
-    const src = fs.readFileSync(SITES_FILE, 'utf8');
-    const sites = new Function(src + NL + ';return SITES;')();
-    const by = {};
-    for (const s of sites) {
-      const b = by[s.provider] || (by[s.provider] = { total: 0, operational: 0, building: 0, planned: 0 });
-      b.total++;
-      if (s.status === 'Operational') b.operational++;
-      else if (s.status === 'Under construction') b.building++;
-      else b.planned++;
-    }
-    return { ok: true, by: by };
+    const src = [SOURCES_FILE, SITES_FILE, PROVIDERS_FILE]
+      .map((f) => fs.readFileSync(f, 'utf8'))
+      .join(NL + ';' + NL);
+    const fn = new Function(
+      src + NL +
+      ';return { SITES: SITES, PROVIDERS: PROVIDERS, PROVENANCE_FIELDS: PROVENANCE_FIELDS,' +
+      ' FIELD_LABELS: FIELD_LABELS, CONFIDENCE_LEVELS: CONFIDENCE_LEVELS, VERDICTS: VERDICTS,' +
+      ' scoreSiteField: scoreSiteField, verdictFor: verdictFor, siteFieldBasis: siteFieldBasis };'
+    );
+    return Object.assign({ ok: true }, fn());
   } catch (e) {
-    return { ok: false, error: e.message, by: {} };
+    return { ok: false, error: e.message, SITES: [], PROVIDERS: [] };
   }
 }
 
+// The atlas pins a display colour per operator. Reusing it here means an
+// operator is the same colour on the map and on the roster, which is the
+// whole reason the desk copies the atlas's tokens in the first place.
+function providerColors(D) {
+  const by = {};
+  for (const p of D.PROVIDERS || []) if (p && p.name && p.color) by[p.name] = p.color;
+  return by;
+}
+
+function liveTracked(D) {
+  if (!D.ok) return { ok: false, error: D.error, by: {} };
+  const by = {};
+  for (const s of D.SITES) {
+    const b = by[s.provider] || (by[s.provider] = { total: 0, operational: 0, building: 0, planned: 0 });
+    b.total++;
+    if (s.status === 'Operational') b.operational++;
+    else if (s.status === 'Under construction') b.building++;
+    else b.planned++;
+  }
+  return { ok: true, by: by };
+}
+
+// ── One tracked site, as a table row ───────────────────────────────────
+//
+// The atlas's own rule is that a site scores as its weakest field, and that
+// the verdict — in words — leads, with the graded level demoted to a dot.
+// The roster follows both, because a coverage table that quietly reported
+// the *best* field would be exactly the flattering summary the confidence
+// engine exists to prevent.
+const VERDICT_RANK = { unsourced: 0, operator: 1, independent: 2 };
+
+function trackedRow(D, site, today, refFor) {
+  const fields = (D.PROVENANCE_FIELDS || [])
+    .filter((f) => !(f === 'capacityMW' && site.capacityMW == null))
+    .map((f) => {
+      const score = D.scoreSiteField(site, f, today);
+      const verdict = D.verdictFor(score);
+      const level = D.CONFIDENCE_LEVELS[score.level] || { label: score.level, color: '' };
+      return {
+        label: D.FIELD_LABELS[f] || f,
+        verdict: verdict.label,
+        verdictKey: verdict.key,
+        level: level.label,
+        color: level.color,
+        rank: level.rank == null ? 0 : level.rank,
+        stale: !!score.stale,
+        reason: score.reason || '',
+      };
+    });
+
+  const weakestLevel = fields.slice().sort((a, b) => a.rank - b.rank)[0] || null;
+  const weakestVerdict = fields
+    .slice()
+    .sort((a, b) => VERDICT_RANK[a.verdictKey] - VERDICT_RANK[b.verdictKey])[0] || null;
+
+  const derived = site.capacityMW != null && D.siteFieldBasis(site, 'capacityMW') === 'derived';
+
+  return {
+    kind: 'tracked',
+    id: site.id,
+    name: site.site || site.city,
+    place: [site.city, site.country].filter(Boolean).join(', '),
+    status: site.status || '',
+    capacity: site.capacityMW == null ? '' : site.capacityMW + ' MW',
+    derived: derived,
+    updated: site.lastUpdated || '',
+    verdict: weakestVerdict ? weakestVerdict.verdict : 'Unsourced',
+    verdictKey: weakestVerdict ? weakestVerdict.verdictKey : 'unsourced',
+    level: weakestLevel ? weakestLevel.level : 'Unverified',
+    color: weakestLevel ? weakestLevel.color : '',
+    fields: fields,
+    refs: (site.sources || []).map((s) => refFor(s && s.label, s && s.url)).filter(Boolean),
+  };
+}
+
 // Markdown down to plain text. Nothing from this file is ever rendered as
-// HTML — links become their label, emphasis is dropped, and the result goes
-// into the DOM via textContent like everything else on the desk.
+// HTML — emphasis is dropped and the result goes into the DOM via
+// textContent like everything else on the desk. Links are pulled out
+// separately by lead() first; anything still bracketed here becomes its
+// label.
 function plain(md) {
   return String(md)
     .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
@@ -149,7 +215,57 @@ function plain(md) {
     .replace(/\*([^*]+)\*/g, '$1')
     .replace(/`([^`]+)`/g, '$1')
     .replace(/&amp;/g, '&')
+    .replace(/\s*·\s*$/, '')
     .trim();
+}
+
+// ── One roster lead, as a table row ────────────────────────────────────
+//
+// A lead is written as a single markdown bullet: a bold site name, then
+// prose, then the citations. Split it into the same shape as a tracked row
+// so both can sit in one table — with the crucial difference that a lead's
+// "confidence" is the roster's own hand-written grading of how likely the
+// site is to be real, NOT a score from data/sources.js. Nothing here has
+// been vetted, and the table has to keep saying so.
+function lead(text, kind, done, refFor) {
+  const refs = [];
+  let rest = String(text).replace(/\[([^\]]+)\]\(([^)]+)\)/g, (m, label, url) => {
+    const n = refFor(label, url);
+    if (n) refs.push(n);
+    return '';
+  });
+
+  let name = '';
+  const bold = rest.match(/\*\*([^*]+)\*\*/);
+  if (bold) {
+    name = plain(bold[1]);
+    rest = rest.replace(bold[0], '');
+  } else {
+    const split = rest.split(/\s+—\s+/);
+    name = plain(split[0]);
+    rest = split.slice(1).join(' — ');
+  }
+
+  const detail = plain(rest).replace(/^[\s—·-]+/, '').trim();
+
+  // Leads carry their headline facts in prose, so the status and capacity
+  // columns are sniffed out of that prose rather than being fields. The
+  // renderer shows them in a lighter weight for exactly that reason — they
+  // are a reading of the sentence below them, not a recorded value.
+  const st = detail.match(/\b(operational|under construction|commissioning|planned|approved|announced)\b/i);
+  const mw = detail.match(/\b(\d[\d,.]*)\s*(MW|GW)\b/i);
+
+  return {
+    kind: kind === 'watch' ? 'watch' : 'lead',
+    grade: kind,
+    done: done,
+    name: name,
+    place: '',
+    status: st ? st[1][0].toUpperCase() + st[1].slice(1).toLowerCase() : '',
+    capacity: mw ? mw[1] + ' ' + mw[2].toUpperCase() : '',
+    detail: detail,
+    refs: refs,
+  };
 }
 
 function parseCoverage(text) {
@@ -193,41 +309,96 @@ function parseCoverage(text) {
     }
     if (!section) continue;
 
+    // Checkbox bullets only; a "- **Name** — ..." bullet without a box is a
+    // watch-only item, which has no box by convention. Both are kept raw here
+    // and split into columns later, once there is a per-operator footnote
+    // numbering to hang the citations off.
     if ((m = raw.match(/^-\s+(?:\[([ xX])\]\s*)?(.+)$/))) {
-      section.items.push({ done: String(m[1] || '').toLowerCase() === 'x', text: plain(m[2]) });
+      section.items.push({ done: String(m[1] || '').toLowerCase() === 'x', raw: m[2] });
     }
   }
   return { compiled: compiled, operators: operators };
 }
 
-function readCoverage() {
-  const tracked = liveTracked();
-  if (!fs.existsSync(COVERAGE)) {
-    return { hasFile: false, path: COVERAGE, tracked: tracked, compiled: '', operators: [] };
-  }
-  const parsed = parseCoverage(fs.readFileSync(COVERAGE, 'utf8'));
+// Citations are numbered per operator, not per row: the same DCD article
+// routinely backs three leads, and renumbering it each time would make the
+// footnote list longer than the table it annotates. Returns a closure that
+// hands out (and deduplicates by URL) the superscript numbers for one tab.
+function refCounter() {
+  const list = [];
+  const byUrl = {};
+  return {
+    list: list,
+    ref: function (label, url) {
+      const clean = /^https?:\/\//i.test(String(url || '')) ? String(url) : '';
+      const key = clean || 'label:' + label;
+      if (byUrl[key]) return byUrl[key];
+      const n = list.length + 1;
+      byUrl[key] = n;
+      list.push({ n: n, label: plain(label || '') || host(clean) || 'source', url: clean, host: host(clean) });
+      return n;
+    },
+  };
+}
 
-  // Attach the live counts, and let operators that exist in the data but have
-  // never had a gap search show up as their own (empty) row rather than being
-  // quietly left out. A provider with no roster is a real gap in the roster.
-  const colors = providerColors();
+function host(url) {
+  const m = String(url || '').match(/^https?:\/\/([^/]+)/i);
+  return m ? m[1].replace(/^www\./, '') : '';
+}
+
+function buildOperator(D, op, sites, today, colors, trackedBy) {
+  const refs = refCounter();
+  const rows = sites.map((s) => trackedRow(D, s, today, refs.ref));
+
+  const leads = [];
+  for (const sec of op.sections || []) {
+    for (const item of sec.items) {
+      leads.push(lead(item.raw, sec.kind, item.done, refs.ref));
+    }
+  }
+
+  return Object.assign({}, op, {
+    live: trackedBy[op.name] || null,
+    color: colors[op.name] || '',
+    rows: rows,
+    leads: leads,
+    sources: refs.list,
+  });
+}
+
+function readCoverage() {
+  const D = loadAtlas();
+  const tracked = liveTracked(D);
+  const today = new Date().toISOString().slice(0, 10);
+  const colors = providerColors(D);
+
+  const byProvider = {};
+  for (const s of D.SITES || []) (byProvider[s.provider] || (byProvider[s.provider] = [])).push(s);
+
+  const parsed = fs.existsSync(COVERAGE)
+    ? parseCoverage(fs.readFileSync(COVERAGE, 'utf8'))
+    : { compiled: '', operators: [] };
+
+  // Attach the live sites and the leads, and let operators that exist in the
+  // data but have never had a gap search show up as their own tab rather than
+  // being quietly left out. A provider with no roster is a real gap in the
+  // roster, and an absent roster must look like an absent roster.
   const seen = {};
   const operators = parsed.operators.map((op) => {
     seen[op.name] = true;
-    return Object.assign({}, op, { live: tracked.by[op.name] || null, color: colors[op.name] || '' });
+    return buildOperator(D, op, byProvider[op.name] || [], today, colors, tracked.by);
   });
   for (const name of Object.keys(tracked.by)) {
-    if (!seen[name]) {
-      operators.push({
-        name: name, heading: name, listed: null, sections: [],
-        live: tracked.by[name], color: colors[name] || '',
-      });
-    }
+    if (seen[name]) continue;
+    operators.push(buildOperator(
+      D, { name: name, heading: name, listed: null, sections: [] },
+      byProvider[name] || [], today, colors, tracked.by
+    ));
   }
   operators.sort((a, b) => (b.live ? b.live.total : 0) - (a.live ? a.live.total : 0));
 
   return {
-    hasFile: true,
+    hasFile: fs.existsSync(COVERAGE),
     path: COVERAGE,
     compiled: parsed.compiled,
     tracked: tracked,
@@ -273,7 +444,7 @@ function createWindow() {
   });
 
   // The roster is edited by hand and by research runs; reflect it live too.
-  for (const target of [COVERAGE, SITES_FILE]) {
+  for (const target of [COVERAGE, SITES_FILE, SOURCES_FILE]) {
     if (!fs.existsSync(target)) continue;
     try {
       let p = null;

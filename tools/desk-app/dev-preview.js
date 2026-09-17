@@ -76,6 +76,9 @@ if (!window.desk) {
       notes: SAMPLE,
     }),
     run: async () => 'Sample archived report body.',
+    // Same shape main.js's readCoverage() returns: per operator, the tracked
+    // sites as rows, the roster's leads, and one numbered source list the
+    // superscripts in both point into.
     coverage: async () => ({
       hasFile: true,
       compiled: '2026-09-12',
@@ -83,25 +86,67 @@ if (!window.desk) {
       operators: [
         {
           name: 'SAMPLE Operator A',
+          heading: 'SAMPLE Operator A',
           listed: 4,
           color: '#4C6FE5',
-          live: { total: 4, operational: 3, building: 1, planned: 0 },
-          sections: [
-            { kind: 'high', title: 'Missing — high confidence', items: [
-              { done: false, text: 'SAMPLE lead — a site reported to exist but not yet vetted.' },
-              { done: true, text: 'SAMPLE lead — already researched and added.' },
-            ] },
-            { kind: 'watch', title: 'Watch-only', items: [
-              { done: false, text: 'SAMPLE — looked at, no citable source, left alone.' },
-            ] },
+          live: { total: 2, operational: 1, building: 1, planned: 0 },
+          rows: [
+            {
+              kind: 'tracked', name: 'SAMPLE Site One', place: 'Nowhere, Sampleland',
+              status: 'Operational', capacity: '120 MW', derived: false,
+              verdict: 'Independently verified', verdictKey: 'independent',
+              level: 'High', color: '#4ADE80', refs: [1, 2],
+              fields: [{ label: 'Capacity', verdict: 'Independently verified', level: 'High' }],
+            },
+            {
+              kind: 'tracked', name: 'SAMPLE Site Two', place: 'Elsewhere, Sampleland',
+              status: 'Under construction', capacity: '45 MW', derived: true,
+              verdict: "Operator's word", verdictKey: 'operator',
+              level: 'Medium', color: '#FBBF24', refs: [2],
+              fields: [{ label: 'Capacity', verdict: "Operator's word", level: 'Medium' }],
+            },
+          ],
+          leads: [
+            {
+              kind: 'lead', grade: 'high', done: false, name: 'SAMPLE lead site',
+              status: 'Planned', capacity: '80 MW', detail:
+                'A site reported to exist but not yet vetted. This is sample content for design work.',
+              refs: [3],
+            },
+            {
+              kind: 'lead', grade: 'medium', done: true, name: 'SAMPLE lead, since added',
+              status: '', capacity: '', detail: 'Already researched and written into data/sites.js.',
+              refs: [],
+            },
+            {
+              kind: 'watch', grade: 'watch', done: false, name: 'SAMPLE watch-only item',
+              status: '', capacity: '', detail: 'Looked at, no citable source, left alone.',
+              refs: [],
+            },
+          ],
+          sources: [
+            { n: 1, label: 'SAMPLE county permit docket', url: 'https://example.invalid/permit', host: 'example.invalid' },
+            { n: 2, label: 'SAMPLE trade press write-up', url: 'https://example.invalid/trade', host: 'example.invalid' },
+            { n: 3, label: 'SAMPLE operator announcement', url: 'https://example.invalid/press', host: 'example.invalid' },
           ],
         },
         {
           name: 'SAMPLE Operator B',
+          heading: 'SAMPLE Operator B',
           listed: null,
           color: '#E0A752',
           live: { total: 1, operational: 0, building: 0, planned: 1 },
-          sections: [],
+          rows: [
+            {
+              kind: 'tracked', name: 'SAMPLE Site Three', place: 'Far Away, Sampleland',
+              status: 'Planned', capacity: '', derived: false,
+              verdict: 'Unsourced', verdictKey: 'unsourced',
+              level: 'Unverified', color: '#8FA39C', refs: [],
+              fields: [{ label: 'Status', verdict: 'Unsourced', level: 'Unverified' }],
+            },
+          ],
+          leads: [],
+          sources: [],
         },
       ],
     }),

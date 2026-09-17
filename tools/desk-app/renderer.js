@@ -126,15 +126,46 @@ $('search').addEventListener('input', renderList);
 // left", which is the thing that was previously only visible by opening
 // COVERAGE.md in an editor.
 //
-// Everything here goes in via textContent, same rule as note bodies: the
-// roster's prose comes out of research runs, so it is treated as untrusted
-// text and never parsed as HTML or markdown.
+// One tab per operator, and inside it one table listing every site claimed
+// to exist under that name — the ones already in data/sites.js and the ones
+// that are still only a lead, in the same table, because "what is claimed to
+// exist" is the question and the split between those two halves is an answer
+// to it rather than a reason to keep two separate lists.
+//
+// Every row carries a confidence rating with its citations attached as
+// superscript numbers, footnoted per tab. Putting the rating on the row
+// rather than in a summary is what stops the roster reading as a list of
+// facts: a tracked row rates what data/sources.js computed from the evidence
+// on file, while a lead row rates only how likely the roster's compiler
+// thought the site was to be real. Those are different claims, and the table
+// has to say which one it is making.
+//
+// Everything user-visible goes in via textContent, same rule as note bodies:
+// the roster's prose comes out of research runs, so it is untrusted text and
+// is never parsed as HTML or markdown. The only nodes built from the file's
+// own structure are anchors, and main.js has already checked their href is
+// http(s) before it gets here.
 
-const SECTION_LABEL = {
-  high: 'Known to exist, not yet added — high confidence',
-  medium: 'Known to exist, not yet added — medium confidence',
-  watch: 'Watch-only — looked at, not currently actionable',
+const GROUP = {
+  tracked: {
+    title: 'In the atlas',
+    note: 'Rated by data/sources.js from the evidence on file — the same score the map shows.',
+  },
+  high: {
+    title: 'Reported to exist, not yet added — high confidence',
+    note: 'Unvetted. The rating is how likely the site is to be real, not how well sourced its figures are.',
+  },
+  medium: {
+    title: 'Reported to exist, not yet added — medium confidence',
+    note: 'Unvetted, and thinner than the above — often one outlet, or a parcel nobody has confirmed.',
+  },
+  watch: {
+    title: 'Watch-only — looked at, not currently actionable',
+    note: 'Investigated and deliberately not pursued. Kept so it is not re-discovered from scratch.',
+  },
 };
+
+let activeOp = null;
 
 function el(tag, cls, text) {
   const n = document.createElement(tag);
@@ -143,10 +174,125 @@ function el(tag, cls, text) {
   return n;
 }
 
-function countOf(op, kind) {
-  return op.sections
-    .filter((sec) => sec.kind === kind)
-    .reduce((t, sec) => t + sec.items.filter((i) => !i.done).length, 0);
+// Superscript citation numbers. The number is a link down to the footnote
+// list under the table, which is where the source actually opens from — so a
+// row stays readable at a glance and the URLs live in one place per tab.
+function refSup(refs) {
+  const sup = el('sup', 'refs');
+  refs.forEach((n, i) => {
+    if (i) sup.append(el('span', 'ref-sep', ','));
+    const a = el('a', 'ref', String(n));
+    a.href = '#src-' + n;
+    a.title = 'Source ' + n + ', listed under the table';
+    sup.append(a);
+  });
+  return sup;
+}
+
+function leadRating(row) {
+  if (row.kind === 'watch') return 'Watch-only';
+  if (row.done) return 'Lead · since added';
+  return 'Unvetted lead · ' + (row.grade === 'high' ? 'high' : 'medium') + ' confidence';
+}
+
+function coverageRow(row) {
+  const tr = el('tr', row.kind === 'tracked' ? 'is-tracked' : 'is-lead');
+  if (row.done) tr.classList.add('is-done');
+
+  const site = el('td', 'c-site');
+  site.append(el('span', 'site-name', row.name || '(unnamed)'));
+  const sub = row.place || row.detail;
+  if (sub) site.append(el('span', 'site-sub', sub));
+  tr.append(site);
+
+  // A lead's status and capacity are read out of its prose rather than
+  // recorded as fields, so they are set in a lighter weight — the sentence
+  // under the name is the actual claim, these two are a reading of it.
+  const guessed = row.kind !== 'tracked';
+  tr.append(el('td', 'c-status' + (guessed ? ' is-guessed' : ''), row.status || '—'));
+
+  const cap = el('td', 'c-cap' + (guessed ? ' is-guessed' : ''), row.capacity || '—');
+  if (row.derived) {
+    cap.append(el('span', 'derived', 'derived'));
+    cap.title = 'Derived here from a public record, not disclosed by the operator.';
+  }
+  tr.append(cap);
+
+  const conf = el('td', 'c-conf');
+  const dot = el('span', 'conf-dot');
+  if (row.kind === 'tracked') {
+    dot.style.background = row.color || 'var(--color-neutral-600)';
+    dot.title = row.level + ' confidence · ' +
+      row.fields.map((f) => f.label + ': ' + f.verdict + ' (' + f.level + ')').join(' · ');
+    conf.append(dot, el('span', 'conf-word', row.verdict));
+  } else {
+    dot.classList.add('is-lead');
+    dot.title = 'Not vetted to the atlas’s sourcing standard.';
+    conf.append(dot, el('span', 'conf-word is-lead', leadRating(row)));
+  }
+  if (row.refs && row.refs.length) conf.append(refSup(row.refs));
+  else conf.append(el('span', 'no-ref', 'no citation'));
+  tr.append(conf);
+
+  return tr;
+}
+
+function groupHeader(kind, count) {
+  const g = GROUP[kind] || { title: kind, note: '' };
+  const tr = el('tr', 'grp');
+  const th = el('th');
+  th.colSpan = 4;
+  th.append(el('span', 'grp-title', g.title + ' (' + count + ')'));
+  if (g.note) th.append(el('span', 'grp-note', g.note));
+  tr.append(th);
+  return tr;
+}
+
+function renderTable(op) {
+  const groups = [
+    { kind: 'tracked', rows: op.rows },
+    { kind: 'high', rows: op.leads.filter((l) => l.kind === 'lead' && l.grade === 'high') },
+    { kind: 'medium', rows: op.leads.filter((l) => l.kind === 'lead' && l.grade === 'medium') },
+    { kind: 'watch', rows: op.leads.filter((l) => l.kind === 'watch') },
+  ].filter((g) => g.rows.length);
+
+  const table = el('table', 'cov');
+  const head = el('thead');
+  const hr = el('tr');
+  ['Site', 'Status', 'Capacity', 'Confidence'].forEach((h) => hr.append(el('th', null, h)));
+  head.append(hr);
+  table.append(head);
+
+  for (const g of groups) {
+    const body = el('tbody', 'grp-' + g.kind);
+    body.append(groupHeader(g.kind, g.rows.length));
+    for (const row of g.rows) body.append(coverageRow(row));
+    table.append(body);
+  }
+  return table;
+}
+
+function renderSources(op) {
+  const wrap = el('div', 'srcs');
+  wrap.append(el('div', 'eyebrow', 'Sources'));
+  const ol = el('ol', 'src-list');
+  for (const s of op.sources) {
+    const li = el('li');
+    li.id = 'src-' + s.n;
+    if (s.url) {
+      const a = el('a', 'src-link', s.label);
+      a.href = s.url;
+      a.target = '_blank';
+      a.rel = 'noreferrer';
+      li.append(a);
+      if (s.host) li.append(el('span', 'src-host', s.host));
+    } else {
+      li.append(el('span', 'src-link is-dead', s.label));
+    }
+    ol.append(li);
+  }
+  wrap.append(ol);
+  return wrap;
 }
 
 function renderOperator(op) {
@@ -155,7 +301,7 @@ function renderOperator(op) {
   const head = el('div', 'op-head');
   const dot = el('span', 'op-dot');
   if (op.color) dot.style.background = op.color;
-  head.append(dot, el('span', 'op-name', op.name));
+  head.append(dot, el('span', 'op-name', op.heading || op.name));
 
   // The heading count in COVERAGE.md is written by hand; the live one is
   // computed from data/sites.js. If they disagree the roster is stale, and
@@ -166,9 +312,10 @@ function renderOperator(op) {
   }
   card.append(head);
 
-  const high = countOf(op, 'high');
-  const medium = countOf(op, 'medium');
-  const watch = countOf(op, 'watch');
+  const open = op.leads.filter((l) => l.kind === 'lead' && !l.done);
+  const high = open.filter((l) => l.grade === 'high').length;
+  const medium = open.filter((l) => l.grade === 'medium').length;
+  const watch = op.leads.filter((l) => l.kind === 'watch').length;
 
   const nums = el('div', 'op-nums');
   const num = (value, label, muted) => {
@@ -182,9 +329,13 @@ function renderOperator(op) {
     num(medium, 'leads · medium', !medium),
     num(watch, 'watch-only', !watch)
   );
-  if (op.live) {
-    nums.append(num(op.live.operational, 'of those, live', !op.live.operational));
-  }
+  if (op.live) nums.append(num(op.live.operational, 'of those, live', !op.live.operational));
+
+  // "Independently verified" is the number this project actually watches, so
+  // the roster states it rather than leaving it to be counted down the
+  // confidence column.
+  const ind = op.rows.filter((r) => r.verdictKey === 'independent').length;
+  if (op.rows.length) nums.append(num(ind, 'independently verified', !ind));
   card.append(nums);
 
   const leads = high + medium;
@@ -205,33 +356,37 @@ function renderOperator(op) {
 
   // Judged on items, not on section count: a roster can carry an empty
   // '### Missing' heading as a placeholder, and that is still no worklist.
-  const hasItems = op.sections.some((sec) => sec.items.length);
-  if (!hasItems) {
+  if (!op.leads.length) {
     card.append(el('p', 'op-empty',
-      'No gap search has been run for this operator yet, so there is no list of ' +
-      'what it might be missing — only what is already tracked. Point research-agent ' +
-      'at it and add a section to COVERAGE.md.'));
-    return card;
+      'No gap search has been run for this operator yet, so the table below is ' +
+      'only what is already tracked — there is no list of what it might be ' +
+      'missing. Point research-agent at it and add a section to COVERAGE.md.'));
   }
 
-  for (const sec of op.sections) {
-    if (!sec.items.length) continue;
-    const d = el('details', 'sec');
-    const open = sec.kind === 'high';
-    if (open) d.open = true;
-    const label = SECTION_LABEL[sec.kind] || sec.title;
-    d.append(el('summary', null, label + ' (' + sec.items.length + ')'));
-
-    const ul = el('ul', 'sec-list');
-    for (const item of sec.items) {
-      const li = el('li', item.done ? 'done' : '');
-      li.append(el('i', null, item.done ? '✓' : '○'), el('span', null, item.text));
-      ul.appendChild(li);
-    }
-    d.appendChild(ul);
-    card.appendChild(d);
-  }
+  if (op.rows.length || op.leads.length) card.append(renderTable(op));
+  if (op.sources.length) card.append(renderSources(op));
   return card;
+}
+
+function renderTabs() {
+  const strip = $('op-tabs');
+  strip.textContent = '';
+  for (const op of coverage.operators) {
+    const b = el('button', 'op-tab');
+    b.type = 'button';
+    b.setAttribute('aria-pressed', String(op.name === activeOp));
+    const dot = el('span', 'op-dot');
+    if (op.color) dot.style.background = op.color;
+    const claimed = (op.live ? op.live.total : 0) +
+      op.leads.filter((l) => l.kind === 'lead' && !l.done).length;
+    b.append(dot, el('span', 'op-tab-name', op.name), el('span', 'op-tab-n', String(claimed)));
+    b.title = claimed + ' sites currently claimed to exist under this operator';
+    b.addEventListener('click', () => {
+      activeOp = op.name;
+      renderCoverage();
+    });
+    strip.append(b);
+  }
 }
 
 function renderCoverage() {
@@ -244,25 +399,34 @@ function renderCoverage() {
     : 'No COVERAGE.md found';
 
   $('coverage-lede').textContent = coverage.hasFile
-    ? 'Tracked counts are read live from data/sites.js, so they are always what ' +
-      'the map actually shows. The leads below are not: they are a hand-kept list ' +
-      'of sites reported to exist that have not been vetted to the atlas’s ' +
-      'sourcing standard yet. Treat them as where to point research-agent next, ' +
-      'not as facts.'
-    : 'The roster lives in COVERAGE.md at the repo root. It is missing, so there ' +
-      'is nothing to show but the live tracked counts.';
+    ? 'One tab per operator. Each table lists every site claimed to exist under ' +
+      'that name: the ones already in the atlas, rated by the same confidence ' +
+      'engine the map uses, and the ones only reported to exist, which have not ' +
+      'been vetted to the atlas’s sourcing standard at all. The number beside a ' +
+      'rating points at the source it rests on, listed under the table.'
+    : 'The roster lives in COVERAGE.md at the repo root. It is missing, so the ' +
+      'tables below show tracked sites only, with no list of what is outstanding.';
 
   const warn = $('coverage-warn');
   if (coverage.tracked && !coverage.tracked.ok) {
     warn.textContent =
-      'data/sites.js could not be parsed, so every tracked count below is 0. ' +
+      'data/sites.js could not be parsed, so every table below is empty. ' +
       'That same error would take the live map down silently. ' + coverage.tracked.error;
     warn.hidden = false;
   } else {
     warn.hidden = true;
   }
 
-  for (const op of coverage.operators) box.appendChild(renderOperator(op));
+  if (!coverage.operators.length) {
+    $('op-tabs').textContent = '';
+    box.append(el('p', 'op-empty', 'No operators to show.'));
+    return;
+  }
+  if (!coverage.operators.some((o) => o.name === activeOp)) {
+    activeOp = coverage.operators[0].name;
+  }
+  renderTabs();
+  box.appendChild(renderOperator(coverage.operators.find((o) => o.name === activeOp)));
 }
 
 function setView(view) {
