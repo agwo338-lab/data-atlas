@@ -207,11 +207,44 @@ var SITES = [
     lon: 2.6400,
     status: "Under construction",
     capacityMW: 240,
-    lastUpdated: "2026-08-21",
+    lastUpdated: "2026-09-16",
     sources: [
-      { label: "Data Center Dynamics — \"Nebius plans 240MW data center in Béthune, France\"", url: "https://www.datacenterdynamics.com/en/news/nebius-plans-240mw-data-center-in-b%C3%A9thune-france/" }
+      { label: "Data Center Dynamics — \"Nebius plans 240MW data center in Béthune, France\"", url: "https://www.datacenterdynamics.com/en/news/nebius-plans-240mw-data-center-in-b%C3%A9thune-france/", cls: "T" },
+      { label: "Horizon Actu — \"Béthune: l'ex-site Bridgestone va accueillir l'un des plus puissants centres d'IA d'Europe\", Feb 13, 2026", url: "https://www.horizonactu.fr/actualite-46881-bethune-l-ex-site-bridgestone-va-accueillir-l-un-des-plus-puissants-centres-d-ia-d-europe", cls: "G" },
+      { label: "Construction Review Online — 240MW Béthune data centre, Feb 18, 2026 (citing Les Echos, La Tribune)", url: "https://constructionreviewonline.com/amsterdam-based-ai-firm-nebius-to-build-240mw-bethune-data-centre-in-france-one-of-europes-largest/", cls: "G" },
+      { label: "gridreadiness.com — Choose France 2026: Nebius €8B investment confirmed", url: "https://www.gridreadiness.com/blog/choose-france-2026-softbank-ardian-nebius-ai-infrastructure.html", cls: "G" }
     ],
-    notes: "Former Bridgestone tire-plant site; ~€1.5B investment. 240MW is the disclosed full-buildout target (2027/28), phased from an initial ~27MW ramping to ~120MW in 2026. Previous source citation (a Mäntsälä/Estonia roundup article that never mentions Béthune) was a copy-paste error — corrected."
+    provenance: {
+      capacityMW: {
+        basis: "disclosed",
+        asOf: "2026-06-01",
+        evidence: [
+          { source: 0, cls: "T", note: "240MW full-buildout target, original Feb 2026 announcement." },
+          { source: 1, cls: "G", note: "Phased detail: 120MW by end 2026, 240MW by end 2027, first phase live from July 2026." },
+          { source: 3, cls: "G", note: "Jun 2026: €8B investment publicly confirmed at Choose France 2026; repeats the 240MW headline figure." }
+        ],
+        conflicting: false
+      },
+      status: {
+        basis: "disclosed",
+        asOf: "2026-06-01",
+        evidence: [
+          { source: 0, cls: "T", note: "Original Feb 2026 announcement of the build itself." },
+          { source: 1, cls: "G", note: "First phase targeted online July 2026; construction underway on the former Bridgestone site." },
+          { source: 3, cls: "G", note: "Jun 2026 restatement, independently dated ~4 months after the original announcement." }
+        ],
+        conflicting: false
+      },
+      location: {
+        basis: "estimated",
+        asOf: "2026-09-16",
+        evidence: [
+          { source: 0, cls: "T", note: "Names the former Bridgestone tire-plant site, Béthune — no street address or parcel found in any source checked." }
+        ],
+        conflicting: false
+      }
+    },
+    notes: "Former Bridgestone tire-plant site; ~€1.5B investment. 240MW is the disclosed full-buildout target (2027/28), phased from an initial ~27MW ramping to ~120MW in 2026. Previous source citation (a Mäntsälä/Estonia roundup article that never mentions Béthune) was a copy-paste error — corrected. Re-checked 2026-09-16: this entry had been left with a single trade-press citation and no provenance block despite being one of the larger capacity claims in the dataset. Added G-class corroboration (Horizon Actu, Construction Review Online citing Les Echos/La Tribune, and gridreadiness.com's Jun 2026 Choose France report), which supplies the phase schedule — 120MW by end-2026, 240MW by end-2027, first phase live from July 2026 — and a later-dated €8B confirmation. All of it still traces to Nebius/French-government messaging rather than to an independent record, so the ceiling here is Medium, not High. Targeted ICPE/Géorisques and RTE-raccordement searches found nothing site-specific; a Géorisques query by commune (rather than general web search) is the next channel to try, and either an ICPE authorization from the Pas-de-Calais préfecture or an RTE connection-register entry would lift capacity and status to High and give location a real parcel instead of a town-level estimate."
   },
   {
     id: "nebius-london",
@@ -1059,6 +1092,116 @@ var SITES = [
     notes: "$3B investment, largest private investment in Warren County history; ~200 direct jobs. Site is described only at road level — along U.S. Highway 61 South, entrance road off Old Cain Ridge Rd, near the Port of Vicksburg — no parcel address published, so lat/lon here is Vicksburg's city-center coordinate, NOT the actual site; treat as approximate pending a precise address. Checked 2026-09-14 for a Warren County Board of Supervisors record (right-of-way approval, loan agreement) that would give a real parcel — only secondhand news coverage of those votes was found, not the underlying agenda/minutes; the county's own agenda portal is the next channel to try. Status upgraded from Planned to Under construction based on Apr-Jun 2026 local reporting describing entrance-road construction / site mobilization; most recent available reporting (Jun 2026) still describes only site-prep activity, no vertical building construction confirmed. No MW capacity disclosed. Re-check within 3-6 months — both the exact location and status are likely to firm up."
   },
   {
+    id: "aws-newcarlisle",
+    provider: "AWS",
+    site: "Project Rainier",
+    city: "New Carlisle, IN",
+    country: "United States",
+    lat: 41.7063,
+    lon: -86.4819,
+    status: "Operational",
+    capacityMW: null,
+    lastUpdated: "2026-09-16",
+    sources: [
+      { label: "EPA ECHO — Amazon Data Services Incorporated, 31100 SR 2, New Carlisle IN (fid 110071949261)", url: "https://echo.epa.gov/detailed-facility-report?fid=110071949261", cls: "R" },
+      { label: "EPA ECHO — Amazon Data Services Incorporated, 31100 Edison Road, New Carlisle IN (fid 110071941722)", url: "https://echo.epa.gov/detailed-facility-report?fid=110071941722", cls: "R" },
+      { label: "About Amazon — \"Amazon plans to invest $15 billion in Northern Indiana to build new data center campuses and advance AI innovation\", Nov 2025", url: "https://www.aboutamazon.com/news/company-news/amazon-15-billion-indiana-data-centers", cls: "P" },
+      { label: "Indianapolis Business Journal — \"Amazon Web Services to build $11 billion data center campus near South Bend\"", url: "https://www.ibj.com/articles/amazon-web-services-to-build-11-billion-data-center-campus-near-south-bend", cls: "G" },
+      { label: "Utility Dive — \"NIPSCO to supply 3 GW to Amazon data centers in northern Indiana\" (reporting IURC Cause No. 46322)", url: "https://www.utilitydive.com/news/nisource-nipsco-amazon-data-centers-indiana/806396/", cls: "G" }
+    ],
+    provenance: {
+      status: {
+        basis: "disclosed",
+        asOf: "2026-09-16",
+        evidence: [
+          { source: 0, cls: "R", note: "EPA ECHO air-permit record, operating status 'Operating' — a regulatory record of a live facility, not an announcement about one." },
+          { source: 2, cls: "P", note: "AWS's own Nov 2025 release confirming continued build-out in Northern Indiana." },
+          { source: 3, cls: "G", note: "Original Apr 2024 announcement: $11B, ~1,000 jobs, Indiana Enterprise Center." }
+        ],
+        conflicting: false
+      },
+      location: {
+        basis: "disclosed",
+        asOf: "2026-09-16",
+        evidence: [
+          { source: 0, cls: "R", note: "Street address and coordinates (41.7062947, -86.4819019) as filed — parcel-level, not geocoded from a town name." },
+          { source: 1, cls: "R", note: "Second permitted building on the same campus, 31100 Edison Road (41.69387, -86.46959)." },
+          { source: 3, cls: "G", note: "New Carlisle, St. Joseph County, Indiana Enterprise Center, Olive Township." }
+        ],
+        conflicting: false
+      }
+    },
+    notes: "AWS's dedicated AI compute campus, built around Trainium2. Found via an EPA ECHO sweep under NAICS 518210 rather than through news — the state query returns AWS's own internally-coded facility records with parcel coordinates, which is why location and status here are independently verified while most of this dataset is not. Two permitted buildings on the same campus (SR 2 and Edison Road); the stored lat/lon is the first, and ~30 buildings are planned with ~18 reported operational as of mid-2026.\n\nCAPACITY IS DELIBERATELY EMPTY. Multi-gigawatt figures circulate for this site (2.2GW and 2.4GW both appear in press), but AWS's own Nov 2025 release and the NIPSCO/IURC filing behind it both describe a REGIONAL program — $15B and 2.4GW across Northern Indiana, served by two dedicated 1.3GW gas plants plus a 400MW battery — not this campus alone. The research pass watched a site-specific number get manufactured by aggregating the regional figure onto Rainier, and declined to carry it. The IURC docket (Cause No. 46322) is the R-class lever that would isolate a real site-level figure; the substantive documents in it are marked confidential, so this may need a data request or a later non-confidential order.\n\nAnthropic is named as the customer across trade press, but AWS's own Nov 2025 release does not name them and no primary source confirming it was read, so that claim is NOT recorded here as fact. Separately: this site is the clearest example of the only AI-vs-general-purpose distinction the evidence actually supports — one utility deal, one interconnection docket, dedicated new generation for a named counterparty, as against Ashburn-style buildout assembled from dozens of modest interconnections over 15+ years. That is a claim about how the project was financed and permitted, not about what workload runs in the building."
+  },
+  {
+    id: "aws-fairlesshills",
+    provider: "AWS",
+    site: "PNE100",
+    city: "Fairless Hills, PA",
+    country: "United States",
+    lat: 40.1639,
+    lon: -74.75106,
+    status: "Operational",
+    capacityMW: null,
+    lastUpdated: "2026-09-16",
+    sources: [
+      { label: "EPA ECHO — Amazon Data Svcs Inc PNE100, 600 Ben Fairless Dr, Fairless Hills PA (fid 110072197980)", url: "https://echo.epa.gov/detailed-facility-report?fid=110072197980", cls: "R" }
+    ],
+    provenance: {
+      status: {
+        basis: "disclosed",
+        asOf: "2026-09-16",
+        evidence: [
+          { source: 0, cls: "R", note: "EPA ECHO operating status 'Operating'. Single class — regulatory, but uncorroborated." }
+        ],
+        conflicting: false
+      },
+      location: {
+        basis: "disclosed",
+        asOf: "2026-09-16",
+        evidence: [
+          { source: 0, cls: "R", note: "Street address and coordinates as filed, Bucks County." }
+        ],
+        conflicting: false
+      }
+    },
+    notes: "Stands on one source: the EPA ECHO air-permit record, whose permittee string carries AWS's own site code (PNE100, a Philadelphia-area cluster code). Regulatory class, so it scores Medium on a single citation, but nothing corroborates it.\n\nUNRESOLVED, AND DELIBERATELY NOT RESOLVED HERE: the coverage roster carried Falls Township, Bucks County as a PLANNED site — the second of two Pennsylvania campuses in Amazon's Jun 2025 $20B state commitment. This ECHO record is at that location and says Operating. Whether that means the announced project matured faster than the roster was updated, or whether this is a distinct, earlier AWS building in the same industrial park that merely shares an address range, cannot be determined from the ECHO record alone: it carries no permit-issue date or construction timeline. Both readings are plausible. The concrete next step is to fetch the Jun 2025 announcement and check whether it names a second address or a different PNE code. Until then this entry claims only what the permit record supports — a facility that exists, at that address, operating — and makes no claim to be the announced campus."
+  },
+  {
+    id: "aws-madison-ms",
+    provider: "AWS",
+    site: "Madison Mega Site",
+    city: "Canton, MS",
+    country: "United States",
+    lat: 32.58749,
+    lon: -90.09539,
+    status: "Operational",
+    capacityMW: null,
+    lastUpdated: "2026-09-16",
+    sources: [
+      { label: "EPA ECHO — Amazon Data Services Inc, Madison Mega Site, 1978 Highway 22, Canton MS (fid 110071424758)", url: "https://echo.epa.gov/detailed-facility-report?fid=110071424758", cls: "R" }
+    ],
+    provenance: {
+      status: {
+        basis: "disclosed",
+        asOf: "2026-09-16",
+        evidence: [
+          { source: 0, cls: "R", note: "EPA ECHO operating status 'Operating'. Single class — regulatory, but uncorroborated." }
+        ],
+        conflicting: false
+      },
+      location: {
+        basis: "disclosed",
+        asOf: "2026-09-16",
+        evidence: [
+          { source: 0, cls: "R", note: "Street address and coordinates as filed, Madison County." }
+        ],
+        conflicting: false
+      }
+    },
+    notes: "Single-class entry: the EPA ECHO permittee string is the ONLY thing connecting Amazon to this parcel. No corporate, trade or general-press source tying AWS to this address was read directly, so there is no corroboration of any kind — unusually, the regulatory record here is not the strongest source, it is the only source.\n\nA claim that this is 'Project Rainier's second campus' surfaced during research and was explicitly RETRACTED by the research pass as an artefact of search-result synthesis over unread trade-press snippets. It is recorded here only so it is not rediscovered and mistaken for a finding. Do not repeat it without a source someone has actually read.\n\nDistinct from aws-vicksburg, which is in Warren County — Mississippi coverage this cycle is muddled across counties, so check the parcel, not the state, before merging or splitting these. The coverage roster's Madison County lead (a $10B→$11B investment, per DCD and the governor's office) plausibly describes this site but was not verified against this parcel, so those citations are not carried here."
+  },
+  {
     id: "spacexai-colossus1",
     provider: "SpaceXAI",
     site: "Colossus 1",
@@ -1218,7 +1361,7 @@ var SITES = [
     lon: 34.7761,
     status: "Under construction",
     capacityMW: 22,
-    lastUpdated: "2026-09-15",
+    lastUpdated: "2026-09-16",
     sources: [
       { label: "Data Center Dynamics — \"Nebius signs 80MW data center lease with Mega Or in Israel\"", url: "https://www.datacenterdynamics.com/en/news/nebius-signs-80mw-data-center-lease-with-mega-or-in-israel/", cls: "T" },
       { label: "Globes — \"Mega Or to provide data center services to Nebius\"", url: "https://en.globes.co.il/en/article-mega-or-to-provide-data-center-services-to-nebius-1001531296", cls: "G" },
@@ -1252,7 +1395,7 @@ var SITES = [
         conflicting: false
       }
     },
-    notes: "Colocation tenancy in a Mega Or (TASE: MGOR) new-build, operated through its Mega DC subsidiary. Part of an ~$880M / 80MW combined lease with Beit Shemesh. Settled on re-check (2026-09-15): Masmiyya and Beit Shemesh are two genuinely distinct, separately named facilities, not one lease that press split in two — every source fetched names both consistently, and the 22MW + 58MW = 80MW split is real rather than an artefact of rounding. STALENESS WARNING, and it is the main thing wrong with this entry: the only coverage anywhere is the Jan 2026 announcement, the disclosed delivery target was Q3 2026, and that window has now arrived with no follow-up reporting found. Status may already be wrong in the direction of Operational. Re-check this before relying on it. CONTESTED and deliberately excluded from capacityMW: sources disagree on the site's ultimate expanded size — separate accounts give \"up to 64MW\", an implied ~44MW (from describing the initial 22MW as half the planned capacity), and a 222MW figure that appears to conflate IT capacity with the ~240MW substation Globes describes at Bnei Re'em. Only the consistently-stated initial 22MW is recorded. Searched and came up empty: EDGAR (no site-level Israel disclosure), PeeringDB Israel (no Mega DC presence), and the underlying TASE/Maya immediate report, which Israeli financial press describes but which could not be retrieved and read directly — reading that filing is the single highest-value next step, since it would be R-class."
+    notes: "Colocation tenancy in a Mega Or (TASE: MGOR) new-build, operated through its Mega DC subsidiary. Part of an ~$880M / 80MW combined lease with Beit Shemesh. Settled on re-check (2026-09-15): Masmiyya and Beit Shemesh are two genuinely distinct, separately named facilities, not one lease that press split in two — every source fetched names both consistently, and the 22MW + 58MW = 80MW split is real rather than an artefact of rounding. STALENESS WARNING, and it is the main thing wrong with this entry: the only coverage anywhere is the Jan 2026 announcement, the disclosed delivery target was Q3 2026, and that window has now arrived with no follow-up reporting found. Status may already be wrong in the direction of Operational. Re-check this before relying on it. CONTESTED and deliberately excluded from capacityMW: sources disagree on the site's ultimate expanded size — separate accounts give \"up to 64MW\", an implied ~44MW (from describing the initial 22MW as half the planned capacity), and a 222MW figure that appears to conflate IT capacity with the ~240MW substation Globes describes at Bnei Re'em. Only the consistently-stated initial 22MW is recorded. Searched and came up empty: EDGAR (no site-level Israel disclosure), PeeringDB Israel (no Mega DC presence), and the underlying TASE/Maya immediate report, which Israeli financial press describes but which could not be retrieved and read directly — reading that filing is the single highest-value next step, since it would be R-class. Re-checked 2026-09-16: no follow-up reporting found in any language searched, and the Q3 2026 delivery window named in the Jan 2026 announcement has now arrived and lapsed in silence — neither confirmed live nor denied. That silence is informative but is not evidence either way, so capacity and status stay exactly as announced and both remain formally stale. The underlying TASE/Maya immediate report is still the single highest-value lever here and has now been flagged twice without being retrieved; a Hebrew-language pass (Calcalist, Bizportal, Maariv, Q3 2026 specifically) is the cheapest next step."
   },
   {
     id: "nebius-beitshemesh",
@@ -1264,7 +1407,7 @@ var SITES = [
     lon: 34.9924,
     status: "Under construction",
     capacityMW: 58,
-    lastUpdated: "2026-09-15",
+    lastUpdated: "2026-09-16",
     sources: [
       { label: "Data Center Dynamics — \"Nebius signs 80MW data center lease with Mega Or in Israel\"", url: "https://www.datacenterdynamics.com/en/news/nebius-signs-80mw-data-center-lease-with-mega-or-in-israel/", cls: "T" },
       { label: "Globes — \"Mega Or to provide data center services to Nebius\"", url: "https://en.globes.co.il/en/article-mega-or-to-provide-data-center-services-to-nebius-1001531296", cls: "G" },
@@ -1298,7 +1441,7 @@ var SITES = [
         conflicting: false
       }
     },
-    notes: "Colocation tenancy with Mega Or (TASE: MGOR) via Mega DC, the larger half of the ~$880M / 80MW combined lease with Masmiyya. Unlike Masmiyya this is a fit-out of an EXISTING building rather than ground-up construction — \"Under construction\" here means capacity buildout, not a building going up. Same staleness warning as Masmiyya, and it matters just as much: the only coverage is the Jan 2026 announcement, the first delivery stage was targeted at Q3 2026, that window has now arrived, and no follow-up reporting was found. Re-check before relying on the status. CONTESTED and excluded from capacityMW: a 222MW figure appears in one account and looks like a conflation with the ~220MW substation Globes reports at Beit Shemesh — a substation rating is not IT capacity, so only the disclosed initial 58MW is recorded. The directory listing (source 2) is D-class and can never support a number; it is kept only because re-fetching it would give a street address to replace the centroid coordinate. Searched and came up empty: EDGAR, PeeringDB Israel (no Mega DC presence), and the underlying TASE/Maya immediate report. An Israel Electric Corporation grid-connection record for that substation would be R-class and could also support a derived capacity ceiling, kept separate from the disclosed figure."
+    notes: "Colocation tenancy with Mega Or (TASE: MGOR) via Mega DC, the larger half of the ~$880M / 80MW combined lease with Masmiyya. Unlike Masmiyya this is a fit-out of an EXISTING building rather than ground-up construction — \"Under construction\" here means capacity buildout, not a building going up. Same staleness warning as Masmiyya, and it matters just as much: the only coverage is the Jan 2026 announcement, the first delivery stage was targeted at Q3 2026, that window has now arrived, and no follow-up reporting was found. Re-check before relying on the status. CONTESTED and excluded from capacityMW: a 222MW figure appears in one account and looks like a conflation with the ~220MW substation Globes reports at Beit Shemesh — a substation rating is not IT capacity, so only the disclosed initial 58MW is recorded. The directory listing (source 2) is D-class and can never support a number; it is kept only because re-fetching it would give a street address to replace the centroid coordinate. Searched and came up empty: EDGAR, PeeringDB Israel (no Mega DC presence), and the underlying TASE/Maya immediate report. An Israel Electric Corporation grid-connection record for that substation would be R-class and could also support a derived capacity ceiling, kept separate from the disclosed figure. Re-checked 2026-09-16 alongside Masmiyya: same result, same lapsed Q3 2026–Q1 2027 delivery window, no follow-up coverage either way. Capacity and status unchanged and still stale; see the Masmiyya entry for the TASE/Maya and Hebrew-press leads that would settle both at once."
   },
   {
     id: "nebius-independence-mo",
@@ -1452,7 +1595,7 @@ var SITES = [
     lon: -22.583679,
     status: "Operational",
     capacityMW: 10,
-    lastUpdated: "2026-09-15",
+    lastUpdated: "2026-09-16",
     sources: [
       { label: "Verne — \"Verne Strikes 10MW Deal with Nebius to Further Expand Europe's AI Capacity\"", url: "https://www.verne.co/news/news-verne-strikes-10mw-deal-with-nebius-to-further-expand-europes-ai-capacity", cls: "P" },
       { label: "Data Center Dynamics — Nebius New Jersey build and Icelandic colocation deployment", url: "https://www.datacenterdynamics.com/en/news/nebius-to-build-300mw-data-center-in-new-jersey-will-launch-icelandic-colocation-deployment-in-q2-2025/", cls: "T" },
@@ -1488,7 +1631,7 @@ var SITES = [
         conflicting: false
       }
     },
-    notes: "Colocation tenancy inside Verne's Keflavík campus — same pattern as the Ark DC, Kao Data, Greenergy, Mega DC and Patmos entries. The 10MW is Nebius's deployment; Verne's campus is roughly 140MW and those two figures must not be conflated. Important limit on the N-class source, and it applies to the Paris entry too: PeeringDB confirms the HOST FACILITY is real and at that address, which is why location scores High — but Nebius's own PeeringDB network object (AS213291, NebiusCloud) lists only four peering facilities (Equinix FR5 Frankfurt, Equinix AM7 Amsterdam, Digita Helsinki, Elisa Helsinki), and Verne Iceland is not among them. So PeeringDB does NOT independently confirm Nebius's tenancy here, only the building. A rack-level compute deployment plausibly has no reason to peer publicly, so this is not evidence against the tenancy either — it just means status cannot ride the N-class source upward and stays on the operator's word. To lift capacity or status: an Icelandic grid connection record (Landsvirkjun publishes connection announcements; searched superficially, nothing Nebius-specific found, worth a dedicated pass) or an EDGAR 20-F capacity breakdown naming Iceland. Searched and empty: EDGAR for 'Verne Global' (90 hits, all unrelated — an infrastructure fund and a 2018 shell filing) and 'Nebius Iceland' (0 hits)."
+    notes: "Colocation tenancy inside Verne's Keflavík campus — same pattern as the Ark DC, Kao Data, Greenergy, Mega DC and Patmos entries. The 10MW is Nebius's deployment; Verne's campus is roughly 140MW and those two figures must not be conflated. Important limit on the N-class source, and it applies to the Paris entry too: PeeringDB confirms the HOST FACILITY is real and at that address, which is why location scores High — but Nebius's own PeeringDB network object (AS213291, NebiusCloud) lists only four peering facilities (Equinix FR5 Frankfurt, Equinix AM7 Amsterdam, Digita Helsinki, Elisa Helsinki), and Verne Iceland is not among them. So PeeringDB does NOT independently confirm Nebius's tenancy here, only the building. A rack-level compute deployment plausibly has no reason to peer publicly, so this is not evidence against the tenancy either — it just means status cannot ride the N-class source upward and stays on the operator's word. To lift capacity or status: an Icelandic grid connection record (Landsvirkjun publishes connection announcements; searched superficially, nothing Nebius-specific found, worth a dedicated pass) or an EDGAR 20-F capacity breakdown naming Iceland. Searched and empty: EDGAR for 'Verne Global' (90 hits, all unrelated — an infrastructure fund and a 2018 shell filing) and 'Nebius Iceland' (0 hits). Capacity re-checked 2026-09-16: now past the 540-day Operational window with no fresher Nebius-specific figure found. Verne announced a further ~120MW campus expansion (Supplier Information Day, Aug 2026) — that is the host building growing, NOT evidence that Nebius’s own 10MW slice grew, and the two must not be conflated. An Icelandic grid-connection record (Landsvirkjun) naming Nebius specifically would be the way to refresh this."
   },
   {
     id: "nebius-paris",

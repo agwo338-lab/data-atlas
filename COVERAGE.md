@@ -29,10 +29,13 @@ research-agent next," not as ready-to-paste facts.
 facilities globally across 30+ cloud regions. That entire footprint is
 deliberately out of scope here — comparing against it would swamp this
 list with routine AZ infrastructure and isn't what this atlas curates. AWS
-gaps below are scoped the same way the six tracked AWS entries already
+gaps below are scoped the same way the nine tracked AWS entries already
 are: individually newsworthy, large new-build campus announcements (a
 named location, a disclosed multi-billion-dollar investment, its own press
-cycle) — not the full global region footprint.
+cycle) — not the full global region footprint. As of 2026-09-16 this is a
+decision made against a known alternative rather than an assumption: the
+footprint *can* now be enumerated cheaply, and that was weighed and
+declined. See "The enumeration question" under AWS below.
 
 ## Summary
 
@@ -40,7 +43,7 @@ cycle) — not the full global region footprint.
 |---|---|---|---|---|
 | CoreWeave | 24 | 3 | 5 | 4 |
 | Nebius | 17 | 0 | 0 | 2 |
-| AWS | 6 | 6 | 1 | 2 |
+| AWS | 9 | 4 | 1 | 2 |
 | SpaceXAI (xAI) | 3 | 1 | 1 | 2 |
 | OpenAI | 1 | — | — | — |
 
@@ -98,6 +101,27 @@ Keflavík IS (Verne) · Saint-Denis FR (Equinix PA10) · Newport GB (Vantage CWL
 
 </details>
 
+### Audit state (2026-09-16) — this operator's gap list is closed, its fields are not
+
+The discovery side is done: no untracked Nebius facility turned up in this
+pass. What remains is per-field verification, and it is uneven. Twelve
+entries carry worked provenance blocks from the 2026-09-15 pass. Four do
+not and are still unverified on every field — **Mäntsälä I, Mäntsälä II,
+Longcross and Hüüru** — with PeeringDB searches for all four coming back
+empty or matching a different operator entirely. That is the next Nebius
+job, and it is a sourcing job, not a re-check.
+
+Two standing re-checks, both flagged twice now without being closed:
+
+- **Masmiyya and Beit Shemesh** — the Q3 2026 delivery window named in the
+  Jan 2026 announcement has arrived and lapsed in silence. No follow-up
+  reporting either way. The TASE/Maya immediate report is the lever that
+  would settle it; a Hebrew-language pass is the cheapest route.
+- **Béthune** — upgraded to Medium on 2026-09-16 with G-class
+  corroboration, but a Géorisques query by commune, or an RTE
+  connection-register entry, is what would make it High and give it a real
+  parcel instead of a town-level coordinate.
+
 ### Missing — high confidence
 
 - [x] **Independence, MO** ("Nebius Independence Campus") — Approved Mar 2026 (Chapter 100 incentive), ~400 acres up to 4 buildings, ~800MW power via a new dedicated plant. [Nebius](https://nebius.com/independencemo) · [DCD](https://www.datacenterdynamics.com/en/news/nebius-plans-800mw-data-center-campus-in-kansas-city-missouri/) · [City of Independence FAQ](https://www.independencemo.gov/data-center-faqs) *(quasi-regulatory, municipal page — worth checking if it counts as R)*
@@ -121,24 +145,63 @@ Keflavík IS (Verne) · Saint-Denis FR (Equinix PA10) · Newport GB (Vantage CWL
 
 ---
 
-## AWS — 6 tracked
+## AWS — 9 tracked
 
 <details><summary>Currently tracked (click to expand)</summary>
 
 Gilroy CA · Santa Clara CA (Mission College) · Walla Walla County WA
 (Advance Phase LLC) · Shreveport LA (Resilient Technology Park/STACK) ·
-Boling TX (Project Eagle) · Vicksburg MS (Warren County)
+Boling TX (Project Eagle) · Vicksburg MS (Warren County) · New Carlisle IN
+(Project Rainier) · Fairless Hills PA (PNE100) · Canton MS (Madison Mega
+Site)
 
 </details>
 
+### The enumeration question — answered 2026-09-16
+
+A scoping run asked whether any source *lists* AWS's facilities rather than
+reporting them one announcement at a time. One does, and it was already
+wired up and unused: **EPA ECHO under NAICS 518210, queried state by
+state.** It returns facilities named `AMAZON DATA SERVICES INC <code>` with
+street address, coordinates and an operating-status field — R-class, filed
+under legal obligation. Virginia alone returned 30+ named Amazon buildings
+carrying AWS's own internal facility codes (`IAD-nnn`).
+
+Two limits worth knowing before trusting a negative: it only catches a site
+once an air permit exists, so genuinely early projects are invisible and
+their absence means nothing; and some campuses don't carry "Amazon" in the
+permittee name at all — Ohio's New Albany cluster files as `CMH050`,
+`CMH051`, etc. A full sweep needs a dictionary of AWS's site-code prefixes
+(`IAD`, `ATL`, `CMH`, `PNE`, `SAT`…) matched against permittee strings.
+
+Everything else was dry for this operator: PeeringDB is near-silent (owned
+campuses run private backbone, not public peering — which is itself a weak
+negative signal for a single-tenant site), EDGAR has no site-level property
+disclosures from Amazon, AWS's own infrastructure pages are logical-only
+with no addresses, and the directories claiming 353–477 "AWS data centers"
+are counting colocation cages with no ownership-vs-tenancy flag.
+
+**Scope decision (2026-09-16): the named-campus line stays.** A full 50-state
+sweep would surface most of the US footprint — realistically 50–150
+address-level records, about a day of scripted queries — and was
+deliberately declined, because it would fill the atlas with Ashburn-style
+AZ buildings that have no announcement, no name and no capacity figure, and
+would make AWS dominate the map. ECHO is instead used here as a
+*verification* channel: a way to lift existing entries from the operator's
+word to independently verified, which is what the three additions above
+are. If that line is ever revisited, the scoping run proposed a mechanical
+test to replace the editorial one: does this site have its own regulatory
+or utility record distinct from the region's routine buildout, plus its own
+named investment figure.
+
 ### Missing — high confidence
 
-- [ ] **Montgomery County (New Florence), MO** ("Project Green") — Planned, announced Jun 2026, $10B, 1,000 acres / 8 buildings phase 1. [PR Newswire](https://www.prnewswire.com/news-releases/amazon-selects-missouri-for-10-billion-data-center-campus-302800859.html) · [DCD](https://www.datacenterdynamics.com/en/news/amazon-commits-10bn-to-data-center-campus-in-montgomery-city-missouri/)
-- [ ] **Salem Township, Luzerne County, PA** ("Salem Township Innovation Campus") — Planned, announced Jun 2025, part of a $20B PA commitment, sited beside the Susquehanna nuclear plant. Note: a FERC ruling blocked a proposed co-location power deal here (Apr 2025) — that docket is a genuine R-class record worth pulling directly. [aboutamazon.com](https://www.aboutamazon.com/news/aws/amazon-pennsylvania-investment-cloud-infrastructure-ai-innovation) · [DCD](https://www.datacenterdynamics.com/en/news/amazon-to-invest-20bn-in-data-centers-in-pennsylvania/)
-- [ ] **Falls Township, Bucks County, PA** — Planned, second site in the same $20B PA announcement as Salem Township; got noticeably less dedicated coverage — confirm it's still active before adding. [Philadelphia Inquirer](https://www.inquirer.com/business/amazon-data-centers-pennsylvania-20250609.html)
-- [ ] **Madison County, MS** — Under construction/expanding, $10B initial → $11B (Nov 2025). Distinct county from the tracked Vicksburg (Warren County) entry — double-check exact parcel before adding, MS coverage this cycle is muddled across counties. [DCD](https://www.datacenterdynamics.com/en/news/aws-scales-up-investment-commitment-for-mississippi-data-centers-to-25bn/) · [governor's office](https://governorreeves.ms.gov/amazon-continues-mississippi-expansion-announcing-plans-to-invest-a-total-of-25-billion-across-the-magnolia-state/)
-- [ ] **Blanchard (Caddo Parish), LA** — Planned, part of a $12B northwest-LA announcement (Feb 2026) explicitly separate from the already-tracked Shreveport/Resilient Tech Park campus — three total NW Louisiana campuses, only one tracked. No branded project name found, sited at Blanchard Latex Rd &amp; State Line Rd. [aboutamazon.com](https://www.aboutamazon.com/news/company-news/amazon-data-center-louisiana-new-jobs) · [KSLA](https://www.ksla.com/2026/02/24/campuses-newly-announced-amazon-data-center-spanning-bossier-caddo-parishes-confirmed/)
-- [ ] **Benton (Bossier Parish), LA** — Planned, second site in the same NW Louisiana announcement, west side of Hwy 3 ~5mi north of Benton. Same sourcing as Blanchard.
+- [ ] **Montgomery County (New Florence), MO** ("Project Green") — Planned, announced Jun 2026, $10B, 1,000 acres / 8 buildings phase 1. **ECHO searched 2026-09-16: not found.** Complete statewide scan, 7 MO facilities under NAICS 518210, no INCOMPLETE flag, all Kansas City-area and none named Amazon — consistent with no permit filed yet for an announcement this recent. [PR Newswire](https://www.prnewswire.com/news-releases/amazon-selects-missouri-for-10-billion-data-center-campus-302800859.html) · [DCD](https://www.datacenterdynamics.com/en/news/amazon-commits-10bn-to-data-center-campus-in-montgomery-city-missouri/)
+- [ ] **Salem Township, Luzerne County, PA** ("Salem Township Innovation Campus") — Planned, announced Jun 2025, part of a $20B PA commitment, sited beside the Susquehanna nuclear plant. Note: a FERC ruling blocked a proposed co-location power deal here (Apr 2025) — that docket is a genuine R-class record worth pulling directly. **ECHO searched 2026-09-16: not found.** Complete statewide scan, 17 PA facilities under NAICS 518210, no INCOMPLETE flag, nothing in Luzerne County — consistent with no air permit filed yet, which is what an early-stage project looks like. Not evidence against the project. [aboutamazon.com](https://www.aboutamazon.com/news/aws/amazon-pennsylvania-investment-cloud-infrastructure-ai-innovation) · [DCD](https://www.datacenterdynamics.com/en/news/amazon-to-invest-20bn-in-data-centers-in-pennsylvania/)
+- [x] **Falls Township, Bucks County, PA** — **added 2026-09-16 as `aws-fairlesshills`**, off an EPA ECHO record (`AMAZON DATA SVCS INC PNE100`, 600 Ben Fairless Dr, status Operating). One caveat carried into the entry's notes rather than resolved: the record says Operating while this lead said Planned, and ECHO carries no permit date, so whether this is the announced campus matured or a distinct earlier AWS building in the same park is undetermined. Fetching the Jun 2025 announcement to check for a second address or PNE code would settle it. [Philadelphia Inquirer](https://www.inquirer.com/business/amazon-data-centers-pennsylvania-20250609.html)
+- [x] **Madison County, MS** — **added 2026-09-16 as `aws-madison-ms`** (Madison Mega Site, 1978 Highway 22, Canton), off an EPA ECHO record that is the *only* source connecting Amazon to that parcel. The citations below plausibly describe it but were not verified against it, so they are not carried on the entry. A "Project Rainier's second campus" framing that surfaced during research was retracted as a search-synthesis artefact — do not reinstate it without a source someone has read. [DCD](https://www.datacenterdynamics.com/en/news/aws-scales-up-investment-commitment-for-mississippi-data-centers-to-25bn/) · [governor's office](https://governorreeves.ms.gov/amazon-continues-mississippi-expansion-announcing-plans-to-invest-a-total-of-25-billion-across-the-magnolia-state/)
+- [ ] **Blanchard (Caddo Parish), LA** — Planned, part of a $12B northwest-LA announcement (Feb 2026) explicitly separate from the already-tracked Shreveport/Resilient Tech Park campus — three total NW Louisiana campuses, only one tracked. No branded project name found, sited at Blanchard Latex Rd &amp; State Line Rd. **ECHO searched 2026-09-16: not found**, and this one is a genuine complete-coverage negative — all 13,842 Louisiana air facilities scanned, zero under NAICS 518210 statewide, no INCOMPLETE flag. Local coverage (KSLA) across seven months says the project is real and active, with the Caddo Parish Commission still debating a construction pause as of Sep 2026, so read this as 'not yet permitted', not 'not real'. [aboutamazon.com](https://www.aboutamazon.com/news/company-news/amazon-data-center-louisiana-new-jobs) · [KSLA](https://www.ksla.com/2026/02/24/campuses-newly-announced-amazon-data-center-spanning-bossier-caddo-parishes-confirmed/)
+- [ ] **Benton (Bossier Parish), LA** — Planned, second site in the same NW Louisiana announcement, west side of Hwy 3 ~5mi north of Benton. Same sourcing as Blanchard, and covered by the same complete-coverage ECHO negative — see above.
 
 ### Missing — medium confidence
 

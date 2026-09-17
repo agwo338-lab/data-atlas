@@ -296,14 +296,19 @@ function parseCoverage(text) {
 
     if ((m = raw.match(/^###\s+(.+?)\s*$/))) {
       const title = m[1].trim();
-      section = {
-        title: title,
-        kind: /high confidence/i.test(title) ? 'high'
-            : /medium confidence/i.test(title) ? 'medium'
-            : /watch/i.test(title) ? 'watch'
-            : 'other',
-        items: [],
-      };
+      const kind = /high confidence/i.test(title) ? 'high'
+                 : /medium confidence/i.test(title) ? 'medium'
+                 : /watch/i.test(title) ? 'watch'
+                 : 'other';
+      // An operator's section can also be prose about the state of the audit
+      // rather than a list of sites — and prose carries bullets. Those are not
+      // claimed sites, so they must not become table rows or count toward the
+      // tab's total. Dropping the section entirely is deliberate: the table
+      // knows four groups, and a fifth would render commentary as if it were
+      // a facility. A new *site* section just needs its heading to say high
+      // confidence, medium confidence, or watch.
+      if (kind === 'other') { section = null; continue; }
+      section = { title: title, kind: kind, items: [] };
       op.sections.push(section);
       continue;
     }

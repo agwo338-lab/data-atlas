@@ -386,6 +386,22 @@ unpaginated call silently drops 39% of the state. The tool paginates and
 states its coverage in the output; if that line says INCOMPLETE, treat a
 negative result as inconclusive rather than as absence.
 
+**ECHO is an enumeration channel, not just a verification one** (found
+Sep 2026, on the AWS scoping run). A state query under NAICS 518210 returns
+hyperscaler facilities under the operator's own name *with its internal
+site code* — `AMAZON DATA SERVICES INC PNE100`, `... INCORPORATED` at a
+New Carlisle address — plus street address, parcel coordinates and an
+operating-status field. That is R-class, address-level, and free, and it is
+the cheapest route from "operator's word" to "independently verified" that
+this project has. Two gotchas: a site only appears once an air permit
+exists, so an early-stage project's absence means nothing; and not every
+campus carries the operator's name in the permittee string (AWS's New
+Albany cluster files as `CMH050`, `CMH051`), so a thorough sweep needs a
+dictionary of site-code prefixes rather than a name search. ECHO gives
+existence, address and status — never capacity. A capacity figure would
+have to come from the underlying permit's generator nameplate, which makes
+it `derived`, never `disclosed`.
+
 ## Open concerns
 
 - **`openrouter_ask` reliability**: in its first real research run (the
