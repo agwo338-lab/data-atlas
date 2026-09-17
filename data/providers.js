@@ -12,6 +12,13 @@
 //            pins, table dot, and provider page. Optional — omit the field
 //            (or leave the provider out of this file entirely) to fall
 //            back to the next unused color in index.html's shared palette.
+//   domain   the operator's own web domain, e.g. "coreweave.com". The
+//            operator page shows the site icon behind that domain (fetched
+//            live from Google's public favicon service) as the operator's
+//            mark, so no logo files are kept in the repo. Optional — an
+//            entry without one gets a lettered tile instead.
+//   logo     a full image URL to use instead of the favicon, if a better
+//            mark is available. Optional; wins over `domain` when set.
 //   summary  2-3 sentences of plain-language orientation: who this company
 //            is and what it's doing in the buildout, shown directly under
 //            the headline stats on the provider page. Optional — a provider
@@ -62,6 +69,7 @@ var PROVIDERS = [
     // So: a teal that gestures at that legacy accent while sitting clear of
     // every other pinned color. An interpretive choice, stated as one.
     name: "OpenAI",
+    domain: "openai.com",
     color: "#3EC4C0",
     summary: "The AI lab behind ChatGPT, and the largest single driver of the " +
       "current compute buildout — but almost entirely as a customer rather than " +
@@ -83,6 +91,7 @@ var PROVIDERS = [
     // doesn't collide with AWS's orange or the auto-palette on the map,
     // not scraped from any brand asset.
     name: "SpaceXAI",
+    domain: "x.ai",
     summary: "SpaceX's AI division, formed when xAI folded entirely into SpaceX rather " +
       "than continuing as a separate company. Its compute buildout is tracked here " +
       "as part of the merged entity; the atlas holds no confirmed SpaceXAI site yet.",
@@ -98,6 +107,7 @@ var PROVIDERS = [
     // assignment in index.html only considers providers that actually have
     // sites.
     name: "AWS",
+    domain: "aws.amazon.com",
     summary: "Amazon's cloud arm and the largest incumbent hyperscaler — it was building " +
       "data centers at scale for a decade before the current AI cycle. Distinct from " +
       "the neoclouds here in that it designs its own accelerators and rents capacity " +
@@ -106,6 +116,7 @@ var PROVIDERS = [
   },
   {
     name: "Nebius",
+    domain: "nebius.com",
     summary: "An Amsterdam-headquartered AI cloud — the business that remained after " +
       "Yandex's Russian operations were divested. It builds and operates its own GPU " +
       "capacity and sells it on long multi-year contracts, so its disclosed pipeline " +
@@ -150,6 +161,7 @@ var PROVIDERS = [
   },
   {
     name: "CoreWeave",
+    domain: "coreweave.com",
     summary: "A GPU-specialist cloud, originally an Ethereum mining operation, now one of " +
       "the largest dedicated AI compute providers. It leases and fits out sites fast " +
       "rather than building slowly from the ground up, which is why its footprint here " +

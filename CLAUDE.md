@@ -6,13 +6,24 @@ capacity. Built as a single static site with no backend and no build step.
 
 ## Stack
 
-- `index.html` — the entire app: markup, CSS, and JS in one file. Renders a
-  world map (MapLibre GL JS + CARTO's Dark Matter vector basemap, both from
-  a public CDN, no API key currently required), a provider dashboard, a
-  detail panel, a site table, a Sources tab, and a Method tab (the evidence
-  pipeline diagram and the live confidence tally). Site markers are plain DOM
-  elements handed to MapLibre — it repositions them on pan/zoom itself, so
-  there's no custom per-frame transform code to maintain. (Previously a
+- `index.html` — the entire app: markup, CSS, and JS in one file. Laid out
+  as a GIS dashboard (Sep 2026 reskin, "Graphite" tokens: warm-neutral darks,
+  one bone accent, Geist + Geist Mono, operator colours the only saturated
+  hue): a 56px icon rail (Atlas, Sources & method, reset view), one docked
+  400px panel with an Operators / Sites switch, the map filling the rest
+  (MapLibre GL JS + CARTO's Dark Matter vector basemap, flat Mercator, both
+  from a public CDN, no API key currently required), and a site inspector
+  that overlays the map's right edge when a site is selected. Opening an
+  operator pushes its page into the same panel (back link returns to the
+  list), solos it on the map and fits the map to its sites. Capacity is
+  drawn as a rack pictogram everywhere — one rack per 100 MW on operators,
+  per 10 MW on a site — with one hoverable segment per status. The atlas
+  view deliberately carries almost none of the confidence machinery: a small
+  tick per site row and a one-line caption under the capacity figure; the
+  per-field verdicts live on the site page and the Sources & method page.
+  Site markers are plain DOM elements handed to MapLibre — it repositions
+  them on pan/zoom itself, so there's no custom per-frame transform code to
+  maintain. (Previously a
   hand-rolled D3 + SVG + topojson map; replaced because SVG's per-frame
   re-rasterization of complex coastline geometry made pan/zoom sluggish in
   a way that survived several rounds of targeted optimization — a GPU-vector
@@ -33,9 +44,11 @@ capacity. Built as a single static site with no backend and no build step.
   so the published explanation of the rules cannot drift from the rules.
 - `data/providers.js` — one entry per operator, for anything that's about
   the *company* rather than one specific site: a pinned display color
-  (dashboard card, map pins, table dot, provider page) and its disclosed
-  partnerships/customers (shown as a "Partnerships" section on the
-  provider page). A provider doesn't need an entry here to show up on the
+  (dashboard card, map pins, table dot, provider page), its web `domain`
+  (the operator page shows the site icon behind it, fetched live from
+  Google's public favicon service, so no logo files live in the repo), and
+  its disclosed partnerships/customers (shown as a "Partnerships" section
+  on the provider page). A provider doesn't need an entry here to show up on the
   map; any new `provider` string in `sites.js` is auto-assigned a color
   from a shared palette and shows an empty partnerships section. Partner
   entries should trace back to something already vetted (e.g. a
@@ -316,7 +329,7 @@ and an operator that has never had a gap search gets its own row saying that
 — an absent roster should look like an absent roster, not like zero work
 outstanding.
 
-It reuses the atlas's Nocturne tokens so the two read as one product; that
+It reuses the atlas's Graphite tokens so the two read as one product; that
 palette is a *copy*, not an import, so a change to `index.html`'s tokens
 needs mirroring there.
 

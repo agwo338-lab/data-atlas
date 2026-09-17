@@ -14,7 +14,7 @@ let coverage = null;
 // Same palette the atlas uses for provider pins, so the two agents read as
 // two "operators" here in the way providers do there.
 const AGENT_COLOR = {
-  'research-agent': '#9184d9',
+  'research-agent': '#e6dfd0',
   'news-agent': '#75798c',
 };
 

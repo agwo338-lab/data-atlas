@@ -1,7 +1,11 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Site Atlas</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@5/dist/maplibre-gl.css">
 <script src="https://cdn.jsdelivr.net/npm/maplibre-gl@5/dist/maplibre-gl.js"></script>
 <script src="data/sites.js"></script>
@@ -11,73 +15,61 @@
 
 <style>
   /* ════════════════════════════════════════════════════════════════════
-     Nocturne tokens — this page always renders dark, regardless of OS/
-     browser setting. Values transcribed from the design system; kept
-     inline since the project has no build step (see CLAUDE.md).
+     Graphite tokens — this page always renders dark, regardless of OS/
+     browser setting. Warm-neutral near-blacks, one bone accent; the
+     operator colours in data/providers.js are the only saturated hue on
+     screen. Kept inline since the project has no build step (see
+     CLAUDE.md). tools/desk-app/ carries a copy of these — mirror changes.
      ════════════════════════════════════════════════════════════════ */
   :root{
-    --color-bg:#161826;
-    --color-surface:#232532;
-    --color-text:#e9e9ed;
-    --color-accent:#9184d9;
-    --color-accent-2:#a7a1db;
-    --color-divider: color-mix(in srgb, #e9e9ed 16%, transparent);
+    --color-map:#0c0c0e;        /* the map field and the page ground */
+    --color-bg:#131315;         /* panels */
+    --color-surface:#19191c;    /* raised: inputs, tiles, hover */
+    --color-surface-3:#202024;  /* active: selected row, pressed seg */
+    --color-rail:#0f0f11;
+    --color-text:#ebe9e4;
+    --color-accent:#e6dfd0;
+    --color-accent-2:#d9cfba;
+    --color-divider:rgba(255,255,255,.07);
+    --color-divider-strong:rgba(255,255,255,.13);
 
-    --color-neutral-100:#f3f5fe; --color-neutral-200:#e4e7f5; --color-neutral-300:#cfd3e5;
-    --color-neutral-400:#b2b6ca; --color-neutral-500:#9397ab; --color-neutral-600:#75798c;
-    --color-neutral-700:#595d6c; --color-neutral-800:#3f424d; --color-neutral-900:#292b31;
+    --color-neutral-100:#f4f2ec; --color-neutral-200:#e6e3dc; --color-neutral-300:#cfccc4;
+    --color-neutral-400:#a3a19b; --color-neutral-500:#86847f; --color-neutral-600:#6b6964;
+    --color-neutral-700:#4f4e4a; --color-neutral-800:#38383a; --color-neutral-900:#26262a;
 
-    --color-accent-100:#f5f4ff; --color-accent-200:#e7e5fe; --color-accent-300:#d2cefd;
-    --color-accent-400:#b5abfc; --color-accent-500:#968ae0; --color-accent-600:#796cbf;
-    --color-accent-700:#5d5294; --color-accent-800:#423a6a; --color-accent-900:#2b2741;
+    --color-accent-100:#faf8f3; --color-accent-200:#f3efe6; --color-accent-300:#f5f1e8;
+    --color-accent-400:#ece5d6; --color-accent-500:#e6dfd0; --color-accent-600:#b9b1a2;
+    --color-accent-700:#8d8678; --color-accent-800:#5c574e; --color-accent-900:#3a3731;
 
-    --font-heading:"Inter", system-ui, sans-serif;
-    --font-body:"Inter", system-ui, sans-serif;
-    /* Display serif — the masthead only. High-contrast editorial face; the
-       rest of the UI stays on Inter so the wordmark reads as a wordmark
-       rather than as a theme. */
-    --font-display:"Instrument Serif", "Iowan Old Style", Georgia, "Times New Roman", serif;
+    --font-heading:"Geist", system-ui, sans-serif;
+    --font-body:"Geist", system-ui, sans-serif;
+    --font-code:"Geist Mono", ui-monospace, monospace;
 
-    /* Height the floating chrome (rail, dashboard, detail card) clears to sit
-       below the top bar. The bar is one row of tabs now that the masthead has
-       moved down into the rail, so this is measured from that, not guessed. */
-    --top-offset:52px;
+    /* Layout: an icon rail, one docked panel, the map, and an inspector
+       that overlays the map's right edge when a site is selected. */
+    --rail-w:56px;
+    --panel-w:400px;
+    --inspector-w:392px;
+    --status-h:28px;
 
-    /* Rail + panel geometry.
-       The provider panel opens like a drawer: the operator list slides to the
-       right and the dashboard is revealed in the space it vacates, with the
-       list ending up docked against the dashboard's right edge as its tab
-       column. The rail's buttons are inset --tab-inset from its own left edge
-       so shifting the rail by (panel width - that inset) lands the active
-       operator's left edge exactly on the panel's right edge. The tab handles
-       now bleed all the way to the rail's own left edge, so the inset is zero
-       and the rail travels exactly the card's width — which is what stops a
-       lighter strip being left over between handle and card. */
-    --rail-w:272px;
-    --panel-w:520px;
-    --tab-inset:0px;
-    --rail-shift:calc(var(--panel-w) - var(--tab-inset));
+    --space-1:2px; --space-2:4px; --space-3:8px; --space-4:12px; --space-6:16px; --space-8:20px;
+    --radius-sm:6px; --radius-md:8px; --radius-lg:12px;
+    --shadow-md:0 8px 24px rgba(0,0,0,.5);
+    --shadow-lg:0 16px 40px rgba(0,0,0,.6);
 
-    --space-1:2.8px; --space-2:5.6px; --space-3:8.4px; --space-4:11.2px; --space-6:16.8px; --space-8:22.4px;
-    --radius-sm:4px; --radius-md:8px; --radius-lg:14px;
-    --shadow-md:0 0 0 1px #595d6c, 0 6px 18px rgba(0,0,0,.55);
-    --shadow-lg:0 0 0 1px #9397ab, 0 16px 40px rgba(0,0,0,.65);
-
-    /* Compat aliases — the ported detail/method/provider/site component CSS
-       below (and the hand-tuned pipeline SVG's own inline <style>) was
-       written against these names. Aliasing lets that CSS keep working
-       unchanged against the new palette instead of a line-by-line port. */
+    /* Compat aliases — the Sources & method page, the site page and the
+       pipeline SVG's inline <style> were written against these names. */
     --bg: var(--color-bg);
     --surface: var(--color-surface);
-    --surface-2: #1c1e2b;
-    --border: var(--color-divider);
+    --surface-2: var(--color-surface);
+    --border: var(--color-divider-strong);
     --ink: var(--color-text);
     --ink-soft: var(--color-neutral-400);
     --accent: var(--color-accent);
-    --accent-soft: color-mix(in srgb, var(--color-accent) 16%, transparent);
+    --accent-soft: color-mix(in srgb, var(--color-accent) 14%, transparent);
     --radius: var(--radius-md);
     --font-sans: var(--font-body);
-    --font-mono: var(--font-heading);
+    --font-mono: var(--font-code);
   }
 
   *, *::before, *::after{ box-sizing:border-box; }
@@ -85,255 +77,305 @@
   html, body{ height:100%; }
   body{
     margin:0; overflow:hidden;
-    background:var(--color-bg); color:var(--color-text);
-    font-family:var(--font-body); font-size:15px; line-height:1.5;
+    background:var(--color-map); color:var(--color-text);
+    font-family:var(--font-body); font-size:13px; line-height:1.45;
     -webkit-font-smoothing:antialiased;
   }
   ::selection{ background:var(--accent-soft); color:var(--ink); }
-  a{ color:var(--accent); text-decoration-color:color-mix(in srgb, var(--accent) 40%, transparent); }
-  a:hover{ text-decoration-color:currentColor; }
-  h1,h2,h3,h4{ font-family:var(--font-heading); font-weight:500; letter-spacing:-0.015em; margin:0; }
+  a{ color:var(--color-text); text-decoration:none; }
+  a:hover{ color:#ffffff; }
+  button{ font:inherit; color:inherit; cursor:pointer; }
+  h1,h2,h3,h4{ font-family:var(--font-heading); font-weight:600; letter-spacing:-0.02em; margin:0; }
+  .mono{ font-family:var(--font-code); font-variant-numeric:tabular-nums; }
+  .eyebrow{ font-family:var(--font-code); font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--color-neutral-500); }
+  .stat-sub{ font-size:12px; color:var(--color-neutral-500); margin-top:var(--space-2); }
+  .scroll{ flex:1; min-height:0; overflow-y:auto; overflow-x:hidden; }
+  .scroll::-webkit-scrollbar, .ov::-webkit-scrollbar, #detail::-webkit-scrollbar{ width:8px; }
+  .scroll::-webkit-scrollbar-thumb, .ov::-webkit-scrollbar-thumb, #detail::-webkit-scrollbar-thumb{ background:#2a2a2f; border-radius:4px; }
 
-  /* --shoulder: the dark band across the top of the operator dashboard,
-     measured from the masthead's rule in JS (see setShoulder) so the card's
-     lighter field begins on exactly that line. */
-  #shell{ position:relative; height:100vh; min-height:560px; --shoulder:0px; }
+  #shell{ position:relative; height:100vh; min-height:520px; }
 
-  /* ---- sky ----
-     The globe's canvas is transparent everywhere outside the sphere, and its
-     atmosphere shader blends into whatever is behind it — so a layer underneath
-     the map reads as the space the globe is sitting in, halo and all. Kept
-     outside #mapwrap on purpose: the map slides sideways when the dashboard
-     opens and the sky does not, which gives the globe a little parallax against
-     a fixed field of stars. */
-  #sky{ position:absolute; inset:0; z-index:0; overflow:hidden; pointer-events:none;
-    background:
-      /* two very restrained washes, so the field isn't a flat black rectangle */
-      radial-gradient(60% 55% at 18% 12%, color-mix(in srgb, var(--color-accent) 13%, transparent) 0%, transparent 70%),
-      radial-gradient(52% 48% at 88% 82%, color-mix(in srgb, #4FC2C9 8%, transparent) 0%, transparent 72%),
-      radial-gradient(120% 90% at 50% 45%, #12131f 0%, #0b0c14 55%, #07070d 100%);
-  }
-  #starfield{ position:absolute; inset:0; display:block; width:100%; height:100%; }
-
-  /* the map is the page; everything else floats over it */
-  /* With the dashboard open the left of the window is covered, so the globe is
-     slid right by half the covered width — that puts its centre in the middle
-     of what's actually visible. The canvas keeps its full size and is only
-     transformed, so this is a compositor move: no resize, no reprojection, and
-     the click target stays under the pixel the user is looking at. The strip it
-     vacates on the left is narrower than the dashboard covering it, and the
-     overhang on the right is clipped by body's overflow, so nothing tears. */
-  #mapwrap{
-    position:absolute; inset:0; --map-shift:0px;
-    transform:translateX(var(--map-shift));
-    transition:transform .42s cubic-bezier(.22,.68,.32,1);
-  }
-  #mapwrap.no-anim{ transition:none; }
-  /* Attribution would ride off the right edge with everything else. It has to
-     stay readable, so it's pushed back by the same amount. */
-  #mapwrap .maplibregl-ctrl-bottom-right{ transform:translateX(calc(-1 * var(--map-shift))); }
-  /* Transparent, not the old flat navy — the sky behind it is the background
-     now, and an opaque colour here would hide it. */
-  #map{ width:100%; height:100%; display:block; background:transparent; }
-  .maplibregl-ctrl-attrib{ font-size:10px !important; }
+  /* ---- map ----
+     The map is a real region of the page, not the page itself: it starts
+     where the panel ends, so fitBounds and centring need no compensation
+     for chrome sitting on top of it. The inspector is the one thing that
+     overlays it, and flyTo offsets for that. */
+  #mapwrap{ position:absolute; top:0; bottom:0; left:calc(var(--rail-w) + var(--panel-w)); right:0; }
+  #map{ width:100%; height:100%; display:block; background:var(--color-map); }
   .map-loading{
     position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
-    font:500 12px var(--font-heading); letter-spacing:.08em; text-transform:uppercase; color:var(--color-neutral-500);
+    margin:0; font-family:var(--font-code); font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--color-neutral-500);
     pointer-events:none;
   }
-  #rail::-webkit-scrollbar, .rows::-webkit-scrollbar{ width:6px; }
-  #rail::-webkit-scrollbar-thumb, .rows::-webkit-scrollbar-thumb{ background:var(--color-neutral-800); border-radius:3px; }
-
-  .fade-x{ background:linear-gradient(to right, transparent, var(--color-divider) 48px, var(--color-divider) calc(100% - 48px), transparent); height:1px; }
-  .hr{ height:1px; border:0; margin:var(--space-4) 0; background:linear-gradient(to right, transparent, var(--color-divider) 48px, var(--color-divider) calc(100% - 48px), transparent); }
-
-  /* ---- top bar ---- */
-  #bar{
-    position:absolute; top:0; left:0; right:0; z-index:50;
-    display:flex; align-items:baseline; gap:var(--space-8);
-    padding:var(--space-6) var(--space-8) var(--space-4);
-    background:linear-gradient(to bottom, rgba(22,24,38,.92) 0%, rgba(22,24,38,.86) 45%, rgba(22,24,38,0) 100%);
+  .maplibregl-ctrl-attrib{ font-size:10px !important; font-family:var(--font-code) !important; background:transparent !important; color:var(--color-neutral-500) !important; padding:0 !important; }
+  .maplibregl-ctrl-attrib a{ color:var(--color-neutral-500) !important; }
+  .maplibregl-ctrl-bottom-right{ bottom:0 !important; right:16px !important; height:var(--status-h); display:flex; align-items:center; z-index:3; }
+  .maplibregl-ctrl-bottom-right .maplibregl-ctrl{ margin:0 !important; }
+  .maplibregl-ctrl-bottom-left{ bottom:0 !important; left:16px !important; height:var(--status-h); display:flex; align-items:center; z-index:3; }
+  .maplibregl-ctrl-bottom-left .maplibregl-ctrl{ margin:0 !important; }
+  .maplibregl-ctrl-scale{
+    background:transparent !important; border:1px solid var(--color-neutral-500) !important; border-top:0 !important;
+    color:var(--color-neutral-500) !important; font:10.5px var(--font-code) !important; padding:0 5px 1px !important; height:auto !important; line-height:1 !important;
   }
-  #bar::after{ content:""; position:absolute; left:var(--space-8); right:var(--space-8); bottom:0; height:1px;
-    background:linear-gradient(to right, transparent, var(--color-divider) 48px, var(--color-divider) calc(100% - 48px), transparent); }
-  /* The masthead sits in the rail, directly above the operator tabs, rather
-     than in the top bar — so the wordmark heads the column it belongs to and
-     the bar is left as pure navigation. It travels with the rail when the
-     dashboard opens, staying glued to the tabs it titles. */
-  .brand{ display:flex; flex-direction:column; gap:var(--space-1); white-space:nowrap;
-    font-family:var(--font-display); font-weight:400; font-size:30px; line-height:1.05; letter-spacing:.004em;
-    padding-bottom:var(--space-4); margin-bottom:var(--space-6);
-    border-bottom:1px solid var(--color-divider); }
-  .brand span{ font:400 10.5px/1 var(--font-body); letter-spacing:.11em; text-transform:uppercase; color:var(--color-neutral-500); }
-  /* Below the rail's breakpoint the rail is hidden outright, and the masthead
-     with it — so a compact one takes its place back in the bar. Only ever one
-     of the two is displayed, so neither is read out twice. */
-  .brand-bar{ display:none; }
-  nav.tabs{ display:flex; gap:var(--space-6); }
-  nav.tabs button{
-    appearance:none; background:none; border:0; cursor:pointer; padding:0 0 2px;
-    font:500 13px/1 var(--font-heading); letter-spacing:.02em;
-    color:var(--color-neutral-500); border-bottom:1px solid transparent;
-  }
-  nav.tabs button:hover{ color:var(--color-accent-300); }
-  nav.tabs button[aria-current="true"]{ color:var(--color-text); border-bottom-color:var(--color-accent); }
-  .bar-meta{ margin-left:auto; display:flex; align-items:baseline; gap:var(--space-4); font-size:11.5px; color:var(--color-neutral-500); letter-spacing:.02em; white-space:nowrap; }
-  .bar-reset{
-    appearance:none; background:none; border:0; cursor:pointer; padding:0;
-    font:500 11.5px var(--font-heading); letter-spacing:.02em; color:var(--color-neutral-500);
-  }
-  .bar-reset:hover{ color:var(--color-accent-300); }
+  .maplibregl-ctrl-attrib-button{ display:none !important; }
 
-  /* ---- left rail ---- */
+  /* Bottom status strip — counts, scale and attribution, the way a GIS
+     viewer carries them. The scale and attribution controls are MapLibre's
+     own, positioned into this band above. */
+  .statusbar{
+    position:absolute; left:0; right:0; bottom:0; height:var(--status-h); z-index:2;
+    display:flex; align-items:center; gap:14px; padding:0 330px 0 120px;
+    background:rgba(12,12,14,.85); border-top:1px solid var(--color-divider);
+    font-family:var(--font-code); font-size:10.5px; color:var(--color-neutral-500); white-space:nowrap; overflow:hidden;
+    pointer-events:none;
+  }
+  .statusbar span{ overflow:hidden; text-overflow:ellipsis; }
+
+  /* Floating map controls, top right. */
+  .map-tools{
+    position:absolute; top:16px; right:16px; z-index:4; display:flex; flex-direction:column;
+    background:var(--color-bg); border:1px solid var(--color-divider-strong); border-radius:10px; overflow:hidden; box-shadow:var(--shadow-md);
+  }
+  .map-tools button{ width:36px; height:36px; display:flex; align-items:center; justify-content:center; border:0; background:transparent; color:var(--color-neutral-400); }
+  .map-tools button + button{ border-top:1px solid var(--color-divider); }
+  .map-tools button:hover{ color:var(--color-text); background:var(--color-surface-3); }
+  .map-tools svg, #rail svg, .field svg, .ghost svg, .primary svg, .back-link svg, .iconbtn svg{ width:16px; height:16px; flex:none; }
+
+  .legend{
+    position:absolute; right:16px; bottom:calc(var(--status-h) + 16px); z-index:4;
+    padding:12px 14px; background:var(--color-bg); border:1px solid var(--color-divider-strong); border-radius:10px; box-shadow:var(--shadow-md);
+    display:flex; flex-direction:column; gap:8px; font-size:11.5px; color:var(--color-neutral-400);
+  }
+  .legend div{ display:flex; align-items:center; gap:8px; }
+  .legend hr{ border:0; height:1px; margin:2px 0; background:var(--color-divider); }
+  .legend .dim{ color:var(--color-neutral-500); }
+  .lg{ width:10px; height:10px; border-radius:50%; flex:none; }
+  .lg.s-operational{ background:var(--color-neutral-400); }
+  .lg.s-under-construction{ border:1.5px solid var(--color-neutral-400); }
+  .lg.s-planned{ border:1.5px dashed var(--color-neutral-500); }
+  .lg-sizes{ display:inline-flex; align-items:center; gap:3px; }
+  .lg-sizes i{ display:block; border-radius:50%; background:var(--color-neutral-500); }
+
+  /* ---- icon rail ---- */
   #rail{
-    position:absolute; z-index:30; top:var(--top-offset); bottom:222px; left:0; width:var(--rail-w);
-    padding:var(--space-8); background:linear-gradient(to right, rgba(22,24,38,.94) 0%, rgba(22,24,38,.9) 62%, rgba(22,24,38,0) 100%);
-    overflow-y:auto; overflow-x:hidden;
-    transform:translateX(0);
-    transition:transform .42s cubic-bezier(.22,.68,.32,1), background .3s ease, box-shadow .3s ease;
+    position:absolute; z-index:30; top:0; bottom:0; left:0; width:var(--rail-w);
+    background:var(--color-rail); border-right:1px solid var(--color-divider);
+    display:flex; flex-direction:column; align-items:center; padding:12px 0; gap:4px;
   }
-  /* Open: the list slides right off the card it was covering. Dark ground,
-     with a hairline where it meets the card's lighter field — the only mark on
-     that join. Across the shoulder both sides are the same dark, so the
-     hairline stops there and the band reads as one continuous piece. */
-  #shell.panel-open #rail{
-    transform:translateX(var(--rail-shift));
-    background:
-      linear-gradient(var(--color-bg), var(--color-bg)) no-repeat 0 0 / 100% var(--shoulder),
-      linear-gradient(to right, var(--color-divider) 0, var(--color-divider) 1px, var(--color-bg) 1px, var(--color-bg) 100%);
-    box-shadow:-16px 0 38px rgba(0,0,0,.42);
-  }
-  @media (prefers-reduced-motion: reduce){ #rail{ transition:background .3s ease; } }
-  .eyebrow{ font:500 10.5px/1 var(--font-heading); letter-spacing:.12em; text-transform:uppercase; color:var(--color-neutral-500); }
-  .stat-sub{ font-size:12px; color:var(--color-neutral-500); margin-top:var(--space-2); }
+  .rail-mark{ width:32px; height:32px; border-radius:8px; background:var(--color-surface-3); box-shadow:inset 0 0 0 1px var(--color-divider-strong); display:flex; align-items:center; justify-content:center; margin-bottom:14px; color:var(--color-text); }
+  #rail button{ width:40px; height:40px; display:flex; align-items:center; justify-content:center; border-radius:8px; border:0; background:transparent; color:var(--color-neutral-500); }
+  #rail button:hover{ color:var(--color-text); background:var(--color-surface); }
+  #rail button[aria-current="true"]{ background:var(--color-surface-3); color:var(--color-text); box-shadow:inset 0 0 0 1px var(--color-divider-strong); }
+  .rail-gap{ flex:1; }
 
-  .prov{ position:relative; display:grid; grid-template-columns:8px 1fr auto; align-items:center; gap:var(--space-2) var(--space-3);
-    padding:var(--space-3) var(--space-2) var(--space-3) var(--space-8);
-    margin:0 calc(var(--space-2) * -1) 0 calc(var(--space-8) * -1); border-radius:0 6px 6px 0;
-    cursor:pointer; border:0; background:none; width:calc(100% + var(--space-8) + var(--space-2)); text-align:left; color:inherit;
-    transition:background .12s ease; }
-  .prov:hover{ background:color-mix(in srgb, var(--color-text) 5%, transparent); }
-  .prov + .prov{ border-top:1px solid color-mix(in srgb, var(--color-text) 8%, transparent); }
+  /* ---- the panel ---- */
+  #panel{
+    position:absolute; z-index:20; top:0; bottom:0; left:var(--rail-w); width:var(--panel-w);
+    background:var(--color-bg); border-right:1px solid var(--color-divider-strong);
+    display:flex; flex-direction:column;
+  }
+  .panel-head{ padding:18px 20px 14px; display:flex; flex-direction:column; gap:12px; border-bottom:1px solid var(--color-divider); flex:none; }
+  .brand-row{ display:flex; align-items:baseline; justify-content:space-between; }
+  .brand{ font-size:17px; font-weight:600; letter-spacing:-.02em; line-height:1; }
+  .panel-view{ flex:1; min-height:0; display:flex; flex-direction:column; }
+  .panel-foot{ flex:none; padding:10px 20px 14px; border-top:1px solid var(--color-divider); display:flex; align-items:center; justify-content:space-between; font-size:11.5px; color:var(--color-neutral-500); }
 
-  /* The open operator becomes the tab handle: same surface as the panel, square
-     on the left where the two meet, hairline on the other three sides. The rail
-     sits above the panel in z-order, so this paints across the join and the
-     seam between list and dashboard disappears. */
-  .prov.is-tab, .prov.is-tab:hover{
-    background:var(--color-surface);
-    border-radius:0 var(--radius-md) var(--radius-md) 0;
-  }
-  .prov.is-tab::before{
-    content:""; position:absolute; inset:0; pointer-events:none;
-    border:1px solid var(--color-divider); border-left:0;
-    border-radius:0 var(--radius-md) var(--radius-md) 0;
-    /* Dissolve the hairline as it approaches the dashboard. Both surfaces are
-       --color-surface, so with the border gone the tab and the panel are one
-       continuous field and the join disappears instead of being drawn. */
-    -webkit-mask-image:linear-gradient(to right, transparent 0, #000 34px);
-    mask-image:linear-gradient(to right, transparent 0, #000 34px);
-  }
-  .prov.is-tab + .prov, .prov:has(+ .prov.is-tab){ border-top-color:transparent; }
-  .prov.is-tab .pname{ color:var(--color-accent-300); }
-  .prov.is-tab .parrow{ opacity:1; max-width:1em; margin-left:5px; transform:translateX(0) rotate(0deg); }
-  .dot{ width:8px; height:8px; border-radius:50%; flex:none; }
-  .pname{ font:500 13.5px/1.2 var(--font-heading); display:inline-flex; align-items:center; transition:color .15s ease; }
-  .pname:hover{ color:var(--color-accent-300); }
-  .parrow{ display:inline-block; opacity:0; max-width:0; overflow:hidden; margin-left:0;
-    transform:translateX(-3px); transition:opacity .16s ease, transform .16s ease, max-width .16s ease, margin-left .16s ease;
-    font-size:11px; color:var(--color-accent-300); }
-  .pname:hover .parrow{ opacity:1; max-width:1em; margin-left:5px; transform:translateX(0); }
-  .pmw{ font-size:12px; color:var(--color-neutral-400); font-variant-numeric:tabular-nums; }
-  .pbar{ grid-column:2 / span 2; height:2px; background:color-mix(in srgb, var(--color-text) 10%, transparent); }
-  .pbar i{ display:block; height:2px; }
-  .pcount{ grid-column:2 / span 2; font-size:11px; color:var(--color-neutral-500); margin-top:2px; }
-  .prov[data-off="1"]{ opacity:.42; }
-
-  .legend{ font-size:11.5px; color:var(--color-neutral-400); display:flex; flex-wrap:wrap; align-items:center; gap:var(--space-2) var(--space-6); }
-  .legend div{ display:flex; align-items:center; gap:var(--space-2); }
-  .lg{ width:9px; height:9px; border-radius:50%; flex:none; }
-
-  /* ---- bottom drawer ---- */
-  #drawer{
-    position:absolute; z-index:25; left:0; right:0; bottom:0; height:218px;
-    background:linear-gradient(to top, rgba(22,24,38,.96) 0%, rgba(22,24,38,.93) 55%, rgba(22,24,38,0) 100%);
-    padding:var(--space-6) var(--space-8); display:flex; flex-direction:column;
-  }
-  #drawer .head{ display:flex; align-items:baseline; flex-wrap:wrap; gap:var(--space-2) var(--space-6); padding-bottom:var(--space-3); }
-  .srch{ margin-left:auto; display:flex; gap:var(--space-4); align-items:center; }
-  .srch input{
-    background:transparent; border:0; border-bottom:1px solid var(--color-divider);
-    color:var(--color-text); font:400 12.5px var(--font-body); padding:3px 0; width:180px;
-  }
-  .srch input::placeholder{ color:var(--color-neutral-500); }
-  .srch input:focus{ outline:none; border-bottom-color:var(--color-accent); }
-
-  .seg{ display:inline-flex; overflow:hidden; border:1px solid var(--color-divider); border-radius:var(--radius-sm); }
-  .seg button{
-    appearance:none; background:none; border:0; cursor:pointer; padding:3px 10px;
-    font:500 11px var(--font-heading); letter-spacing:.03em; color:var(--color-neutral-400);
-  }
-  .seg button + button{ border-left:1px solid var(--color-divider); }
-  .seg button[aria-pressed="true"]{ color:var(--color-accent-300); background:color-mix(in srgb, var(--color-accent) 14%, transparent); }
+  .seg{ display:inline-flex; padding:3px; border-radius:8px; background:var(--color-surface); box-shadow:inset 0 0 0 1px var(--color-divider); }
+  .seg button{ border:0; background:transparent; padding:5px 12px; border-radius:6px; font-size:12px; font-weight:500; color:var(--color-neutral-500); }
+  .seg.wide{ display:flex; } .seg.wide button{ flex:1; }
+  .seg button[aria-pressed="true"]{ background:var(--color-surface-3); color:var(--color-text); box-shadow:0 1px 2px rgba(0,0,0,.4), inset 0 0 0 1px var(--color-divider-strong); }
   .seg button:not([aria-pressed="true"]):hover{ color:var(--color-text); }
 
-  .rows{ overflow-y:auto; margin-right:-8px; padding-right:8px; }
-  .row{
-    display:grid; grid-template-columns:10px minmax(150px,1.3fr) minmax(120px,1fr) 132px 84px minmax(150px,.9fr);
-    align-items:center; gap:var(--space-6); width:100%; text-align:left;
-    padding:7px 0; background:none; border:0; border-top:1px solid color-mix(in srgb, var(--color-text) 7%, transparent);
-    color:inherit; cursor:pointer; font:400 12.5px/1.35 var(--font-body);
+  .field{ display:flex; align-items:center; gap:8px; height:34px; padding:0 12px; border-radius:8px; background:var(--color-surface); box-shadow:inset 0 0 0 1px var(--color-divider-strong); color:var(--color-neutral-500); }
+  .field:focus-within{ box-shadow:inset 0 0 0 1px var(--color-accent-600); }
+  .field input{ flex:1; border:0; background:transparent; color:var(--color-text); font:inherit; outline:none; min-width:0; }
+  .field input::placeholder{ color:var(--color-neutral-500); }
+
+  .ghost{ display:inline-flex; align-items:center; gap:8px; height:32px; padding:0 12px; border-radius:8px; border:0; background:var(--color-surface); box-shadow:inset 0 0 0 1px var(--color-divider-strong); color:var(--color-text); font-size:12.5px; font-weight:500; white-space:nowrap; }
+  .ghost:hover{ background:var(--color-surface-3); }
+  .ghost.sm{ height:28px; padding:0 10px; font-size:12px; }
+  .primary{ display:inline-flex; align-items:center; gap:8px; height:32px; padding:0 14px; border-radius:8px; border:0; background:var(--color-accent); color:#121212; font-size:12.5px; font-weight:600; white-space:nowrap; }
+  .primary:hover{ background:#ffffff; }
+  .iconbtn{ width:32px; height:32px; display:flex; align-items:center; justify-content:center; border-radius:8px; border:0; background:transparent; color:var(--color-neutral-500); }
+  .iconbtn:hover{ color:var(--color-text); background:var(--color-surface); }
+  .chip{ display:inline-flex; align-items:center; gap:6px; height:22px; padding:0 8px; border-radius:6px; font-size:11.5px; font-weight:500; background:var(--color-surface); box-shadow:inset 0 0 0 1px var(--color-divider); color:var(--color-neutral-400); white-space:nowrap; }
+
+  /* ---- status glyphs: the map's pin treatments, reused everywhere ---- */
+  .sg{ width:9px; height:9px; border-radius:50%; flex:none; display:inline-block; --c:var(--color-neutral-400); }
+  .sg.s-operational{ background:var(--c); }
+  .sg.s-under-construction{ border:1.5px solid var(--c); }
+  .sg.s-planned{ border:1.5px dashed var(--c); opacity:.85; }
+
+  /* ---- capacity pictogram: one rack per unit of MW, one hoverable
+     segment per status, tinted by status the way the pins are ---- */
+  .racks{ display:flex; flex-wrap:wrap; gap:2px; --pc:var(--color-neutral-400); }
+  .capseg{ position:relative; display:inline-flex; flex-wrap:wrap; gap:2px; border-radius:3px; }
+  .rack{ width:9px; height:13px; display:block; transition:filter .12s ease; }
+  .rack rect{ fill:var(--pc); stroke:var(--pc); }
+  .rack path{ stroke:var(--color-bg); stroke-width:1; stroke-linecap:round; fill:none; }
+  .capseg.s-under-construction .rack rect{ fill-opacity:.5; }
+  .capseg.s-planned .rack rect{ fill-opacity:.22; stroke-opacity:.55; }
+  .capseg:hover .rack{ filter:brightness(1.5) saturate(1.1); }
+  .capseg .tip{
+    display:none; position:absolute; left:0; bottom:calc(100% + 7px); z-index:6; white-space:nowrap; align-items:baseline; gap:6px;
+    padding:5px 8px; border-radius:6px; background:var(--color-surface-3); box-shadow:0 0 0 1px var(--color-divider-strong), 0 6px 16px rgba(0,0,0,.5);
+    font-size:11px; color:var(--color-text); pointer-events:none;
   }
-  .row:hover{ background:color-mix(in srgb, var(--color-accent) 9%, transparent); }
-  .row[aria-selected="true"]{ background:color-mix(in srgb, var(--color-accent) 14%, transparent); }
-  .row .name{ font-weight:500; font-family:var(--font-heading); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer; }
-  .row .name:hover{ color:var(--color-accent-300); text-decoration:underline; }
-  .row .place, .row .stat{ color:var(--color-neutral-400); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .row .cap{ text-align:right; font-variant-numeric:tabular-nums; }
-  .hrow{ border:0; color:var(--color-neutral-500); font:500 10.5px/1 var(--font-heading); letter-spacing:.1em; text-transform:uppercase; padding-bottom:5px; cursor:default; }
-  .hrow:hover{ background:none; }
+  .capseg .tip::after{ content:""; position:absolute; left:10px; top:100%; border:5px solid transparent; border-top-color:var(--color-surface-3); }
+  .capseg .tip b{ font-weight:600; }
+  .capseg .tip span{ font-family:var(--font-code); color:var(--color-neutral-400); }
+  .capseg:hover .tip{ display:inline-flex; }
+  .racks-key{ display:inline-flex; align-items:center; gap:6px; }
+  .racks-key .rack{ width:8px; height:11px; }
+  .racks-key .rack rect{ fill:var(--color-neutral-500); stroke:var(--color-neutral-500); }
 
-  .vd{ display:inline-flex; align-items:center; gap:6px; font-size:11.5px; white-space:nowrap; }
-  .vd i{ width:3px; height:12px; flex:none; display:block; }
-  .vd.independent{ color:var(--color-accent-300); }
-  .vd.independent i{ background:var(--color-accent); }
-  .vd.operator{ color:var(--color-neutral-400); }
-  .vd.operator i{ background:var(--color-neutral-600); }
-  .vd.unsourced{ color:var(--color-neutral-500); }
-  .vd.unsourced i{ background:repeating-linear-gradient(to bottom, var(--color-neutral-700) 0 2px, transparent 2px 4px); }
+  /* ---- operators list ---- */
+  .list-head{ display:flex; align-items:center; justify-content:space-between; padding:14px 20px 8px; flex:none; }
+  #provList{ padding:0 10px 10px; display:flex; flex-direction:column; gap:2px; }
+  .prov{
+    display:grid; grid-template-columns:10px 1fr auto; align-items:center; column-gap:10px; row-gap:6px;
+    padding:12px 10px; border-radius:8px; border:0; background:transparent; text-align:left; width:100%; color:inherit;
+  }
+  .prov:hover{ background:var(--color-surface); }
+  .prov[aria-expanded="true"]{ background:var(--color-surface-3); box-shadow:inset 0 0 0 1px var(--color-divider-strong); }
+  .prov .dot{ width:9px; height:9px; border-radius:50%; }
+  .prov .pname{ font-size:13.5px; font-weight:500; }
+  .prov .pmw{ font-family:var(--font-code); font-size:12px; color:var(--color-neutral-400); font-variant-numeric:tabular-nums; }
+  .prov .racks, .prov .pcount, .prov .pnone{ grid-column:2 / span 2; }
+  .prov .pcount{ font-size:11.5px; color:var(--color-neutral-500); }
+  .prov .pnone{ font-size:11.5px; color:var(--color-neutral-600); font-style:italic; }
 
-  /* ---- detail panel ---- */
+  /* ---- site rows: the Sites tab and the operator page share them ---- */
+  .rows{ padding:4px 10px 10px; display:flex; flex-direction:column; gap:1px; }
+  .site-row{
+    display:grid; grid-template-columns:14px 1fr 64px 18px; align-items:center; column-gap:10px;
+    padding:9px 10px; border-radius:6px; border:0; background:transparent; text-align:left; width:100%; color:inherit;
+  }
+  .site-row:hover{ background:var(--color-surface); }
+  .site-row[aria-selected="true"]{ background:var(--color-surface-3); box-shadow:inset 0 0 0 1px var(--color-divider-strong); }
+  .sr-main{ display:flex; flex-direction:column; min-width:0; }
+  .sr-name{ font-size:13px; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .sr-sub{ font-size:11.5px; color:var(--color-neutral-500); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .sr-mw{ font-family:var(--font-code); font-size:12px; text-align:right; font-variant-numeric:tabular-nums; }
+  .sr-mw.none{ color:var(--color-neutral-500); }
+  .sr-tick{ width:3px; height:12px; border-radius:1px; display:block; justify-self:center; background:#5a5955; }
+  .sr-tick.independent{ background:var(--color-accent); }
+  .sr-tick.unsourced{ background:repeating-linear-gradient(to bottom, #5a5955 0 2px, transparent 2px 4px); }
+  .sites-head{ padding:12px 20px 4px; display:flex; flex-direction:column; gap:10px; flex:none; }
+  .sites-filters{ display:flex; align-items:center; justify-content:space-between; }
+  .rows-empty{ padding:24px 10px; font-size:12.5px; color:var(--color-neutral-500); text-align:center; }
+
+  /* Verdict, stated in words where it still appears (site page, method page). */
+  .vd{ display:inline-flex; align-items:center; gap:7px; font-size:12px; white-space:nowrap; }
+  .vd i{ width:3px; height:12px; flex:none; display:block; border-radius:1px; }
+  .vd.independent{ color:var(--color-text); } .vd.independent i{ background:var(--color-accent); }
+  .vd.operator{ color:var(--color-neutral-400); } .vd.operator i{ background:#5a5955; }
+  .vd.unsourced{ color:var(--color-neutral-500); } .vd.unsourced i{ background:repeating-linear-gradient(to bottom, #5a5955 0 2px, transparent 2px 4px); }
+
+  /* ---- operator page (inside the panel) ---- */
+  .op-nav{ display:flex; align-items:center; justify-content:space-between; padding:12px 20px 0; }
+  .back-link{ display:inline-flex; align-items:center; gap:4px; background:none; border:0; padding:0; font-size:12px; color:var(--color-neutral-500); }
+  .back-link:hover{ color:var(--color-text); }
+  .op-head{ padding:14px 20px 0; display:flex; flex-direction:column; gap:10px; }
+  .op-ident{ display:flex; align-items:center; gap:12px; }
+  .op-logo{ width:40px; height:40px; border-radius:10px; background:#ffffff; box-shadow:inset 0 0 0 1px var(--color-divider-strong); display:flex; align-items:center; justify-content:center; flex:none; overflow:hidden; }
+  .op-logo img{ width:26px; height:26px; display:block; }
+  .op-logo.fallback{ background:var(--color-surface-3); color:var(--color-text); font-weight:600; font-size:15px; }
+  .op-ident h1{ font-size:22px; line-height:1.1; }
+  .op-meta{ display:inline-flex; align-items:center; gap:6px; font-size:11.5px; color:var(--color-neutral-500); }
+  .op-meta .dot{ width:8px; height:8px; border-radius:50%; }
+  .p-summary{ margin:0; font-size:12.5px; line-height:1.5; color:var(--color-neutral-400); }
+  .p-figure{ padding:18px 20px 0; display:flex; flex-direction:column; gap:10px; }
+  .p-cap{ display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 8px; }
+  .p-cap .eyebrow{ white-space:nowrap; }
+  .p-cap b{ font:500 36px/1 var(--font-code); letter-spacing:-.02em; font-variant-numeric:tabular-nums; }
+  .p-cap-meta{ flex-basis:100%; font-size:11.5px; color:var(--color-neutral-500); }
+  .racks-legend{ display:flex; flex-wrap:wrap; align-items:center; gap:12px; font-size:11px; color:var(--color-neutral-500); }
+  .racks-legend span{ display:inline-flex; align-items:center; gap:4px; }
+  .racks-legend .rack{ width:8px; height:11px; }
+  .tiles{ display:flex; flex-wrap:wrap; gap:8px; }
+  .tile{ flex:1 1 100px; display:flex; flex-direction:column; gap:4px; padding:10px 10px; background:var(--color-surface); border-radius:8px; box-shadow:inset 0 0 0 1px var(--color-divider); min-width:0; }
+  .tile .eyebrow{ display:inline-flex; align-items:center; gap:5px; letter-spacing:.06em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .tile b{ font:500 18px/1.1 var(--font-code); font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .tile b small{ font-size:11px; color:var(--color-neutral-500); font-weight:400; }
+  .tile span{ font-size:11.5px; color:var(--color-neutral-500); }
+  .p-section{ padding:18px 20px 0; display:flex; flex-direction:column; gap:10px; }
+  .p-section.p-sites{ padding:18px 10px 0; gap:2px; }
+  .p-section.p-sites .list-head{ padding:0 10px 8px; }
+  .p-section:last-child{ padding-bottom:24px; }
+  .p-section h2{ font-family:var(--font-code); font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--color-neutral-500); font-weight:500; }
+
+  .partner-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; }
+  .partner-card{ padding:10px 0; border-top:1px solid var(--color-divider); }
+  .partner-card:first-child{ border-top:0; padding-top:0; }
+  .partner-top{ display:flex; align-items:baseline; gap:8px; }
+  .partner-name{ font-size:13px; font-weight:500; }
+  .partner-since{ margin-left:auto; font-family:var(--font-code); font-size:10.5px; color:var(--color-neutral-500); }
+  .partner-relationship{ display:block; font-family:var(--font-code); font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--color-neutral-500); margin-top:2px; }
+  .partner-detail{ margin:.3rem 0 0; font-size:12px; color:var(--color-neutral-400); line-height:1.5; }
+  .partner-meta{ display:block; margin-top:.35rem; font-size:11px; color:var(--color-neutral-500); }
+  .partner-meta, .partner-detail, .partner-relationship{ min-width:0; overflow-wrap:break-word; }
+  .partner-meta a, .headline-meta a{ color:var(--color-neutral-500); }
+  .partner-meta a:hover, .headline-meta a:hover{ color:var(--color-text); }
+  .empty-note{ color:var(--color-neutral-500); font-size:12.5px; font-style:italic; }
+
+  .headline-list{ list-style:none; margin:0; padding:0; }
+  .headline-item{ padding:9px 0; border-top:1px solid var(--color-divider); font-size:12.5px; line-height:1.45; }
+  .headline-item:first-child{ border-top:0; padding-top:0; }
+  .headline-top{ display:flex; align-items:center; gap:6px; margin-bottom:2px; font-family:var(--font-code); font-size:10.5px; color:var(--color-neutral-500); }
+  .headline-category{ letter-spacing:.06em; text-transform:uppercase; }
+  .headline-title{ display:block; color:var(--color-text); font-weight:500; }
+  .headline-why{ margin:.25rem 0 0; color:var(--color-neutral-400); font-size:12px; line-height:1.5; }
+  .headline-meta{ display:block; margin-top:.3rem; font-size:11px; color:var(--color-neutral-500); }
+  .p-search-link{ display:inline-block; margin-top:4px; font-size:12px; color:var(--color-neutral-400); }
+
+  /* ---- site inspector ---- */
   #detail{
-    position:absolute; z-index:28; top:var(--top-offset); right:0; bottom:222px; width:372px;
-    padding:var(--space-8); background:linear-gradient(to left, rgba(22,24,38,.96) 0%, rgba(22,24,38,.93) 70%, rgba(22,24,38,0) 100%);
-    overflow-y:auto; display:none;
+    position:absolute; z-index:28; top:0; right:0; bottom:0; width:var(--inspector-w);
+    background:var(--color-bg); border-left:1px solid var(--color-divider-strong); box-shadow:-12px 0 32px rgba(0,0,0,.35);
+    display:none; flex-direction:column;
   }
-  #detail.on{ display:block; }
-  #detail::before{ content:""; position:absolute; left:0; top:24px; bottom:24px; width:1px;
-    background:linear-gradient(to bottom, transparent, var(--color-divider) 48px, var(--color-divider) calc(100% - 48px), transparent); }
-  .dclose{ position:absolute; top:var(--space-6); right:var(--space-6); background:none; border:0; color:var(--color-neutral-500); cursor:pointer; font-size:15px; }
-  .dclose:hover{ color:var(--color-text); }
-  .d-op{ display:flex; align-items:center; gap:var(--space-3); font:500 12px var(--font-heading); letter-spacing:.04em; text-transform:uppercase; cursor:pointer; width:fit-content; }
-  .d-op:hover .d-op-name{ color:var(--color-accent-300); }
-  .d-op .dot{ width:8px; height:8px; border-radius:50%; flex:none; }
-  .d-title{ font:500 24px/1.15 var(--font-heading); letter-spacing:-.02em; margin:var(--space-3) 0 var(--space-2); cursor:pointer; }
-  .d-title:hover{ color:var(--color-accent-300); }
-  .d-place{ font-size:13px; color:var(--color-neutral-400); }
-  .fields{ margin-top:var(--space-8); display:grid; gap:var(--space-6); }
-  .field{ display:grid; gap:3px; }
-  .field .k{ font:500 10.5px/1 var(--font-heading); letter-spacing:.12em; text-transform:uppercase; color:var(--color-neutral-500); }
-  .field .v{ font:500 18px/1.25 var(--font-heading); display:flex; align-items:center; gap:var(--space-3); flex-wrap:wrap; }
-  .conf-why{ margin-top:var(--space-6); padding:var(--space-3) var(--space-4); background:color-mix(in srgb, var(--color-text) 5%, transparent); border-left:2px solid var(--color-divider); border-radius:0 6px 6px 0; font-size:12px; line-height:1.5; color:var(--color-neutral-400); }
-  .d-notes{ margin-top:var(--space-6); padding:var(--space-3) var(--space-4); border:1px dashed var(--color-divider); border-radius:8px; font-size:12.5px; font-style:italic; color:var(--color-neutral-400); line-height:1.55; }
-  .srcs{ margin-top:var(--space-8); }
-  .src{ display:grid; grid-template-columns:22px 1fr; gap:var(--space-4); padding:var(--space-3) 0; border-top:1px solid color-mix(in srgb, var(--color-text) 7%, transparent); font-size:12px; }
-  .cls{ font:500 10px/16px var(--font-heading); text-align:center; border:1px solid var(--color-neutral-700); color:var(--color-neutral-300); border-radius:3px; }
+  #detail.on{ display:flex; }
+  .d-top{ padding:14px 16px 0 20px; display:flex; align-items:center; justify-content:space-between; flex:none; }
+  .d-op{ display:inline-flex; align-items:center; gap:8px; font-family:var(--font-code); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--color-neutral-400); background:none; border:0; padding:0; }
+  .d-op:hover{ color:var(--color-text); }
+  .d-op .dot{ width:9px; height:9px; border-radius:50%; }
+  .d-body{ flex:1; min-height:0; overflow-y:auto; overflow-x:hidden; display:flex; flex-direction:column; }
+  .d-head{ padding:8px 20px 0; display:flex; flex-direction:column; gap:6px; }
+  .d-title{ font-size:22px; line-height:1.15; }
+  .d-place{ font-size:12.5px; color:var(--color-neutral-400); }
+  .d-coords{ font-family:var(--font-code); font-size:11px; color:var(--color-neutral-500); }
+  .d-chips{ display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
+  .d-figure{ margin:18px 20px 0; padding:14px 16px; background:var(--color-surface); border-radius:10px; box-shadow:inset 0 0 0 1px var(--color-divider); display:flex; flex-direction:column; gap:6px; }
+  .d-figure .p-cap b{ font-size:34px; }
+  .d-figure .racks{ margin-top:6px; }
+  .d-figure .cap-note{ font-size:11px; color:var(--color-neutral-500); }
+  .d-figure .cap-none{ font-size:12.5px; color:var(--color-neutral-500); }
+  .d-section{ padding:18px 20px 0; display:flex; flex-direction:column; gap:6px; }
+  .d-section:last-child{ padding-bottom:20px; }
+  .d-notes{ margin:0; font-size:12.5px; line-height:1.55; color:var(--color-neutral-400); white-space:pre-line;
+    display:-webkit-box; -webkit-line-clamp:7; -webkit-box-orient:vertical; overflow:hidden; }
+  .d-notes.open{ display:block; -webkit-line-clamp:unset; }
+  .d-more{ align-self:flex-start; background:none; border:0; padding:0; font-size:12px; color:var(--color-neutral-500); }
+  .d-more:hover{ color:var(--color-text); }
+  .src{ display:grid; grid-template-columns:22px 1fr; gap:10px; align-items:start; padding:7px 0; border-top:1px solid var(--color-divider); font-size:12px; line-height:1.4; }
+  .src:last-child{ border-bottom:1px solid var(--color-divider); }
+  .src .cls{ margin-top:1px; }
+  .src .sm{ display:block; margin-top:2px; font-family:var(--font-code); font-size:10.5px; color:var(--color-neutral-500); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .cls{ font:500 10px/16px var(--font-code); text-align:center; border:1px solid var(--color-neutral-700); color:var(--color-neutral-300); border-radius:4px; display:inline-block; min-width:18px; }
   .cls.ind{ border-color:var(--color-accent-600); color:var(--color-accent-300); }
-  .src .sl{ color:var(--color-neutral-300); }
-  .src .sm{ color:var(--color-neutral-500); font-size:11px; }
-  .d-updated{ margin-top:var(--space-6); font-size:11px; color:var(--color-neutral-500); }
+  .d-foot{ flex:none; padding:12px 20px 16px; border-top:1px solid var(--color-divider); display:flex; gap:8px; }
 
-  /* ---- confidence dot (hover-revealed graded level, beside the verdict) ---- */
+  .basis-tag{ font-family:var(--font-code); font-size:10px; text-transform:uppercase; letter-spacing:.06em; color:var(--color-neutral-500); }
+  .basis-tag.basis-derived, .basis-tag.basis-estimated{ color:#d9b45a; }
+
+  .status-pill{ display:inline-flex; align-items:center; gap:.45rem; font:500 12px var(--font-heading); }
+  .status-pill::before{ content:""; width:8px; height:8px; border-radius:50%; flex-shrink:0; box-sizing:border-box; }
+  .status-pill.status-operational::before{ background:currentColor; }
+  .status-pill.status-under-construction::before{ border:1.5px solid currentColor; }
+  .status-pill.status-planned::before{ border:1.5px dashed currentColor; opacity:.85; }
+
+  /* ---- confidence dot (hover-revealed graded level, beside the verdict) — method page & site page ---- */
   .conf-badge{
     display:inline-flex; align-items:center;
     height:15px; padding:0 3px; border-radius:999px;
@@ -348,303 +390,118 @@
   .conf-badge:hover .conf-label, .conf-badge:focus-visible .conf-label{ max-width:7rem; opacity:1; margin-left:.32rem; }
   .conf-badge:focus-visible{ outline:1px solid var(--conf-bd); outline-offset:2px; }
 
-  .basis-tag{ font:500 10px var(--font-heading); text-transform:uppercase; letter-spacing:.06em; color:var(--color-neutral-500); }
-  .basis-tag.basis-derived, .basis-tag.basis-estimated{ color:#FBBF24; }
-
-  .status-pill{ display:inline-flex; align-items:center; gap:.4rem; font:500 12px var(--font-heading); letter-spacing:.01em; }
-  .status-pill::before{ content:""; width:6px; height:6px; border-radius:50%; background:currentColor; flex-shrink:0; }
-  .status-operational{ color:#4ADE80; }
-  .status-under-construction{ color:#FBBF24; }
-  .status-planned{ color:#94A3B8; }
-
   /* ---- provider tag ---- */
-  .provider-tag{
-    font:600 11px var(--font-heading); letter-spacing:.05em; text-transform:uppercase;
-    padding:.22rem .55rem; border-radius:5px; color:#131420; white-space:nowrap;
-  }
+  .provider-tag{ font:600 11px var(--font-heading); letter-spacing:.05em; text-transform:uppercase; padding:.22rem .55rem; border-radius:5px; color:#121212; white-space:nowrap; }
 
   /* ---- pins ---- */
   .pin-marker{ width:44px; height:44px; display:flex; align-items:center; justify-content:center; cursor:pointer; }
   .pin-marker.dim{ display:none; }
   .pin-core{ border-radius:50%; transition:transform .15s ease; box-sizing:border-box; }
-  .pin-marker.pin-status-operational .pin-core{ background:var(--dot); border:1.4px solid #0e0f1a; }
+  .pin-marker.pin-status-operational .pin-core{ background:var(--dot); border:1.5px solid var(--color-map); }
   .pin-marker.pin-status-under-construction .pin-core{ background:color-mix(in srgb, var(--dot) 22%, transparent); border:1.6px solid var(--dot); }
-  .pin-marker.pin-status-planned .pin-core{ background:transparent; border:1.3px dashed var(--dot); }
+  .pin-marker.pin-status-planned .pin-core{ background:color-mix(in srgb, var(--dot) 10%, transparent); border:1.4px dashed var(--dot); }
   .pin-marker:hover .pin-core, .pin-marker:focus .pin-core, .pin-marker.active .pin-core{ transform:scale(1.22); }
   .pin-halo{ position:absolute; width:100%; height:100%; border-radius:50%; background:var(--dot); opacity:0; transition:opacity .15s ease; pointer-events:none; }
-  .pin-marker:hover .pin-halo, .pin-marker:focus .pin-halo, .pin-marker.active .pin-halo{ opacity:.24; }
-  .pin-marker:hover, .pin-marker:focus{ z-index:10; }
+  .pin-marker:hover .pin-halo, .pin-marker:focus .pin-halo{ opacity:.2; }
+  .pin-marker.active .pin-halo{ opacity:0; }
+  .pin-ring{ position:absolute; border-radius:50%; border:1.5px solid var(--color-accent); opacity:0; pointer-events:none; transition:opacity .15s ease; }
+  .pin-marker.active .pin-ring{ opacity:1; }
+  .pin-marker:hover, .pin-marker:focus, .pin-marker.active{ z-index:10; }
   .pin-pulse{ position:absolute; border-radius:50%; border:2px solid var(--dot); opacity:0; pointer-events:none; }
   .pin-marker.pin-status-operational .pin-pulse{ animation:pin-pulse 2.4s cubic-bezier(.2,.6,.4,1) infinite; }
-  @keyframes pin-pulse{ 0%{ transform:scale(1); border-width:3px; opacity:.55; } 100%{ transform:scale(2.4); border-width:.5px; opacity:0; } }
+  @keyframes pin-pulse{ 0%{ transform:scale(1); border-width:3px; opacity:.5; } 100%{ transform:scale(2.4); border-width:.5px; opacity:0; } }
   @media (prefers-reduced-motion: reduce){ .pin-marker.pin-status-operational .pin-pulse{ animation:none; display:none; } }
-
   .pin-label{
-    position:absolute; bottom:calc(100% + 4px); left:50%; transform:translateX(-50%);
-    display:flex; flex-direction:column; align-items:center; gap:.1rem;
-    padding:.35rem .55rem; border-radius:6px; background:var(--color-surface); border:1px solid var(--color-divider);
+    position:absolute; bottom:calc(100% - 2px); left:50%; transform:translateX(-50%);
+    display:flex; flex-direction:column; align-items:flex-start; gap:1px;
+    padding:6px 9px; border-radius:6px; background:var(--color-bg); border:1px solid var(--color-divider-strong); box-shadow:0 6px 18px rgba(0,0,0,.5);
     white-space:nowrap; opacity:0; pointer-events:none; transition:opacity .12s ease; z-index:5;
   }
   .pin-marker:hover .pin-label, .pin-marker:focus .pin-label{ opacity:1; }
-  .pin-label-name{ font-size:.76rem; font-weight:600; color:var(--color-text); line-height:1.2; }
-  .pin-label-cap{ font-size:.7rem; color:var(--color-neutral-400); line-height:1.2; font-variant-numeric:tabular-nums; }
+  .pin-label-name{ font-size:11.5px; font-weight:500; color:var(--color-text); line-height:1.2; }
+  .pin-label-cap{ font-family:var(--font-code); font-size:10.5px; color:var(--color-neutral-500); line-height:1.2; }
 
-  /* ---- full-screen overlay views (Sources & method / provider / site) ---- */
-  .ov{ position:absolute; inset:0; z-index:40; background:var(--color-bg); overflow-y:auto; display:none; padding:96px var(--space-8) 96px; }
+  /* ---- full-screen overlay views (Sources & method / site page) ----
+     They sit to the right of the rail, so the rail stays the way back. */
+  .ov{ position:absolute; top:0; bottom:0; left:var(--rail-w); right:0; z-index:40; background:var(--color-bg); overflow-y:auto; display:none; padding:56px 40px 96px; }
   .ov.on{ display:block; }
-
-  /* ---- provider panel ----
-     Docks to the right edge of the rail's buttons and unfurls horizontally,
-     so the operator list reads as a tab column and the open operator as the
-     tab handle attached to it. Animated with clip-path rather than transform
-     so the panel genuinely *expands* from the tab edge instead of sliding in
-     from off-screen — the shadow sweeps out with it. */
-  /* The dock is a fixed window onto the dashboard; the panel slides inside it.
-     Everything past --panel-w is clipped here rather than on the panel, so the
-     panel itself only ever animates transform. */
-  #providerDock{
-    position:absolute; z-index:26; top:var(--top-offset); bottom:222px; left:0;
-    width:var(--panel-w); overflow:hidden; pointer-events:none;
-  }
-  #providerDock.on{ pointer-events:auto; }
-  #providerPanel{
-    position:absolute; inset:0;
-    /* The band across the top is --shoulder tall, taken from the masthead's own
-       rule so the card's lighter field starts on that exact line and the band
-       reads as one piece over card and tabs alike.
-       The card's ground has to END on exactly the fill the tab handle is
-       painted in, or the join is a colour step no radius can hide — so the
-       gradient resolves to --color-surface well before the right edge and only
-       darkens away from the seam, leftward. */
-    background:
-      linear-gradient(var(--color-bg), var(--color-bg)) no-repeat 0 0 / 100% var(--shoulder),
-      linear-gradient(to right, #1e202d 0%, var(--color-surface) 62%, var(--color-surface) 100%);
-    /* The band is real estate, not padding: the operator's name sits in it and
-       the scroller starts below it, so content can never ride up onto the dark
-       ground or under the close button. */
-    display:flex; flex-direction:column;
-    /* Revealed, not flown in. The panel and the rail translate by the SAME
-       distance on the SAME curve, so the panel's right edge stays glued to the
-       active operator's tab edge for every frame of the motion — the dashboard
-       reads as something the list was sitting on top of. Both are transforms so
-       both run on the compositor; animating one of them as clip-path or width
-       put it on the main thread, where a busy frame (the map redrawing, say)
-       desynced it from the rail and tore the seam open. */
-    transform:translateX(calc(-1 * var(--rail-shift)));
-    transition:transform .42s cubic-bezier(.22,.68,.32,1);
-  }
-  #providerDock.on #providerPanel{ transform:translateX(0); }
-  @media (prefers-reduced-motion: reduce){ #providerPanel{ transition:none; } }
-  /* One rule where the shoulder ends and the card's field begins — collinear
-     with the masthead's rule in the tab column, so a single line crosses the
-     whole dashboard instead of two meeting near the seam. The panel's own top
-     edge carries nothing. */
-  #providerPanel::before, #providerPanel::after{
-    content:""; position:absolute; left:0; right:0; height:1px; pointer-events:none; z-index:3;
-    background:linear-gradient(to right, transparent 0, var(--color-divider) 56px, var(--color-divider) 100%);
-  }
-  #providerPanel::before{ top:var(--shoulder); }
-  #providerPanel::after{ bottom:0; }
-  /* The name is chrome, not content — it holds still in the shoulder while the
-     card scrolls under it. */
-  .pp-head{ flex:none; height:var(--shoulder); display:flex; align-items:center; gap:var(--space-3);
-    padding:0 52px 0 var(--space-8); }
-  .pp-head .dot{ width:11px; height:11px; border-radius:50%; flex:none; }
-  .pp-head h1{ font-size:20px; letter-spacing:-.02em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  /* Scrollbar on the FAR LEFT. On the right it lands exactly on the seam with
-     the operator tabs and cuts a grey stripe through the join. direction:rtl
-     moves the scrollbar to the other edge; the content is flipped back to ltr
-     one level down so nothing else about the layout changes. */
-  .pp-body{ flex:1; min-height:0; overflow-y:auto; overflow-x:hidden;
-    padding:var(--space-6) var(--space-8) 56px; direction:rtl; }
-  .pp-body > *{ direction:ltr; }
-  .pp-body::-webkit-scrollbar{ width:6px; }
-  .pp-body::-webkit-scrollbar-thumb{ background:var(--color-neutral-800); border-radius:3px; }
-  /* Sits in the shoulder, beside the name, clear of the card's content. */
-  .pp-close{
-    position:absolute; top:calc(var(--shoulder) / 2 - 13px); right:var(--space-6); z-index:2;
-    background:none; border:0; cursor:pointer; padding:var(--space-2);
-    line-height:1; font-size:15px; color:var(--color-neutral-500); border-radius:var(--radius-sm);
-  }
-  .pp-close:hover{ color:var(--color-text); background:color-mix(in srgb, var(--color-text) 7%, transparent); }
-
-  /* The provider markup was written for a 1040px full-screen page; inside a
-     ~520px panel it collapses to a single column. Content is unchanged. */
-  #providerPanel .wrap{ max-width:none; }
-  #providerPanel .p-body{ gap:36px; }
   .wrap{ max-width:1040px; margin:0 auto; }
-  .lede{ font-size:15px; color:var(--color-neutral-300); max-width:66ch; }
-  .back-link{ background:none; border:0; color:var(--color-neutral-500); font:500 12px var(--font-heading); letter-spacing:.03em; cursor:pointer; padding:0 0 var(--space-6); display:block; }
-  .back-link:hover{ color:var(--color-accent-300); }
+  .lede{ font-size:14px; line-height:1.6; color:var(--color-neutral-300); max-width:66ch; }
+  .ov .back-link{ margin-bottom:20px; }
   .plink{ cursor:pointer; }
-  .plink:hover{ color:var(--color-accent-300); }
+  .plink:hover{ color:#ffffff; text-decoration:underline; }
 
-  .tally{ display:flex; align-items:baseline; gap:var(--space-4); margin:var(--space-8) 0 var(--space-4); flex-wrap:wrap; }
-  .tally b{ font:500 56px/1 var(--font-heading); letter-spacing:-.035em; }
+  .tally{ display:flex; align-items:baseline; gap:12px; margin:20px 0 12px; flex-wrap:wrap; }
+  .tally b{ font:500 56px/1 var(--font-code); letter-spacing:-.035em; }
   .tally span{ font-size:14px; color:var(--color-neutral-400); max-width:34ch; }
-  .meter{ display:flex; height:6px; max-width:620px; margin-bottom:var(--space-3); border-radius:3px; overflow:hidden; }
+  .meter{ display:flex; height:6px; max-width:620px; margin-bottom:8px; border-radius:3px; overflow:hidden; }
   .meter i:nth-child(1){ background:var(--color-accent); }
   .meter i:nth-child(2){ background:var(--color-neutral-700); }
   .meter i:nth-child(3){ background:repeating-linear-gradient(to right, var(--color-neutral-800) 0 3px, transparent 3px 6px); }
 
-  .band{ margin:56px 0 var(--space-8); }
-  .band h4{ font-size:20px; margin-bottom:var(--space-2); }
+  .band{ margin:56px 0 20px; }
+  .band h4{ font-size:20px; margin-bottom:4px; }
   .band p{ color:var(--color-neutral-400); font-size:13px; max-width:70ch; margin:0; }
 
-  .classes{ display:grid; gap:0; margin-top:var(--space-6); }
-  .cl{ display:grid; grid-template-columns:26px 200px 1fr; gap:var(--space-6); align-items:baseline;
-    padding:var(--space-4) 0; border-top:1px solid color-mix(in srgb, var(--color-text) 8%, transparent); }
-  .cl .code{ font:500 12px/22px var(--font-heading); text-align:center; border:1px solid var(--color-neutral-700); color:var(--color-neutral-300); border-radius:3px; }
+  .classes{ display:grid; gap:0; margin-top:16px; }
+  .cl{ display:grid; grid-template-columns:26px 200px 1fr; gap:16px; align-items:baseline; padding:12px 0; border-top:1px solid var(--color-divider); }
+  .cl .code{ font:500 12px/22px var(--font-code); text-align:center; border:1px solid var(--color-neutral-700); color:var(--color-neutral-300); border-radius:4px; }
   .cl.ind .code{ border-color:var(--color-accent-600); color:var(--color-accent-300); }
   .cl .lab{ font:500 14px var(--font-heading); }
   .cl .bl{ font-size:12.5px; color:var(--color-neutral-400); }
 
-  table.table{ width:100%; border-collapse:collapse; font-size:13.5px; margin-top:var(--space-4); }
-  table.table th{ text-align:left; font:500 10.5px var(--font-heading); letter-spacing:.08em; text-transform:uppercase; color:var(--color-neutral-500); padding:var(--space-2) var(--space-3) var(--space-2) 0; }
-  table.table td{ padding:var(--space-3) var(--space-3) var(--space-3) 0; vertical-align:top; }
-  table.table thead tr{ background:linear-gradient(to right, transparent, var(--color-divider) 0, var(--color-divider) 100%, transparent) no-repeat bottom / 100% 1px; }
-  table.table tbody tr{ background:linear-gradient(to right, transparent, color-mix(in srgb, var(--color-text) 8%, transparent) 0, color-mix(in srgb, var(--color-text) 8%, transparent) 100%, transparent) no-repeat bottom / 100% 1px; }
-  table.table tbody tr:hover{ background: linear-gradient(color-mix(in srgb, var(--color-text) 4%, transparent), color-mix(in srgb, var(--color-text) 4%, transparent)) no-repeat 0 0/100% 100%, linear-gradient(to right, transparent, color-mix(in srgb, var(--color-text) 8%, transparent) 0, color-mix(in srgb, var(--color-text) 8%, transparent) 100%, transparent) no-repeat bottom / 100% 1px; }
+  table.table{ width:100%; border-collapse:collapse; font-size:13px; margin-top:12px; }
+  table.table th{ text-align:left; font:500 10.5px var(--font-code); letter-spacing:.08em; text-transform:uppercase; color:var(--color-neutral-500); padding:4px 8px 6px 0; border-bottom:1px solid var(--color-divider-strong); }
+  table.table td{ padding:8px 8px 8px 0; vertical-align:top; border-bottom:1px solid var(--color-divider); }
+  table.table tbody tr:hover td{ background:color-mix(in srgb, var(--color-text) 3%, transparent); }
   .ch-name{ font-weight:500; }
   .ch-gives{ color:var(--color-neutral-400); font-size:12.5px; line-height:1.5; max-width:44ch; }
   .ch-meta{ font-size:12px; color:var(--color-neutral-400); white-space:nowrap; }
   .cls-cell{ width:26px; }
 
-  .rule-list{ list-style:none; margin:var(--space-4) 0 0; padding:0; display:flex; flex-direction:column; gap:var(--space-3); }
-  .rule-list li{ display:grid; grid-template-columns:6.5rem 1fr; gap:var(--space-6); align-items:baseline;
-    background:var(--color-surface); border:1px solid var(--color-divider); border-radius:8px; padding:var(--space-3) var(--space-4);
+  .rule-list{ list-style:none; margin:12px 0 0; padding:0; display:flex; flex-direction:column; gap:8px; }
+  .rule-list li{ display:grid; grid-template-columns:6.5rem 1fr; gap:16px; align-items:baseline;
+    background:var(--color-surface); border:1px solid var(--color-divider); border-radius:8px; padding:8px 12px;
     font-size:12.5px; line-height:1.55; color:var(--color-neutral-400); }
   .rule-list li strong{ color:var(--color-text); }
 
-  .tally-row{ display:flex; flex-wrap:wrap; gap:var(--space-3); margin:var(--space-4) 0 0; }
-  .tally-card{ background:var(--color-surface); border:1px solid var(--color-divider); border-top:2px solid var(--tc); border-radius:8px; padding:var(--space-3) var(--space-4); min-width:8.5rem; }
-  .tally-value{ font:500 26px var(--font-heading); color:var(--tc); }
+  .tally-row{ display:flex; flex-wrap:wrap; gap:8px; margin:12px 0 0; }
+  .tally-card{ background:var(--color-surface); border:1px solid var(--color-divider); border-top:2px solid var(--tc); border-radius:8px; padding:8px 12px; min-width:8.5rem; }
+  .tally-value{ font:500 26px var(--font-code); color:var(--tc); }
   .tally-label{ font-size:11.5px; color:var(--color-neutral-500); margin-top:2px; }
 
-  .method-figure{ background:var(--color-surface); border:1px solid var(--color-divider); border-radius:var(--radius-lg); padding:20px; overflow-x:auto; margin-top:var(--space-4); }
+  .method-figure{ background:var(--color-surface); border:1px solid var(--color-divider); border-radius:var(--radius-lg); padding:20px; overflow-x:auto; margin-top:12px; }
   .method-figure svg{ display:block; min-width:940px; width:100%; height:auto; }
 
-  /* ---- operator card content ---- */
-  .p-summary{ margin:var(--space-4) 0 0; font-size:13.5px; line-height:1.62;
-    color:var(--color-neutral-300); max-width:60ch; }
-
-  /* Headline figure. One number the tab already showed, taken apart. The split
-     bar and its key use the map's own pin treatments — filled, ringed, dashed —
-     so the card reads as a close-up of the pins, not a second chart language. */
-  .p-figure{ margin-top:var(--space-8); }
-  .p-cap{ display:flex; align-items:baseline; gap:var(--space-3); }
-  .p-cap b{ font:500 42px/1 var(--font-heading); letter-spacing:-.035em; font-variant-numeric:tabular-nums; }
-  .p-cap em{ font-style:normal; font:500 11px var(--font-heading); letter-spacing:.09em; text-transform:uppercase; color:var(--color-neutral-500); }
-  .p-cap-meta{ margin-top:var(--space-3); font-size:12px; color:var(--color-neutral-500); }
-  .p-split{ display:flex; gap:3px; height:9px; margin-top:var(--space-6); }
-  .p-split i{ display:block; min-width:3px; border-radius:2px; box-sizing:border-box; }
-  .p-split i.s-operational{ background:var(--pc); }
-  .p-split i.s-under-construction{ background:color-mix(in srgb, var(--pc) 24%, transparent); border:1.4px solid var(--pc); }
-  .p-split i.s-planned{ background:transparent; border:1.3px dashed color-mix(in srgb, var(--pc) 70%, transparent); }
-  .p-key{ list-style:none; margin:var(--space-4) 0 0; padding:0;
-    display:grid; grid-template-columns:repeat(auto-fit, minmax(108px,1fr)); gap:var(--space-4); }
-  .p-key li{ display:grid; grid-template-rows:2.3em auto auto; gap:2px; padding-top:var(--space-3);
-    border-top:1px solid color-mix(in srgb, var(--color-text) 10%, transparent); }
-  .p-key .kl{ display:flex; align-items:flex-start; gap:5px; font:500 10px/1.25 var(--font-heading); letter-spacing:.07em; text-transform:uppercase; color:var(--color-neutral-500); }
-  .p-key .sw{ width:9px; height:9px; border-radius:50%; flex:none; box-sizing:border-box; margin-top:2px; }
-  .p-key .sw.s-operational{ background:var(--pc); }
-  .p-key .sw.s-under-construction{ background:color-mix(in srgb, var(--pc) 24%, transparent); border:1.4px solid var(--pc); }
-  .p-key .sw.s-planned{ border:1.2px dashed color-mix(in srgb, var(--pc) 70%, transparent); }
-  .p-key .kv{ font:500 15px var(--font-heading); font-variant-numeric:tabular-nums; }
-  .p-key .kn{ font-size:11.5px; color:var(--color-neutral-500); }
-
-  /* Evidence strip — the drawer's weakest-link verdict, tallied per operator. */
-  .p-ev{ margin-top:var(--space-8); }
-  .p-ev-meter{ display:flex; gap:3px; height:4px; margin:var(--space-3) 0; }
-  .p-ev-meter i{ display:block; min-width:3px; }
-  .p-ev-meter i.independent{ background:var(--color-accent); }
-  .p-ev-meter i.operator{ background:var(--color-neutral-700); }
-  .p-ev-meter i.unsourced{ background:repeating-linear-gradient(to right, var(--color-neutral-700) 0 3px, transparent 3px 6px); }
-  .p-ev-key{ display:flex; flex-wrap:wrap; gap:var(--space-2) var(--space-6); }
-  .p-ev-key .vd b{ font-weight:500; font-variant-numeric:tabular-nums; }
-
-  /* One column, read top to bottom: who they are, who they work with, what's
-     happened lately, and only then the site-by-site list — which is the long
-     part, and the part the map is already showing. */
-  .p-body{ display:grid; grid-template-columns:minmax(0,1fr); gap:40px; margin-top:var(--space-8); }
-  .p-section h2{ font:500 10.5px/1 var(--font-heading); letter-spacing:.12em; text-transform:uppercase;
-    color:var(--color-neutral-500); margin-bottom:var(--space-4); }
-  .p-locations{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; }
-  .p-loc-item{ display:flex; align-items:center; gap:var(--space-3); padding:.4rem 0; font-size:13px; cursor:pointer;
-    border-top:1px solid color-mix(in srgb, var(--color-text) 7%, transparent); }
-  .p-loc-item:first-child{ border-top:0; }
-  .p-loc-item:hover{ color:var(--color-accent-300); }
-  .p-loc-name{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .p-loc-place{ color:var(--color-neutral-500); font-size:12px; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .p-loc-cap{ color:var(--color-neutral-500); font-size:12px; font-variant-numeric:tabular-nums; flex-shrink:0; width:5em; text-align:right; }
-  .status-dot{ width:6px; height:6px; border-radius:50%; flex-shrink:0; }
-  .status-dot.status-operational{ background:#4ADE80; }
-  .status-dot.status-under-construction{ background:#FBBF24; }
-  .status-dot.status-planned{ background:#94A3B8; }
-
-  /* Hairline rows, not cards. Boxed entries inside a boxed panel inside a
-     boxed rail was three frames deep; the relationship rides above the name as
-     its own line so long labels never fight the name for the row. */
-  .p-partners{ margin-top:var(--space-8); }
-  .partner-list{ list-style:none; margin:0; padding:0; display:grid; gap:0; }
-  .partner-card{ border:0; border-radius:0; padding:var(--space-4) 0;
-    border-top:1px solid color-mix(in srgb, var(--color-text) 8%, transparent); }
-  .partner-card:first-child{ border-top:0; padding-top:0; }
-  .partner-top{ display:flex; align-items:baseline; gap:var(--space-3); margin-top:1px; }
-  .partner-name{ font:500 14px var(--font-heading); }
-  .partner-since{ margin-left:auto; font-size:11px; color:var(--color-neutral-500); font-variant-numeric:tabular-nums; }
-  .partner-relationship{ display:block; font:500 10px var(--font-heading); letter-spacing:.09em; text-transform:uppercase; color:var(--color-accent-300); }
-  .partner-detail{ margin:.3rem 0 0; font-size:12.5px; color:var(--color-neutral-400); line-height:1.55; max-width:56ch; }
-  .partner-meta{ display:block; margin-top:.4rem; font-size:11px; color:var(--color-neutral-500); }
-  .partner-meta, .partner-detail, .partner-relationship{ min-width:0; overflow-wrap:break-word; }
-  .partner-meta a{ color:var(--color-neutral-500); }
-  .partner-meta a:hover{ color:var(--color-accent-300); }
-  .empty-note{ color:var(--color-neutral-500); font-size:13px; font-style:italic; }
-
-  .headline-list{ list-style:none; margin:0; padding:0; }
-  .headline-item{ padding:var(--space-3) 0; border-top:1px solid color-mix(in srgb, var(--color-text) 7%, transparent); font-size:13px; line-height:1.45; }
-  .headline-item:first-child{ border-top:0; }
-  .headline-top{ display:flex; align-items:center; gap:var(--space-2); margin-bottom:2px; }
-  .headline-date{ font-size:11px; color:var(--color-neutral-500); white-space:nowrap; }
-  .headline-category{ font:500 10px var(--font-heading); letter-spacing:.09em; text-transform:uppercase; color:var(--color-neutral-500); }
-  .headline-title{ display:block; color:var(--color-text); font-weight:500; }
-  .headline-why{ margin:.25rem 0 0; color:var(--color-neutral-400); font-size:12px; line-height:1.5; }
-  .headline-meta{ display:block; margin-top:.3rem; font-size:11px; color:var(--color-neutral-500); }
-  .headline-meta a{ color:var(--color-neutral-500); }
-  .headline-meta a:hover{ color:var(--color-accent-300); }
-  .p-search-link{ display:inline-block; margin-top:var(--space-4); font-size:12.5px; }
-
   /* ---- site page ---- */
-  .s-head{ display:flex; align-items:flex-start; gap:var(--space-4); }
+  .s-head{ display:flex; align-items:flex-start; gap:12px; }
   .s-head h1{ font-size:26px; }
-  .s-sub{ margin:4px 0 0; color:var(--color-accent-300); font-size:13px; }
+  .s-sub{ margin:4px 0 0; color:var(--color-neutral-400); font-size:13px; }
   .s-head .provider-tag{ margin-left:auto; flex-shrink:0; }
-  .s-facts{ display:flex; flex-wrap:wrap; gap:var(--space-6) var(--space-8);
-    padding:var(--space-4) var(--space-6); margin:var(--space-6) 0 var(--space-8);
+  .s-facts{ display:flex; flex-wrap:wrap; gap:16px 20px; padding:12px 16px; margin:16px 0 20px;
     background:var(--color-surface); border:1px solid var(--color-divider); border-radius:var(--radius-lg); }
-  .fact-label{ font-size:10px; text-transform:uppercase; letter-spacing:.09em; color:var(--color-neutral-500); }
-  .fact-value{ margin-top:.3rem; font-size:15px; }
+  .fact-label{ font-family:var(--font-code); font-size:10px; text-transform:uppercase; letter-spacing:.09em; color:var(--color-neutral-500); }
+  .fact-value{ margin-top:.3rem; font-size:14px; }
   .fact-muted{ color:var(--color-neutral-500); }
-  .s-block{ margin-bottom:var(--space-8); }
-  .s-block h2{ font-size:14px; font-weight:600; margin-bottom:var(--space-3); }
+  .s-block{ margin-bottom:20px; }
+  .s-block h2{ font-size:14px; font-weight:600; margin-bottom:8px; }
   .s-prose{ max-width:70ch; font-size:13.5px; line-height:1.68; color:var(--color-text); white-space:pre-line; }
   .src-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; }
-  .src-list li{ display:grid; grid-template-columns:22px 1fr; gap:var(--space-4); align-items:start;
-    padding:var(--space-3) 0; border-top:1px solid color-mix(in srgb, var(--color-text) 8%, transparent); font-size:13px; line-height:1.45; }
+  .src-list li{ display:grid; grid-template-columns:22px 1fr; gap:12px; align-items:start; padding:8px 0; border-top:1px solid var(--color-divider); font-size:13px; line-height:1.45; }
   .src-list li:first-child{ border-top:0; }
   .src-meta{ margin-top:2px; font-size:11px; color:var(--color-neutral-500); }
 
   .site-disclosure{ border:1px solid var(--color-divider); border-radius:var(--radius-lg); background:var(--color-surface); }
-  .site-disclosure > summary{ display:flex; align-items:center; gap:var(--space-3); padding:var(--space-4); cursor:pointer; list-style:none; font-size:13.5px; font-weight:600; }
+  .site-disclosure > summary{ display:flex; align-items:center; gap:8px; padding:12px; cursor:pointer; list-style:none; font-size:13px; font-weight:600; }
   .site-disclosure > summary::-webkit-details-marker{ display:none; }
-  .site-disclosure > summary:hover{ color:var(--color-accent-300); }
+  .site-disclosure > summary:hover{ color:#ffffff; }
   .disc-chevron{ color:var(--color-neutral-500); transition:transform .16s ease; display:inline-block; }
   .site-disclosure[open] .disc-chevron{ transform:rotate(90deg); }
-  .disc-body{ padding:0 var(--space-4) var(--space-2); border-top:1px solid var(--color-divider); }
-  .disc-block{ padding:var(--space-4) 0; border-bottom:1px solid color-mix(in srgb, var(--color-text) 8%, transparent); }
+  .disc-body{ padding:0 12px 4px; border-top:1px solid var(--color-divider); }
+  .disc-block{ padding:12px 0; border-bottom:1px solid var(--color-divider); }
   .disc-block:last-child{ border-bottom:0; }
-  .disc-head{ display:flex; align-items:center; gap:var(--space-3); flex-wrap:wrap; }
-  .disc-field{ font-size:10.5px; text-transform:uppercase; letter-spacing:.08em; color:var(--color-neutral-500); min-width:5rem; }
+  .disc-head{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .disc-field{ font-family:var(--font-code); font-size:10.5px; text-transform:uppercase; letter-spacing:.08em; color:var(--color-neutral-500); min-width:5rem; }
   .disc-blurb{ margin:.45rem 0 0; font-size:12.5px; line-height:1.55; color:var(--color-neutral-400); max-width:68ch; }
   .disc-lift{ margin:.5rem 0 0; font-size:12.5px; line-height:1.55; color:var(--color-neutral-400); max-width:68ch; }
   .disc-lift strong{ color:var(--color-text); font-weight:600; }
@@ -657,85 +514,105 @@
   .verdict-unsourced{ color:var(--color-neutral-500); } .verdict-unsourced i{ background:repeating-linear-gradient(to bottom, var(--color-neutral-700) 0 2px, transparent 2px 4px); }
 
   @media (max-width:1100px){
-    :root{ --rail-w:232px; --panel-w:430px; }
-    #detail{ width:320px; }
+    :root{ --panel-w:340px; --inspector-w:340px; }
   }
   @media (max-width:760px){
-    /* The bar carries the masthead again here, so it's two rows tall. */
-    :root{ --top-offset:78px; }
-    #bar{ flex-wrap:wrap; gap:var(--space-2) var(--space-6); }
-    .brand{ display:none; }
-    .brand-bar{ display:flex; flex-direction:row; align-items:baseline; flex-basis:100%;
-      gap:var(--space-3); font-size:21px; padding:0; margin:0; border-bottom:0; }
-    #rail{ display:none; }
-    /* No list to slide — the dashboard just takes the screen. */
-    #providerPanel{ width:100%; }
-    #detail{ width:88%; max-width:340px; }
-    .row{ grid-template-columns:10px minmax(120px,1.4fr) 84px minmax(90px,.9fr); }
-    .row .place, .row .stat{ display:none; }
+    /* Phone: the panel becomes a bottom sheet under the map, and the
+       inspector takes the whole width beside the rail. */
+    #panel{ top:50%; bottom:0; left:var(--rail-w); right:0; width:auto; border-right:0; border-top:1px solid var(--color-divider-strong); }
+    #mapwrap{ left:var(--rail-w); bottom:50%; }
+    #detail{ left:var(--rail-w); right:0; width:auto; }
     .legend{ display:none; }
+    .statusbar{ padding-left:110px; padding-right:16px; }
+    .maplibregl-ctrl-bottom-right{ display:none; }
+    .ov{ padding:32px 16px 96px; }
   }
   @media (prefers-reduced-motion: reduce){ *{ transition:none !important; } }
 </style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 5-3.5 8.5-7 10-3.5-1.5-7-5-7-10V6z"/><path d="M9 12l2 2 4-4"/></symbol>
+    <symbol id="i-crosshair" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></symbol>
+    <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+    <symbol id="i-out" viewBox="0 0 24 24"><path d="M7 17L17 7M9 7h8v8"/></symbol>
+    <symbol id="i-chev" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s-6-5.5-6-11a6 6 0 0 1 12 0c0 5.5-6 11-6 11z"/><circle cx="12" cy="10" r="2"/></symbol>
+  </defs>
+</svg>
 
 <div id="shell">
-  <div id="sky" aria-hidden="true"><canvas id="starfield"></canvas></div>
-
   <div id="mapwrap">
     <div id="map" role="img" aria-label="World map with data center site markers"></div>
     <p class="map-loading" id="mapLoading">Loading map…</p>
+    <div class="map-tools" aria-label="Map controls">
+      <button id="zoomIn" aria-label="Zoom in" title="Zoom in"><svg fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><use href="#i-plus"/></svg></button>
+      <button id="zoomOut" aria-label="Zoom out" title="Zoom out"><svg fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><use href="#i-minus"/></svg></button>
+      <button data-fit aria-label="Fit the map to every site" title="Fit to every site"><svg fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><use href="#i-crosshair"/></svg></button>
+    </div>
+    <div class="legend" aria-label="Map legend">
+      <div><span class="lg s-operational"></span>Operational</div>
+      <div><span class="lg s-under-construction"></span>Under construction</div>
+      <div><span class="lg s-planned"></span>Planned</div>
+      <hr>
+      <div class="dim"><span class="lg-sizes"><i style="width:4px;height:4px"></i><i style="width:7px;height:7px"></i><i style="width:10px;height:10px"></i></span>Dot size ∝ disclosed MW</div>
+    </div>
+    <div class="statusbar" aria-live="polite"><span id="statusMeta"></span></div>
   </div>
 
-  <header id="bar">
-    <div class="brand brand-bar">Site Atlas <span>/ data center buildout</span></div>
-    <nav class="tabs" role="tablist">
-      <button data-view="atlas" aria-current="true">Atlas</button>
-      <button data-view="sources">Sources &amp; method</button>
-    </nav>
-    <div class="bar-meta">
-      <button class="bar-reset" id="resetView" title="Fit the map to every site">⤾ Reset view</button>
-      <span id="barMeta"></span>
-    </div>
-  </header>
+  <nav id="rail" aria-label="Views">
+    <div class="rail-mark" aria-hidden="true"><svg fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><use href="#i-pin"/></svg></div>
+    <button data-view="atlas" aria-current="true" aria-label="Atlas" title="Atlas"><svg fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><use href="#i-globe"/></svg></button>
+    <button data-view="sources" aria-current="false" aria-label="Sources &amp; method" title="Sources &amp; method"><svg fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><use href="#i-shield"/></svg></button>
+    <span class="rail-gap"></span>
+    <button data-fit aria-label="Reset view" title="Reset view"><svg fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><use href="#i-crosshair"/></svg></button>
+  </nav>
 
-  <aside id="rail">
-    <div class="brand">Site Atlas <span>/ data center buildout</span></div>
-    <div class="eyebrow" style="margin-bottom:var(--space-2)">Operators</div>
-    <div id="provList"></div>
-  </aside>
-
-  <section id="drawer">
-    <div class="head">
-      <div class="eyebrow">Sites</div>
-      <div class="stat-sub" id="drawerMeta" style="margin:0"></div>
-      <div class="legend">
-        <div><span class="lg" style="background:var(--color-neutral-300)"></span> Operational</div>
-        <div><span class="lg" style="background:transparent;border:1.5px solid var(--color-neutral-300)"></span> Under construction</div>
-        <div><span class="lg" style="background:transparent;border:1px dashed var(--color-neutral-500)"></span> Planned</div>
-        <div>Dot size ∝ disclosed MW</div>
+  <section id="panel" aria-label="Operators and sites">
+    <header class="panel-head">
+      <div class="brand-row"><span class="brand">Site Atlas</span><span class="eyebrow">data center buildout</span></div>
+      <div class="seg wide" id="panelSeg" role="tablist">
+        <button role="tab" data-panel="operators" aria-pressed="true">Operators</button>
+        <button role="tab" data-panel="sites" aria-pressed="false">Sites</button>
       </div>
-      <div class="srch">
-        <div class="seg" id="statusSeg">
-          <button data-f="operational" aria-pressed="true">Operational</button>
-          <button data-f="all" aria-pressed="false">All</button>
+    </header>
+
+    <div class="panel-view" id="panelOperators">
+      <div class="list-head"><span class="eyebrow" id="opsMeta"></span><span class="eyebrow racks-key"><svg class="rack" viewBox="0 0 9 13" aria-hidden="true"><rect x="0.5" y="0.5" width="8" height="12" rx="1.5"/><path d="M2.5 3.5h4M2.5 6.5h4M2.5 9.5h4"/></svg>= 100 MW</span></div>
+      <div id="provList" class="scroll"></div>
+    </div>
+
+    <div class="panel-view" id="panelOperator" hidden>
+      <div class="scroll" id="providerPanelBody"></div>
+    </div>
+
+    <div class="panel-view" id="panelSites" hidden>
+      <div class="sites-head">
+        <label class="field"><svg fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><use href="#i-search"/></svg><input id="q" placeholder="Filter sites, cities, operators" aria-label="Filter sites"></label>
+        <div class="sites-filters">
+          <div class="seg" id="statusSeg">
+            <button data-f="operational" aria-pressed="false">Operational</button>
+            <button data-f="all" aria-pressed="true">All</button>
+          </div>
+          <span class="eyebrow" id="sitesMeta"></span>
         </div>
-        <input id="q" placeholder="Filter sites, cities, operators">
       </div>
+      <div class="rows scroll" id="rows"></div>
     </div>
-    <div class="fade-x"></div>
-    <div class="rows" id="rows"></div>
+
+    <footer class="panel-foot"><span class="mono" id="footMW"></span><span id="footCount"></span></footer>
   </section>
 
-  <aside id="detail"></aside>
+  <aside id="detail" aria-label="Site inspector"></aside>
 
   <section class="ov" id="viewSourcesMethod"></section>
-  <div id="providerDock" aria-hidden="true">
-    <aside id="providerPanel">
-      <button class="pp-close" type="button" aria-label="Close operator panel">&#10005;</button>
-      <div class="pp-head" id="providerPanelHead"></div>
-      <div class="pp-body" id="providerPanelBody"></div>
-    </aside>
-  </div>
   <section class="ov" id="viewSite"></section>
 </div>
 
@@ -756,6 +633,10 @@
     return String(s == null ? "" : s)
       .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;");
+  }
+  // Inline icon from the sprite in <body>; `extra` lands on the <svg> tag.
+  function ICON(id, extra){
+    return '<svg' + (extra || "") + ' fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><use href="#i-' + id + '"/></svg>';
   }
   function hexToRgba(hex, a){
     var h = hex.replace("#", "");
@@ -784,7 +665,7 @@
       providerColor[p] = pinned || PALETTE[next++ % PALETTE.length];
     });
   })();
-  function colorFor(provider){ return providerColor[provider] || "#9184d9"; }
+  function colorFor(provider){ return providerColor[provider] || "#b9b1a2"; }
   var providerOrder = Object.keys(providerColor);
   var STATUS_ORDER = { "Operational": 0, "Under construction": 1, "Planned": 2 };
   function tableSortCompare(a, b){
@@ -838,76 +719,6 @@
   }
 
   // ════════════════════════════════════════════════════════════════════
-  // Sky — a still starfield behind the globe
-  // ════════════════════════════════════════════════════════════════════
-  // Drawn to a canvas rather than assembled from CSS gradients or a pile of
-  // box-shadows: a few hundred dots with varying size, brightness and colour
-  // cost one paint and stay crisp on a HiDPI screen, where a tiled gradient
-  // would visibly repeat.
-  //
-  // Deliberately NOT animated. A twinkle would mean a permanent rAF loop
-  // running alongside a WebGL globe for decoration, and the globe is what the
-  // frame budget is for.
-  (function sky(){
-    var cv = document.getElementById("starfield");
-    if (!cv || !cv.getContext) return;
-    var ctx = cv.getContext("2d");
-
-    // Seeded, so the same sky comes back after a resize instead of the stars
-    // reshuffling themselves every time the window moves.
-    function rng(seed){
-      return function(){
-        seed |= 0; seed = seed + 0x6D2B79F5 | 0;
-        var t = Math.imul(seed ^ seed >>> 15, 1 | seed);
-        t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
-        return ((t ^ t >>> 14) >>> 0) / 4294967296;
-      };
-    }
-
-    // Starlight isn't white — most stars read faintly blue, a few warm.
-    var TINTS = ["255,255,255", "214,226,255", "186,205,255", "255,236,214"];
-
-    function draw(){
-      var w = cv.clientWidth, h = cv.clientHeight;
-      if (!w || !h) return;
-      var dpr = Math.min(window.devicePixelRatio || 1, 2);
-      cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      ctx.clearRect(0, 0, w, h);
-
-      var rand = rng(20260915);
-      var count = Math.round(w * h / 5200); // density, not a fixed count
-      for (var i = 0; i < count; i++) {
-        var x = rand() * w, y = rand() * h;
-        // Cube the roll so the big bright stars stay rare.
-        var t = Math.pow(rand(), 3);
-        var r = 0.35 + t * 1.25;
-        var a = 0.22 + Math.pow(rand(), 1.6) * 0.62;
-        var tint = TINTS[Math.floor(rand() * TINTS.length)];
-
-        // The handful of largest stars get a soft bloom, which is most of what
-        // sells this as a sky rather than as noise.
-        if (t > 0.55) {
-          var g = ctx.createRadialGradient(x, y, 0, x, y, r * 5.5);
-          g.addColorStop(0, "rgba(" + tint + "," + (a * 0.5) + ")");
-          g.addColorStop(1, "rgba(" + tint + ",0)");
-          ctx.fillStyle = g;
-          ctx.beginPath(); ctx.arc(x, y, r * 5.5, 0, 6.2832); ctx.fill();
-        }
-        ctx.fillStyle = "rgba(" + tint + "," + a + ")";
-        ctx.beginPath(); ctx.arc(x, y, r, 0, 6.2832); ctx.fill();
-      }
-    }
-
-    draw();
-    var pending;
-    window.addEventListener("resize", function(){
-      clearTimeout(pending);
-      pending = setTimeout(draw, 150);
-    });
-  })();
-
-  // ════════════════════════════════════════════════════════════════════
   // Map — MapLibre GL, CARTO Dark Matter vector basemap, globe projection
   // ════════════════════════════════════════════════════════════════════
   var pinEls = {};
@@ -926,35 +737,14 @@
     style: "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
     center: DEFAULT_CENTER,
     zoom: DEFAULT_ZOOM,
-    minZoom: 0.8,
+    minZoom: 1.2,
     maxZoom: 14,
     dragRotate: false,
     pitchWithRotate: false,
     touchPitch: false
   });
   map.touchZoomRotate.disableRotation();
-  // Globe instead of flat Mercator: vector tiles are Mercator-projected at
-  // the data level regardless, but rendering them onto a sphere removes the
-  // flat projection's area/distance distortion since a globe has no
-  // projection to distort in the first place.
-  map.on("style.load", function(){
-    map.setProjection({ type: "globe" });
-    // The default atmosphere is tuned for a bright sky and hazes the whole
-    // sphere to a pale grey disc — which, over a starfield, reads as fog rather
-    // than as a planet. Darkened, and faded out entirely by the zoom at which
-    // the projection stops being a globe anyway.
-    try {
-      map.setSky({
-        "sky-color": "#0a0b13",
-        "horizon-color": "#1d2440",
-        "fog-color": "#0c0e1a",
-        "sky-horizon-blend": 0.5,
-        "horizon-fog-blend": 0.6,
-        "fog-ground-blend": 0.2,
-        "atmosphere-blend": ["interpolate", ["linear"], ["zoom"], 0, 0.6, 5, 0.25, 7, 0]
-      });
-    } catch (e) { console.warn("Site Atlas: sky styling unavailable", e); }
-  });
+  map.addControl(new maplibregl.ScaleControl({ maxWidth: 90, unit: "metric" }), "bottom-left");
 
   var CAP_MAX = Math.max.apply(null, SITES.map(function(s){ return s.capacityMW || 0; })) || 1;
   function pinDiameter(mw){
@@ -985,7 +775,11 @@
       var core = document.createElement("span");
       core.className = "pin-core";
       core.style.width = d + "px"; core.style.height = d + "px";
+      var ring = document.createElement("span");
+      ring.className = "pin-ring";
+      ring.style.width = (d + 12) + "px"; ring.style.height = (d + 12) + "px";
       el.appendChild(halo);
+      el.appendChild(ring);
       el.appendChild(core);
 
       var label = document.createElement("span");
@@ -1004,7 +798,7 @@
     document.getElementById("mapLoading").style.display = "none";
   }
 
-  map.on("load", buildPins);
+  map.on("load", function(){ buildPins(); fitTo(fitBoundsArg, { duration: 0 }); });
   map.on("error", function(){
     document.getElementById("mapLoading").textContent = "Couldn't load the map — check your connection and reload.";
   });
@@ -1028,18 +822,28 @@
     else if (z < detailZoomAnchor - DETAIL_ZOOM_LEEWAY) closeDetail();
   });
 
-  function zoomToSite(site, targetZoom){
-    map.flyTo({ center: [site.lon, site.lat], zoom: targetZoom || DEFAULT_SITE_ZOOM, duration: 650 });
+  // The inspector overlays the map's right edge, so a selected site is flown
+  // to the centre of what is still visible rather than the centre of the canvas.
+  function inspectorWidth(){
+    if (window.innerWidth <= 760) return 0;
+    return parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--inspector-w")) || 0;
   }
-  document.getElementById("resetView").addEventListener("click", function(){
-    // The shift leaves the visible slice centred on the canvas, so the margin
-    // it costs is the same on both sides rather than all on the left.
-    var slack = openProvider ? mapShift() : 0;
-    map.fitBounds(fitBoundsArg, {
-      padding: { top: 60, right: 60 + slack, bottom: 60, left: 60 + slack },
-      duration: 500
-    });
-  });
+  function inspectorOpen(){ return detailEl.classList.contains("on"); }
+  function zoomToSite(site, targetZoom){
+    map.flyTo({ center: [site.lon, site.lat], zoom: targetZoom || DEFAULT_SITE_ZOOM, duration: 650, offset: [-Math.round(inspectorWidth() / 2), 0] });
+  }
+  function fitTo(bounds, opts){
+    var right = inspectorOpen() ? inspectorWidth() : 0;
+    map.fitBounds(bounds, Object.assign({ padding: { top: 70, right: 70 + right, bottom: 60, left: 60 }, duration: 550, maxZoom: 7 }, opts || {}));
+  }
+  function fitSites(list){
+    if (!list.length) return fitTo(fitBoundsArg);
+    var lo = list.map(function(x){ return x.lon; }), la = list.map(function(x){ return x.lat; });
+    fitTo([[Math.min.apply(null, lo), Math.min.apply(null, la)], [Math.max.apply(null, lo), Math.max.apply(null, la)]]);
+  }
+  document.querySelectorAll("[data-fit]").forEach(function(b){ b.addEventListener("click", function(){ fitTo(fitBoundsArg); }); });
+  document.getElementById("zoomIn").addEventListener("click", function(){ map.zoomIn(); });
+  document.getElementById("zoomOut").addEventListener("click", function(){ map.zoomOut(); });
 
   // ════════════════════════════════════════════════════════════════════
   // Rail — disclosed capacity + operator filter
@@ -1067,45 +871,70 @@
     providerOrder.forEach(function(p){ activeProviders[p] = (p === name); });
   }
 
-  function providerRailStats(p){
-    var sites = SITES.filter(function(s){ return s.provider === p; });
-    var disclosed = sites.filter(function(s){ return s.capacityMW != null; });
-    var mw = disclosed.reduce(function(t, s){ return t + s.capacityMW; }, 0);
-    return { n: sites.length, mw: mw, undis: sites.length - disclosed.length };
+  var RACK_SVG = '<svg class="rack" viewBox="0 0 9 13" aria-hidden="true"><rect x="0.5" y="0.5" width="8" height="12" rx="1.5"/><path d="M2.5 3.5h4M2.5 6.5h4M2.5 9.5h4"/></svg>';
+  var STATUSES = ["Operational", "Under construction", "Planned"];
+  function mwFmt(v){ return v.toLocaleString("en-US", { maximumFractionDigits: 1 }); }
+  function plural(n, word){ return n + " " + word + (n === 1 ? "" : "s"); }
+  function providerSites(p){ return SITES.filter(function(x){ return x.provider === p; }); }
+
+  // Disclosed MW per status for a list of sites. Statuses with no site are
+  // left out, so a tile never renders for a status the operator has nothing in.
+  function capacitySplit(sites){
+    return STATUSES.map(function(st){
+      var list = sites.filter(function(x){ return x.status === st; });
+      var disc = list.filter(function(x){ return x.capacityMW != null; });
+      return { status: st, slug: statusSlug(st), n: list.length, mw: disc.reduce(function(t, x){ return t + x.capacityMW; }, 0), undis: list.length - disc.length };
+    }).filter(function(g){ return g.n; });
+  }
+
+  // The capacity pictogram: one rack per `unit` MW, grouped into one segment
+  // per status so hovering a segment lights it and names it. Tinted like the
+  // pins — solid operational, half for under construction, faint for planned —
+  // so the card reads as a close-up of the map rather than a second chart.
+  function racksHtml(split, unit, color){
+    var segs = split.filter(function(g){ return g.mw > 0; });
+    if (!segs.length) return "";
+    return '<div class="racks" style="--pc:' + color + '">' + segs.map(function(g){
+      var n = Math.max(1, Math.round(g.mw / unit));
+      var detail = mwFmt(g.mw) + ' MW' + (g.n != null ? ' · ' + plural(g.n, 'site') : '');
+      return '<span class="capseg s-' + g.slug + '" title="' + esc(g.status + ' · ' + detail) + '">' +
+        new Array(n + 1).join(RACK_SVG) +
+        '<span class="tip"><b>' + esc(g.status) + '</b><span>' + esc(detail) + '</span></span></span>';
+    }).join('') + '</div>';
+  }
+  function racksLegend(color, unit){
+    return '<div class="racks-legend" style="--pc:' + color + '">' +
+      '<span class="capseg s-operational">' + RACK_SVG + ' operational</span>' +
+      '<span class="capseg s-under-construction">' + RACK_SVG + ' under construction</span>' +
+      '<span class="capseg s-planned">' + RACK_SVG + ' planned</span>' +
+      '<span>· one rack = ' + unit + ' MW</span></div>';
   }
 
   function renderRail(){
     var byProv = providerOrder.map(function(p){
-      var st = providerRailStats(p);
-      return { name: p, n: st.n, mw: st.mw, undis: st.undis };
+      var sites = providerSites(p);
+      var split = capacitySplit(sites);
+      return {
+        name: p, n: sites.length, split: split,
+        mw: split.reduce(function(t, g){ return t + g.mw; }, 0),
+        undis: sites.filter(function(x){ return x.capacityMW == null; }).length
+      };
     }).sort(function(a, b){ return b.mw - a.mw; });
-    var max = Math.max.apply(null, byProv.map(function(p){ return p.mw; })) || 1;
 
+    document.getElementById("opsMeta").textContent = plural(byProv.length, "operator") + " · by disclosed MW";
     document.getElementById("provList").innerHTML = byProv.map(function(p){
-      return '<button class="prov' + (openProvider === p.name ? ' is-tab' : '') + '" data-prov="' + esc(p.name) + '" data-off="' + (activeProviders[p.name] ? 0 : 1) + '"' +
-        (openProvider === p.name ? ' aria-expanded="true"' : '') + '>' +
+      var racks = racksHtml(p.split, 100, colorFor(p.name));
+      return '<button class="prov" data-prov="' + esc(p.name) + '"' + (openProvider === p.name ? ' aria-expanded="true"' : '') + '>' +
         '<span class="dot" style="background:' + colorFor(p.name) + '"></span>' +
-        '<span class="pname plink" data-open-provider="' + esc(p.name) + '">' + esc(p.name) + '<span class="parrow">→</span></span>' +
-        '<span class="pmw">' + p.mw.toLocaleString() + ' MW</span>' +
-        '<span class="pbar"><i style="width:' + Math.round(p.mw / max * 100) + '%;background:' + colorFor(p.name) + '"></i></span>' +
-        '<span class="pcount">' + p.n + ' site' + (p.n === 1 ? '' : 's') + ' · ' + p.undis + ' undisclosed</span>' +
+        '<span class="pname">' + esc(p.name) + '</span>' +
+        '<span class="pmw">' + mwFmt(p.mw) + ' MW</span>' +
+        (racks || '<span class="pnone">no disclosed capacity yet</span>') +
+        '<span class="pcount">' + plural(p.n, "site") + ' · ' + p.undis + ' undisclosed</span>' +
       '</button>';
     }).join("");
 
     document.querySelectorAll("#provList .prov").forEach(function(btn){
-      btn.addEventListener("click", function(e){
-        if (e.target.closest("[data-open-provider]")) {
-          e.stopPropagation();
-          openProviderView(e.target.closest("[data-open-provider]").getAttribute("data-open-provider"));
-          return;
-        }
-        var name = btn.getAttribute("data-prov");
-        activeProviders[name] = !activeProviders[name];
-        // A hand-made toggle takes precedence over the solo: stop tracking what
-        // to restore, so closing the panel doesn't undo what was just set.
-        providerFilterSnapshot = null;
-        renderRail(); renderRows(); applyPinFilter();
-      });
+      btn.addEventListener("click", function(){ openProviderView(btn.getAttribute("data-prov")); });
     });
   }
 
@@ -1119,51 +948,51 @@
   // Drawer — searchable, filterable site list
   // ════════════════════════════════════════════════════════════════════
   var query = "";
-  var statusFilter = "operational";
+  var statusFilter = "all";
   var selectedId = null;
-  var rowEls = {};
 
   function visibleSites(){
     var q = query.trim().toLowerCase();
-    return SITES.filter(function(s){
-      if (!activeProviders[s.provider]) return false;
-      if (statusFilter === "operational" && s.status !== "Operational") return false;
+    return SITES.filter(function(x){
+      if (!activeProviders[x.provider]) return false;
+      if (statusFilter === "operational" && x.status !== "Operational") return false;
       if (!q) return true;
-      var hay = (s.site || "") + " " + s.city + " " + s.country + " " + s.provider + " " + s.status;
+      var hay = (x.site || "") + " " + x.city + " " + x.country + " " + x.provider + " " + x.status;
       return hay.toLowerCase().indexOf(q) !== -1;
     }).sort(function(a, b){ return (b.capacityMW || 0) - (a.capacityMW || 0); });
   }
 
+  // One site row, shared by the Sites tab and the operator page. The tick on
+  // the right is the only trace of the confidence engine left on the atlas
+  // view: bright when something other than the operator backs the entry.
+  function siteRowHtml(x, opts){
+    opts = opts || {};
+    var vd = siteVerdict(x);
+    var sub = esc(x.city) + ', ' + esc(x.country) + (opts.provider === false ? '' : ' · ' + esc(x.provider));
+    return '<button class="site-row" data-id="' + x.id + '"' + (selectedId === x.id ? ' aria-selected="true"' : '') + '>' +
+      '<span class="sg s-' + statusSlug(x.status) + '" style="--c:' + colorFor(x.provider) + '" title="' + esc(x.status) + '"></span>' +
+      '<span class="sr-main"><span class="sr-name">' + esc(x.site || x.city) + '</span><span class="sr-sub">' + sub + '</span></span>' +
+      (x.capacityMW == null ? '<span class="sr-mw none">—</span>' : '<span class="sr-mw">' + mwFmt(x.capacityMW) + ' MW</span>') +
+      '<span class="sr-tick ' + vd.key + '" title="' + esc(vd.label) + '"></span>' +
+    '</button>';
+  }
+  function wireSiteRows(root){
+    root.querySelectorAll(".site-row[data-id]").forEach(function(r){
+      r.addEventListener("click", function(){ selectSite(r.getAttribute("data-id")); });
+    });
+  }
+  function markSelectedRows(){
+    document.querySelectorAll(".site-row[data-id]").forEach(function(r){
+      if (r.getAttribute("data-id") === selectedId) r.setAttribute("aria-selected", "true"); else r.removeAttribute("aria-selected");
+    });
+  }
+
   function renderRows(){
     var v = visibleSites();
-    var indepCount = v.filter(function(s){ return siteVerdict(s).key === "independent"; }).length;
-    document.getElementById("drawerMeta").textContent =
-      v.length + " shown · sorted by disclosed capacity · " + indepCount + " independently verified";
-
+    document.getElementById("sitesMeta").textContent = plural(v.length, "site") + " · by MW";
     var rowsEl = document.getElementById("rows");
-    rowEls = {};
-    rowsEl.innerHTML =
-      '<div class="row hrow"><span></span><span>Site</span><span>Location</span><span>Status</span><span style="text-align:right">Capacity</span><span>Evidence</span></div>' +
-      v.map(function(s){
-        var vd = siteVerdict(s);
-        return '<button class="row" data-id="' + s.id + '" aria-selected="' + (selectedId === s.id) + '">' +
-          '<span class="dot" style="background:' + colorFor(s.provider) + '"></span>' +
-          '<span class="name plink" data-open-site="' + s.id + '">' + esc(s.site || s.city) + '</span>' +
-          '<span class="place">' + esc(s.city) + ', ' + esc(s.country) + '</span>' +
-          '<span class="stat">' + esc(s.status) + '</span>' +
-          '<span class="cap">' + (s.capacityMW == null ? '<span style="color:var(--color-neutral-500)">undisclosed</span>' : s.capacityMW + ' MW') + '</span>' +
-          verdictInline(vd) +
-        '</button>';
-      }).join("");
-
-    rowsEl.querySelectorAll(".row[data-id]").forEach(function(r){
-      var id = r.getAttribute("data-id");
-      r.addEventListener("click", function(e){
-        if (e.target.closest("[data-open-site]")) { e.stopPropagation(); openSiteView(id); return; }
-        selectSite(id);
-      });
-      rowEls[id] = r;
-    });
+    rowsEl.innerHTML = v.length ? v.map(function(x){ return siteRowHtml(x); }).join("") : '<div class="rows-empty">No sites match.</div>';
+    wireSiteRows(rowsEl);
   }
 
   document.getElementById("q").addEventListener("input", function(e){ query = e.target.value; renderRows(); });
@@ -1184,65 +1013,81 @@
     selectedId = null;
     detailEl.classList.remove("on");
     Object.keys(pinEls).forEach(function(k){ pinEls[k].classList.remove("active"); });
-    Object.keys(rowEls).forEach(function(k){ rowEls[k].removeAttribute("aria-selected"); });
-  }
-
-  function fieldBlock(site, field, label, valueHtml){
-    var score = scoreSiteField(site, field, TODAY);
-    var v = verdictFor(score);
-    return '<div class="field">' +
-      '<span class="k">' + esc(label) + '</span>' +
-      '<span class="v">' + valueHtml + verdictInline(v) + confBadge(score, { title: score.reason }) + '</span>' +
-    '</div>';
+    markSelectedRows();
   }
 
   function selectSite(id){
-    selectedId = id;
-    var site = SITES.filter(function(s){ return s.id === id; })[0];
+    var site = SITES.filter(function(x){ return x.id === id; })[0];
     if (!site) return;
-
+    selectedId = id;
+    if (currentView !== "atlas") switchMainView("atlas");
     Object.keys(pinEls).forEach(function(k){ pinEls[k].classList.toggle("active", k === id); });
-    Object.keys(rowEls).forEach(function(k){
-      if (k === id) rowEls[k].setAttribute("aria-selected", "true"); else rowEls[k].removeAttribute("aria-selected");
-    });
+    markSelectedRows();
+    detailEl.classList.add("on");
     zoomToSite(site);
     // Measure the leeway from where the card is about to land, not from
     // wherever the map happened to be sitting when the site was picked.
     detailZoomAnchor = DEFAULT_SITE_ZOOM;
-    detailEl.classList.add("on");
 
     var color = colorFor(site.provider);
-    var overall = scoreSite(site, TODAY);
-    var weakest = null;
-    Object.keys(overall.fields).forEach(function(f){ if (overall.fields[f].level === overall.level && !weakest) weakest = f; });
-
-    var sourcesHtml = (site.sources || []).map(function(s){
-      return '<div class="src">' + classChip(classifySource(s, site.provider)) +
-        '<span><span class="sl"><a href="' + s.url + '" target="_blank" rel="noopener">' + esc(s.label) + '</a></span></span></div>';
+    var capNote = "";
+    if (site.capacityMW != null) {
+      var cv = verdictFor(scoreSiteField(site, "capacityMW", TODAY));
+      var basis = siteFieldBasis(site, "capacityMW");
+      capNote = 'one rack = 10 MW · ' +
+        (cv.key === "independent" ? 'independently verified figure' : cv.key === "operator" ? 'operator-disclosed figure' : 'unsourced figure') +
+        (basis && basis !== "disclosed" ? ' · ' + String(BASIS_LABELS[basis] || basis).toLowerCase() : '');
+    }
+    var sources = site.sources || [];
+    var sourcesHtml = sources.map(function(x){
+      return '<div class="src">' + classChip(classifySource(x, site.provider)) +
+        '<span><a href="' + x.url + '" target="_blank" rel="noopener">' + esc(x.label) + '</a>' +
+        '<span class="sm">' + esc(hostOf(x.url) || '') + '</span></span></div>';
     }).join("");
 
     detailEl.innerHTML =
-      '<button class="dclose" aria-label="Close">✕</button>' +
-      '<div class="d-op" id="detailProv"><span class="dot" style="background:' + color + '"></span><span class="d-op-name">' + esc(site.provider) + '</span></div>' +
-      '<div class="d-title" id="detailTitle">' + esc(site.site || site.city) + '</div>' +
-      '<div class="d-place">' + esc(site.city) + ', ' + esc(site.country) + ' · ' + site.lat.toFixed(3) + ', ' + site.lon.toFixed(3) + '</div>' +
-      '<div class="fields">' +
-        fieldBlock(site, "capacityMW", "Disclosed capacity",
-          site.capacityMW != null ? site.capacityMW + ' MW ' + basisHtml(site, "capacityMW") : 'Undisclosed ') +
-        fieldBlock(site, "status", "Status", '<span class="status-pill status-' + statusSlug(site.status) + '">' + esc(site.status) + '</span> ') +
-        fieldBlock(site, "location", "Location", esc(site.city) + ' ') +
+      '<div class="d-top">' +
+        '<button class="d-op" id="detailProv" title="Open the operator page"><span class="dot" style="background:' + color + '"></span>' + esc(site.provider) + ' ' + ICON("chev", ' style="width:12px;height:12px"') + '</button>' +
+        '<button class="iconbtn dclose" aria-label="Close">' + ICON("x") + '</button>' +
       '</div>' +
-      '<p class="conf-why">' + esc(overall.fields[weakest] ? overall.fields[weakest].reason : "No fields scored.") +
-        (siteFieldHasProvenance(site, weakest || "status") ? '' : ' No per-field provenance recorded yet, so every source on this entry counts toward every field.') +
-      '</p>' +
-      (site.notes && site.notes.length ? '<div class="d-notes">' + esc(site.notes) + '</div>' : '') +
-      (sourcesHtml ? '<div class="srcs"><div class="eyebrow" style="margin-bottom:var(--space-3)">Evidence on file</div>' + sourcesHtml + '</div>' : '') +
-      '<div class="d-updated">Updated ' + fmtDate(site.lastUpdated) + '</div>';
+      '<div class="d-body">' +
+        '<div class="d-head">' +
+          '<h1 class="d-title">' + esc(site.site || site.city) + '</h1>' +
+          '<div class="d-place">' + esc(site.city) + ', ' + esc(site.country) + '</div>' +
+          '<div class="d-coords">' + site.lat.toFixed(4) + ', ' + site.lon.toFixed(4) + (siteFieldBasis(site, "location") === "estimated" ? ' · pin is an estimate' : '') + '</div>' +
+          '<div class="d-chips"><span class="chip"><span class="sg s-' + statusSlug(site.status) + '"></span>' + esc(site.status) + '</span>' +
+            '<span class="chip">Updated ' + esc(fmtDate(site.lastUpdated)) + '</span></div>' +
+        '</div>' +
+        '<div class="d-figure">' +
+          (site.capacityMW != null
+            ? '<div class="p-cap"><b>' + mwFmt(site.capacityMW) + '</b><span class="eyebrow">MW disclosed</span></div>' +
+              racksHtml([{ status: site.status, slug: statusSlug(site.status), mw: site.capacityMW, n: null }], 10, color) +
+              '<span class="cap-note">' + esc(capNote) + '</span>'
+            : '<span class="cap-none">Capacity not disclosed.</span>') +
+        '</div>' +
+        (site.notes && site.notes.length
+          ? '<div class="d-section"><span class="eyebrow">What we know</span><p class="d-notes" id="detailNotes">' + esc(site.notes) + '</p><button class="d-more" id="detailMore">Read more</button></div>'
+          : '') +
+        (sourcesHtml ? '<div class="d-section"><span class="eyebrow">Sources · ' + sources.length + '</span><div>' + sourcesHtml + '</div></div>' : '') +
+      '</div>' +
+      '<div class="d-foot">' +
+        '<button class="primary" id="detailOpen">Open site page ' + ICON("out") + '</button>' +
+        '<button class="ghost" id="detailZoom">' + ICON("crosshair") + 'Zoom to site</button>' +
+      '</div>';
 
     detailEl.querySelector(".dclose").addEventListener("click", closeDetail);
-    document.getElementById("detailTitle").addEventListener("click", function(){ openSiteView(site.id); });
     document.getElementById("detailProv").addEventListener("click", function(){ openProviderView(site.provider); });
-    detailEl.scrollTop = 0;
+    document.getElementById("detailOpen").addEventListener("click", function(){ openSiteView(site.id); });
+    document.getElementById("detailZoom").addEventListener("click", function(){ zoomToSite(site, 12); detailZoomAnchor = 12; });
+    var more = document.getElementById("detailMore"), notes = document.getElementById("detailNotes");
+    if (more && notes) {
+      if (notes.scrollHeight <= notes.clientHeight + 2) more.hidden = true;
+      more.addEventListener("click", function(){
+        notes.classList.toggle("open");
+        more.textContent = notes.classList.contains("open") ? "Show less" : "Read more";
+      });
+    }
+    detailEl.querySelector(".d-body").scrollTop = 0;
   }
 
   // ════════════════════════════════════════════════════════════════════
@@ -1355,49 +1200,54 @@
   // ════════════════════════════════════════════════════════════════════
   // Provider page
   // ════════════════════════════════════════════════════════════════════
-  function providerStats(p){
-    var sites = SITES.filter(function(s){ return s.provider === p; });
-    var operational = sites.filter(function(s){ return s.status === "Operational"; });
-    var disclosed = operational.filter(function(s){ return s.capacityMW != null; });
-    var totalGW = disclosed.reduce(function(sum, s){ return sum + s.capacityMW; }, 0) / 1000;
-    return { siteCount: sites.length, operationalCount: operational.length, totalGW: totalGW, disclosedCount: disclosed.length };
+  // The operator's mark: its own site icon, fetched by domain, so no logo
+  // files live in the repo. An explicit `logo` URL in data/providers.js wins;
+  // an entry with neither gets a lettered tile.
+  function providerLogoHtml(p){
+    var entry = providerLookup[p] || {};
+    if (entry.logo) return '<span class="op-logo"><img src="' + esc(entry.logo) + '" alt="" width="26" height="26"></span>';
+    if (entry.domain) return '<span class="op-logo"><img src="https://www.google.com/s2/favicons?domain=' + encodeURIComponent(entry.domain) + '&amp;sz=64" alt="" width="26" height="26"></span>';
+    return '<span class="op-logo fallback" aria-hidden="true">' + esc(p.charAt(0)) + '</span>';
   }
 
   function renderProviderView(p){
-    var stats = providerStats(p);
     var color = colorFor(p);
+    var entry = providerLookup[p] || {};
+    var sitesOf = providerSites(p).sort(function(a, b){ return (b.capacityMW || 0) - (a.capacityMW || 0); });
+    var split = capacitySplit(sitesOf);
+    var totalMW = split.reduce(function(t, g){ return t + g.mw; }, 0);
+    var undisclosed = sitesOf.filter(function(x){ return x.capacityMW == null; }).length;
+    var operational = sitesOf.filter(function(x){ return x.status === "Operational"; }).length;
+    var countries = [];
+    sitesOf.forEach(function(x){ if (x.country && countries.indexOf(x.country) === -1) countries.push(x.country); });
 
-    var providerSites = SITES.filter(function(s){ return s.provider === p; }).sort(tableSortCompare);
-    var locationsHtml = providerSites.map(function(s){
-      return '<li class="p-loc-item" data-id="' + s.id + '">' +
-        '<span class="status-dot status-' + statusSlug(s.status) + '"></span>' +
-        '<span class="p-loc-name">' + esc(s.site || s.city) + '</span>' +
-        '<span class="p-loc-place">' + esc(s.city) + ', ' + esc(s.country) + '</span>' +
-        '<span class="p-loc-cap">' + (s.capacityMW != null ? s.capacityMW + ' MW' : '—') + '</span>' +
-      '</li>';
-    }).join("");
+    var tiles = '<div class="tiles">' + split.map(function(g){
+      return '<div class="tile"><span class="eyebrow"><span class="sg s-' + g.slug + '"></span>' + esc(g.status === "Under construction" ? "Building" : g.status) + '</span>' +
+        '<b>' + (g.mw > 0 ? mwFmt(g.mw) + '<small> MW</small>' : '—') + '</b>' +
+        '<span>' + plural(g.n, "site") + (g.undis ? ' · ' + g.undis + ' undisclosed' : '') + '</span></div>';
+    }).join('') + '</div>';
 
-    var partners = (providerLookup[p] && providerLookup[p].partners) || [];
+    var partners = entry.partners || [];
     var partnersHtml = partners.length
       ? '<ul class="partner-list">' + partners.map(function(partner){
-          var sourceLinks = (partner.sources || []).map(function(s){ return '<a href="' + s.url + '" target="_blank" rel="noopener">' + esc(s.label) + '</a>'; }).join(', ');
+          var sourceLinks = (partner.sources || []).map(function(x){ return '<a href="' + x.url + '" target="_blank" rel="noopener">' + esc(x.label) + '</a>'; }).join(', ');
           return '<li class="partner-card">' +
-            '<span class="partner-relationship">' + esc(partner.relationship) + '</span>' +
             '<div class="partner-top"><span class="partner-name">' + esc(partner.name) + '</span>' +
               (partner.since ? '<span class="partner-since">' + esc(partner.since) + '</span>' : '') +
             '</div>' +
+            '<span class="partner-relationship">' + esc(partner.relationship) + '</span>' +
             (partner.detail ? '<p class="partner-detail">' + esc(partner.detail) + '</p>' : '') +
             (sourceLinks ? '<span class="partner-meta">' + sourceLinks + '</span>' : '') +
           '</li>';
         }).join('') + '</ul>'
-      : '<p class="empty-note">No disclosed partnerships logged yet — see data/providers.js.</p>';
+      : '<p class="empty-note">No disclosed partnerships logged yet.</p>';
 
     var curated = (typeof NEWS !== "undefined" && NEWS[p]) ? NEWS[p] : [];
     var headlinesHtml;
     if (curated.length) {
       headlinesHtml = '<ul class="headline-list">' + curated.slice().sort(function(a, b){ return (b.date || "").localeCompare(a.date || ""); }).map(function(h){
-        var sourceLinks = (h.sources || []).map(function(s){ return '<a href="' + s.url + '" target="_blank" rel="noopener">' + esc(s.label) + '</a>'; }).join(', ');
-        return '<li class="headline-item"><div class="headline-top"><span class="headline-date">' + esc(h.date || '') + '</span><span class="headline-category">' + esc(h.category || 'other') + '</span></div>' +
+        var sourceLinks = (h.sources || []).map(function(x){ return '<a href="' + x.url + '" target="_blank" rel="noopener">' + esc(x.label) + '</a>'; }).join(', ');
+        return '<li class="headline-item"><div class="headline-top"><span class="headline-date">' + esc(h.date || '') + '</span><span>·</span><span class="headline-category">' + esc(h.category || 'other') + '</span></div>' +
           '<span class="headline-title">' + esc(h.headline) + '</span>' +
           (h.why ? '<p class="headline-why">' + esc(h.why) + '</p>' : '') +
           (sourceLinks ? '<span class="headline-meta">Source: ' + sourceLinks + '</span>' : '') +
@@ -1405,213 +1255,101 @@
       }).join('') + '</ul>';
     } else {
       var seenUrls = {}, fallback = [];
-      providerSites.slice().sort(function(a, b){ return (b.lastUpdated || "").localeCompare(a.lastUpdated || ""); }).forEach(function(s){
-        (s.sources || []).forEach(function(src){
+      sitesOf.slice().sort(function(a, b){ return (b.lastUpdated || "").localeCompare(a.lastUpdated || ""); }).forEach(function(x){
+        (x.sources || []).forEach(function(src){
           if (seenUrls[src.url]) return;
           seenUrls[src.url] = true;
-          fallback.push({ label: src.label, url: src.url, site: s.site || s.city, lastUpdated: s.lastUpdated });
+          fallback.push({ label: src.label, url: src.url, site: x.site || x.city, lastUpdated: x.lastUpdated });
         });
       });
       headlinesHtml = fallback.length
-        ? '<ul class="headline-list"><li class="empty-note">No curated headlines yet — showing sourced citations from this provider\'s sites instead.</li>' +
+        ? '<ul class="headline-list"><li class="empty-note">No curated headlines yet — showing sourced citations from this operator\'s sites instead.</li>' +
           fallback.map(function(h){ return '<li class="headline-item"><a href="' + h.url + '" target="_blank" rel="noopener">' + esc(h.label) + '</a><span class="headline-meta">' + esc(h.site) + (h.lastUpdated ? ' · checked ' + fmtDate(h.lastUpdated) : '') + '</span></li>'; }).join('') + '</ul>'
-        : '<p class="empty-note">No sourced coverage logged yet — see data/sites.js.</p>';
+        : '<p class="empty-note">No sourced coverage logged yet.</p>';
     }
 
-    // Optional per-operator orientation, from data/providers.js. Qualitative
-    // by design — see that file's header for why no figures live in it.
-    var summary = providerLookup[p] && providerLookup[p].summary;
-    var summaryHtml = summary ? '<p class="p-summary" style="margin-top:0">' + esc(summary) + '</p>' : '';
+    var summaryHtml = entry.summary ? '<p class="p-summary">' + esc(entry.summary) + '</p>' : '';
 
     var el = document.getElementById("providerPanelBody");
-    document.getElementById("providerPanelHead").innerHTML =
-      '<span class="dot" style="background:' + color + '"></span><h1>' + esc(p) + '</h1>';
-
-    // ── The headline figure ─────────────────────────────────────────────
-    // The number is the one the operator's tab already shows, taken apart by
-    // status. Same figure, same place on screen — the card reads as the tab
-    // opening up rather than as a second, differently-scoped summary.
-    var mwFmt = function(v){ return v.toLocaleString(undefined, { maximumFractionDigits: 1 }); };
-    var split = ["Operational", "Under construction", "Planned"].map(function(st){
-      var list = providerSites.filter(function(x){ return x.status === st; });
-      var disc = list.filter(function(x){ return x.capacityMW != null; });
-      return {
-        status: st, slug: statusSlug(st), n: list.length,
-        mw: disc.reduce(function(t, x){ return t + x.capacityMW; }, 0),
-        undis: list.length - disc.length
-      };
-    }).filter(function(g){ return g.n; });
-    var totalMW = split.reduce(function(t, g){ return t + g.mw; }, 0);
-    var undisclosed = providerSites.filter(function(x){ return x.capacityMW == null; }).length;
-    var countries = [];
-    providerSites.forEach(function(x){ if (x.country && countries.indexOf(x.country) === -1) countries.push(x.country); });
-
-    var splitBar = totalMW > 0
-      ? '<div class="p-split">' + split.filter(function(g){ return g.mw > 0; }).map(function(g){
-          return '<i class="s-' + g.slug + '" style="flex:' + g.mw + '"></i>';
-        }).join('') + '</div>'
-      : '';
-    var splitKey = '<ul class="p-key">' + split.map(function(g){
-      return '<li>' +
-        '<span class="kl"><span class="sw s-' + g.slug + '"></span>' + esc(g.status) + '</span>' +
-        '<span class="kv">' + (g.mw > 0 ? mwFmt(g.mw) + ' MW' : '—') + '</span>' +
-        '<span class="kn">' + g.n + ' site' + (g.n === 1 ? '' : 's') + '</span>' +
-      '</li>';
-    }).join('') + '</ul>';
-
-    // ── Evidence across this operator's sites ───────────────────────────
-    // The same weakest-link verdict the drawer prints per row, tallied — so the
-    // card answers "how much of this is the company's own word" for the
-    // operator as a whole, in the atlas's existing vocabulary.
-    var EV = [["independent", "independently verified"], ["operator", "operator's word"], ["unsourced", "unsourced"]];
-    var evCounts = { independent: 0, operator: 0, unsourced: 0 };
-    providerSites.forEach(function(x){ var k = siteVerdict(x).key; evCounts[k] = (evCounts[k] || 0) + 1; });
-    var evHtml = '<div class="p-ev">' +
-      '<div class="eyebrow">Evidence across these sites</div>' +
-      '<div class="p-ev-meter">' + EV.filter(function(e){ return evCounts[e[0]]; }).map(function(e){
-        return '<i class="' + e[0] + '" style="flex:' + evCounts[e[0]] + '"></i>';
-      }).join('') + '</div>' +
-      '<div class="p-ev-key">' + EV.filter(function(e){ return evCounts[e[0]]; }).map(function(e){
-        return '<span class="vd ' + e[0] + '"><i></i><b>' + evCounts[e[0]] + '</b>&nbsp;' + e[1] + '</span>';
-      }).join('') + '</div>' +
-    '</div>';
-
-    el.innerHTML = '<div class="wrap" style="--pc:' + color + '">' +
-      summaryHtml +
+    el.innerHTML =
+      '<div class="op-nav">' +
+        '<button class="back-link" id="opBack">' + ICON("back") + 'Operators</button>' +
+        '<button class="ghost sm" id="opFit" title="Fit the map to this operator\'s sites">' + ICON("crosshair") + 'Fit map</button>' +
+      '</div>' +
+      '<div class="op-head">' +
+        '<div class="op-ident">' + providerLogoHtml(p) +
+          '<div style="display:flex;flex-direction:column;gap:3px;min-width:0"><h1>' + esc(p) + '</h1>' +
+          '<span class="op-meta"><span class="dot" style="background:' + color + '"></span>' + plural(sitesOf.length, "site") +
+            ' · ' + countries.length + (countries.length === 1 ? ' country' : ' countries') +
+            (entry.domain ? ' · ' + esc(entry.domain) : '') + '</span></div>' +
+        '</div>' + summaryHtml +
+      '</div>' +
       '<div class="p-figure">' +
-        '<div class="p-cap"><b>' + (totalMW > 0 ? mwFmt(totalMW) : '—') + '</b><em>MW disclosed</em></div>' +
-        '<div class="p-cap-meta">' + stats.siteCount + ' site' + (stats.siteCount === 1 ? '' : 's') +
-          ' · ' + stats.operationalCount + ' operational · ' + undisclosed + ' disclose no figure · ' +
-          countries.length + ' countr' + (countries.length === 1 ? 'y' : 'ies') + '</div>' +
-        splitBar + splitKey +
+        '<div class="p-cap"><b>' + (totalMW > 0 ? mwFmt(totalMW) : '—') + '</b><span class="eyebrow">MW disclosed</span>' +
+          '<span class="p-cap-meta">' + operational + ' operational · ' + undisclosed + ' disclose no figure</span></div>' +
+        (totalMW > 0 ? racksHtml(split, 100, color) + racksLegend(color, 100) : '<span class="empty-note">No site of this operator has a disclosed figure yet.</span>') +
+        tiles +
       '</div>' +
-      evHtml +
-      '<div class="p-body">' +
-        '<div class="p-section p-partners"><h2>Partnerships</h2>' + partnersHtml + '</div>' +
-        '<div class="p-section"><h2>Latest headlines</h2>' + headlinesHtml +
-          '<a class="p-search-link" href="https://www.google.com/search?tbm=nws&q=' + encodeURIComponent(p + " data center") + '" target="_blank" rel="noopener">Search for more coverage of ' + esc(p) + ' →</a>' +
-        '</div>' +
-        '<div class="p-section"><h2>Locations</h2><ul class="p-locations">' + locationsHtml + '</ul></div>' +
+      '<div class="p-section p-sites"><div class="list-head"><h2>Sites · ' + sitesOf.length + '</h2><span class="eyebrow">by disclosed MW</span></div>' +
+        sitesOf.map(function(x){ return siteRowHtml(x, { provider: false }); }).join('') +
       '</div>' +
-    '</div>';
+      '<div class="p-section"><h2>Partnerships</h2>' + partnersHtml + '</div>' +
+      '<div class="p-section"><h2>Latest headlines</h2>' + headlinesHtml +
+        '<a class="p-search-link" href="https://www.google.com/search?tbm=nws&q=' + encodeURIComponent(p + " data center") + '" target="_blank" rel="noopener">Search for more coverage of ' + esc(p) + ' →</a>' +
+      '</div>';
 
-    // The panel stays open — unlike the old full-screen page, it doesn't cover
-    // the map, so picking a location can just move the map underneath it.
-    el.querySelectorAll(".p-loc-item").forEach(function(li){
-      li.addEventListener("click", function(){
-        if (currentView !== "atlas") switchMainView("atlas");
-        selectSite(li.getAttribute("data-id"));
-      });
+    wireSiteRows(el);
+    document.getElementById("opBack").addEventListener("click", function(){ closeProviderPanel(); });
+    document.getElementById("opFit").addEventListener("click", function(){ fitSites(sitesOf); });
+  }
+
+  // ── The panel's three views: the operator list, one operator, the site list.
+  // Opening an operator pushes into the same panel; back returns to the list.
+  var panelView = "operators";
+  function setPanelView(v){
+    panelView = v;
+    document.getElementById("panelOperators").hidden = v !== "operators";
+    document.getElementById("panelOperator").hidden = v !== "operator";
+    document.getElementById("panelSites").hidden = v !== "sites";
+    document.querySelectorAll("#panelSeg button").forEach(function(b){
+      b.setAttribute("aria-pressed", String(b.getAttribute("data-panel") === (v === "operator" ? "operators" : v)));
     });
   }
-
-  // ── Recentering the globe ───────────────────────────────────────────
-  // With the dashboard open, the left of the canvas is covered by the panel and
-  // the operator list, so the globe has to move out from under them.
-  //
-  // This used to be done with MapLibre's camera padding, which does nothing at
-  // all under the globe projection — the sphere is drawn centred on the canvas
-  // and padding never reaches it. easeTo accepted the option and returned
-  // without error, so the globe simply never moved, in either direction. It
-  // only appeared to half-work because the projection falls back to Mercator
-  // when you zoom in far enough, and padding does apply there; closing the
-  // dashboard back at globe zoom left the map sitting where it was.
-  //
-  // So the offset is applied to the container instead — see #mapwrap's CSS.
-  var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-  var MIN_MAP_STRIP = 380; // px of canvas the globe always keeps
-
-  function occludedLeft(){
-    var rail = document.getElementById("rail");
-    // Below the rail's breakpoint the panel covers the map outright, so there
-    // is no "remaining space" to centre anything in.
-    if (getComputedStyle(rail).display === "none") return 0;
-    var cs = getComputedStyle(document.documentElement);
-    var px = function(name){ return parseFloat(cs.getPropertyValue(name)) || 0; };
-    var want = px("--panel-w") - px("--tab-inset") + rail.getBoundingClientRect().width;
-    // Between the rail's breakpoint (760px) and a comfortable desktop, the
-    // panel plus the list can claim nearly the whole window — at 900px wide
-    // they want 645 of it. Padding the camera by that much squeezes the globe
-    // into a slit, so cap it: the map always keeps a usable strip, even if
-    // that means it isn't perfectly centred in what's left.
-    var avail = document.getElementById("mapwrap").getBoundingClientRect().width;
-    return Math.max(0, Math.min(want, avail - MIN_MAP_STRIP));
-  }
-
-  // The dark band across the top of the dashboard. Measured from the masthead's
-  // own rule in the tab column so the card's lighter field starts on that exact
-  // line — one rule crossing the whole width, instead of the panel's top edge
-  // and the masthead's rule clashing beside the seam.
-  function setShoulder(){
-    var shell = document.getElementById("shell");
-    var panel = document.getElementById("providerPanel");
-    var rail = document.getElementById("rail");
-    var brand = rail.querySelector(".brand");
-    // Below the rail's breakpoint there is no masthead to measure against, so
-    // the band falls back to something that just fits the name and the ✕.
-    if (!brand || getComputedStyle(rail).display === "none") {
-      shell.style.setProperty("--shoulder", "44px");
-      return;
-    }
-    var h = Math.round(brand.getBoundingClientRect().bottom - panel.getBoundingClientRect().top);
-    shell.style.setProperty("--shoulder", Math.max(0, h) + "px");
-  }
-
-  // Half the occluded width: sliding by that much centres the map in the strip
-  // that's left, rather than pushing it clear of the dashboard entirely.
-  function mapShift(){ return Math.round(occludedLeft() / 2); }
-
-  function setMapShift(px, animate){
-    var wrap = document.getElementById("mapwrap");
-    wrap.classList.toggle("no-anim", animate === false || reduceMotion.matches);
-    wrap.style.setProperty("--map-shift", px + "px");
-  }
-
-  // Keep the globe centred if the window is resized while the panel is open.
-  window.addEventListener("resize", function(){
-    setMapShift(openProvider ? mapShift() : 0, false);
-    if (openProvider) setShoulder();
+  document.querySelectorAll("#panelSeg button").forEach(function(b){
+    b.addEventListener("click", function(){
+      var target = b.getAttribute("data-panel");
+      if (openProvider) closeProviderPanel(target); else setPanelView(target);
+    });
   });
 
+  // Opening an operator solos it on the map and fits the map to its sites.
   function openProviderView(p){
-    if (openProvider === p) { closeProviderPanel(); return; }
     if (currentView !== "atlas") switchMainView("atlas");
-    // Snapshot only on the way in from nothing open — switching straight from
-    // one operator's tab to another should still restore the filter the user
-    // had before any of this started, not the previous solo.
     if (!openProvider) providerFilterSnapshot = Object.assign({}, activeProviders);
     soloProvider(p);
     openProvider = p;
-    setShoulder();          // before render: .pp-head is sized from it
     renderProviderView(p);
-    var dock = document.getElementById("providerDock");
-    dock.classList.add("on");
-    dock.setAttribute("aria-hidden", "false");
-    document.getElementById("providerPanel").setAttribute("aria-label", p + " — operator overview");
-    document.getElementById("shell").classList.add("panel-open");
+    setPanelView("operator");
     document.getElementById("providerPanelBody").scrollTop = 0;
-    setMapShift(mapShift(), true);
     renderRail(); renderRows(); applyPinFilter();
+    fitSites(providerSites(p));
   }
 
-  function closeProviderPanel(){
-    if (!openProvider) return;
+  function closeProviderPanel(nextView){
+    if (!openProvider) { setPanelView(nextView || "operators"); return; }
     openProvider = null;
     if (providerFilterSnapshot) {
       activeProviders = providerFilterSnapshot;
       providerFilterSnapshot = null;
     }
-    var dock = document.getElementById("providerDock");
-    dock.classList.remove("on");
-    dock.setAttribute("aria-hidden", "true");
-    document.getElementById("shell").classList.remove("panel-open");
-    setMapShift(0, true);
+    setPanelView(nextView || "operators");
     renderRail(); renderRows(); applyPinFilter();
   }
 
-  document.querySelector(".pp-close").addEventListener("click", closeProviderPanel);
   document.addEventListener("keydown", function(e){
-    if (e.key === "Escape" && openProvider) closeProviderPanel();
+    if (e.key !== "Escape") return;
+    if (inspectorOpen()) closeDetail();
+    else if (openProvider) closeProviderPanel();
   });
 
   // ════════════════════════════════════════════════════════════════════
@@ -1698,7 +1436,7 @@
   // View switching — Atlas (map+rail+drawer+detail) vs. the three
   // full-screen overlays (Sources & method, provider, site).
   // ════════════════════════════════════════════════════════════════════
-  var ATLAS_PARTS = ["rail", "drawer", "detail", "mapwrap"];
+  var ATLAS_PARTS = ["panel", "detail", "mapwrap"];
   var OVERLAYS = { sources: "viewSourcesMethod", site: "viewSite" };
   var currentView = "atlas";
 
@@ -1709,17 +1447,15 @@
     Object.keys(OVERLAYS).forEach(function(key){
       document.getElementById(OVERLAYS[key]).classList.toggle("on", view === key);
     });
-    document.querySelectorAll("nav.tabs button").forEach(function(b){
+    document.querySelectorAll("#rail button[data-view]").forEach(function(b){
       var isSources = b.getAttribute("data-view") === "sources";
       b.setAttribute("aria-current", String((isSources && view === "sources") || (!isSources && onAtlas)));
     });
-    // The provider panel belongs to the atlas view; leaving the atlas closes it.
-    if (view !== "atlas") { closeDetail(); closeProviderPanel(); }
     if (view === "sources") renderSourcesMethodView();
     window.scrollTo(0, 0);
   }
 
-  document.querySelectorAll("nav.tabs button").forEach(function(b){
+  document.querySelectorAll("#rail button[data-view]").forEach(function(b){
     b.addEventListener("click", function(){ switchMainView(b.getAttribute("data-view") === "sources" ? "sources" : "atlas"); });
   });
 
@@ -1733,20 +1469,20 @@
     '<title id="pipelineTitle">Site Atlas evidence pipeline</title>' +
     '<desc id="pipelineDesc">Four layers. A trigger (you in chat, or the reconcile slash command) starts a subagent. The subagents research and return a report; none of them can write files. The main Claude session is the only thing holding write and git access, and it routes findings by confidence: high confidence is applied and pushed, everything else is shown to you. The data files feed the page. data/sources.js is a shared ruleset read by both research-agent and the page, not a stage in the flow.</desc>' +
     '<defs>' +
-      '<marker id="arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#4b5f59"/></marker>' +
-      '<marker id="arwd" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#9184d9"/></marker>' +
+      '<marker id="arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#6b6964"/></marker>' +
+      '<marker id="arwd" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#b9b1a2"/></marker>' +
     '</defs>' +
     '<style>' +
-      '.bnd{ font:600 10px var(--font-mono); fill:#5f746d; letter-spacing:0.12em; text-transform:uppercase; }' +
+      '.bnd{ font:600 10px var(--font-mono); fill:#86847f; letter-spacing:0.12em; text-transform:uppercase; }' +
       '.bx{ fill:var(--surface-2); stroke:var(--border); stroke-width:1; }' +
       '.nm{ font:600 12px var(--font-sans); fill:var(--ink); }' +
       '.sb{ font:400 10.5px var(--font-sans); fill:var(--ink-soft); }' +
       '.mn{ font:500 10.5px var(--font-mono); fill:var(--ink-soft); }' +
       '.warn{ font:600 10.5px var(--font-sans); fill:#E0708A; }' +
-      '.cn{ stroke:#4b5f59; stroke-width:1.4; fill:none; }' +
-      '.cnd{ stroke:#9184d9; stroke-width:1.2; fill:none; stroke-dasharray:3 3; opacity:0.75; }' +
-      '.lbl{ font:500 9.5px var(--font-mono); fill:#5f746d; letter-spacing:0.05em; }' +
-      '.lbla{ font:500 9.5px var(--font-mono); fill:#9184d9; letter-spacing:0.05em; opacity:0.85; }' +
+      '.cn{ stroke:#6b6964; stroke-width:1.4; fill:none; }' +
+      '.cnd{ stroke:#b9b1a2; stroke-width:1.2; fill:none; stroke-dasharray:3 3; opacity:0.75; }' +
+      '.lbl{ font:500 9.5px var(--font-mono); fill:#86847f; letter-spacing:0.05em; }' +
+      '.lbla{ font:500 9.5px var(--font-mono); fill:#b9b1a2; letter-spacing:0.05em; opacity:0.85; }' +
       '.div{ stroke:var(--border); stroke-width:1; }' +
     '</style>' +
     '<text class="bnd" x="40" y="30">1 · What starts a run</text>' +
@@ -1755,19 +1491,19 @@
     '<text class="sb" x="56" y="84">“vet this site before I add it”</text>' +
     '<text class="sb" x="56" y="99">“re-check the Kristiansand entry”</text>' +
     '<text class="sb" x="56" y="114">“audit every CoreWeave entry”</text>' +
-    '<text class="mn" x="56" y="134" fill="#5f746d">→ research-agent</text>' +
+    '<text class="mn" x="56" y="134" fill="#86847f">→ research-agent</text>' +
     '<rect class="bx" x="320" y="44" width="290" height="104" rx="6"/>' +
     '<text class="nm" x="336" y="66">/reconcile [scope]</text>' +
     '<text class="sb" x="336" y="84">A slash command, not an agent. The</text>' +
     '<text class="sb" x="336" y="99">session reads the data files, lists the</text>' +
     '<text class="sb" x="336" y="114">claims already on record, hands them over.</text>' +
-    '<text class="mn" x="336" y="134" fill="#5f746d">→ research-agent</text>' +
+    '<text class="mn" x="336" y="134" fill="#86847f">→ research-agent</text>' +
     '<rect class="bx" x="630" y="44" width="270" height="104" rx="6"/>' +
     '<text class="nm" x="646" y="66">You, in chat</text>' +
     '<text class="sb" x="646" y="84">“what’s new about CoreWeave”</text>' +
     '<text class="sb" x="646" y="99">Headlines for a provider page —</text>' +
     '<text class="sb" x="646" y="114">not fact-checking a site entry.</text>' +
-    '<text class="mn" x="646" y="134" fill="#5f746d">→ news-agent</text>' +
+    '<text class="mn" x="646" y="134" fill="#86847f">→ news-agent</text>' +
     '<path class="cn" d="M 170 148 C 170 176 180 176 180 200" marker-end="url(#arw)"/>' +
     '<path class="cn" d="M 465 148 C 465 176 300 176 300 200" marker-end="url(#arw)"/>' +
     '<path class="cn" d="M 765 148 C 765 176 575 176 575 200" marker-end="url(#arw)"/>' +
@@ -1782,7 +1518,7 @@
     '<text class="sb" x="56" y="320">Classes every source R/N/O/P/T/G/D/U, checks</text>' +
     '<text class="sb" x="56" y="334">cross-class corroboration and recency, assigns</text>' +
     '<text class="sb" x="56" y="348">a confidence level per field.</text>' +
-    '<rect x="56" y="358" width="358" height="28" rx="4" fill="rgba(145,132,217,0.08)" stroke="rgba(145,132,217,0.3)"/>' +
+    '<rect x="56" y="358" width="358" height="28" rx="4" fill="rgba(230,223,208,0.08)" stroke="rgba(230,223,208,0.3)"/>' +
     '<text class="sb" x="66" y="376">openrouter_ask → deepseek-chat: legwork, never a finding.</text>' +
     '<rect class="bx" x="450" y="204" width="250" height="192" rx="6"/>' +
     '<text class="nm" x="466" y="226">news-agent</text>' +
@@ -1796,8 +1532,8 @@
     '<text class="sb" x="466" y="356">Output lands in data/news.js,</text>' +
     '<text class="sb" x="466" y="370">a separate track from site facts.</text>' +
     '<rect class="bx" x="720" y="204" width="180" height="192" rx="6" stroke-dasharray="4 3"/>' +
-    '<text class="nm" x="736" y="226" fill="#8FA39C">monitor-agent</text>' +
-    '<text class="mn" x="736" y="242" fill="#5f746d">not built yet</text>' +
+    '<text class="nm" x="736" y="226" fill="#a3a19b">monitor-agent</text>' +
+    '<text class="mn" x="736" y="242" fill="#86847f">not built yet</text>' +
     '<text class="sb" x="736" y="262">⟳ self-triggering, on a</text>' +
     '<text class="sb" x="736" y="276">schedule. Nobody asks it.</text>' +
     '<line class="div" x1="736" y1="288" x2="884" y2="288"/>' +
@@ -1858,8 +1594,11 @@
   // ---- Boot ----------------------------------------------------------------
   renderRail();
   renderRows();
-  document.getElementById("barMeta").textContent =
-    SITES.length + " sites · " + providerOrder.length + " operators · updated " + fmtDate(SITES.reduce(function(m, s){ return (s.lastUpdated || "") > m ? s.lastUpdated : m; }, ""));
+  setPanelView("operators");
+  document.getElementById("statusMeta").textContent =
+    SITES.length + " sites · " + providerOrder.length + " operators · updated " + fmtDate(SITES.reduce(function(m, x){ return (x.lastUpdated || "") > m ? x.lastUpdated : m; }, ""));
+  document.getElementById("footMW").textContent = mwFmt(SITES.reduce(function(t, x){ return t + (x.capacityMW || 0); }, 0)) + " MW disclosed";
+  document.getElementById("footCount").textContent = plural(SITES.length, "site") + " · " + plural(providerOrder.length, "operator");
 
 })();
 </script>
