@@ -101,7 +101,22 @@
      for chrome sitting on top of it. The inspector is the one thing that
      overlays it, and flyTo offsets for that. */
   #mapwrap{ position:absolute; top:0; bottom:0; left:calc(var(--rail-w) + var(--panel-w)); right:0; }
-  #map{ width:100%; height:100%; display:block; background:var(--color-map); }
+  /* ---- sky ----
+     The globe's canvas is transparent everywhere outside the sphere, and its
+     atmosphere shader blends into whatever is behind it — so a layer under
+     the map reads as the space the globe is sitting in, halo and all. Two
+     very restrained neutral washes keep it from being a flat black rectangle;
+     the old blue and teal washes are what made the page read as navy. */
+  #sky{ position:absolute; inset:0; z-index:0; overflow:hidden; pointer-events:none;
+    background:
+      radial-gradient(60% 55% at 22% 14%, rgba(230,223,208,.045) 0%, transparent 70%),
+      radial-gradient(52% 48% at 86% 84%, rgba(255,255,255,.03) 0%, transparent 72%),
+      radial-gradient(120% 90% at 50% 45%, #111113 0%, #0b0b0d 55%, #060607 100%);
+  }
+  #starfield{ position:absolute; inset:0; display:block; width:100%; height:100%; }
+  /* Positioned so it paints above #sky, but no z-index of its own: the scale
+     and attribution controls inside it have to outrank the status strip. */
+  #map{ position:relative; width:100%; height:100%; display:block; background:transparent; }
   .map-loading{
     position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
     margin:0; font-family:var(--font-code); font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--color-neutral-500);
@@ -550,6 +565,7 @@
 
 <div id="shell">
   <div id="mapwrap">
+    <div id="sky" aria-hidden="true"><canvas id="starfield"></canvas></div>
     <div id="map" role="img" aria-label="World map with data center site markers"></div>
     <p class="map-loading" id="mapLoading">Loading map…</p>
     <div class="map-tools" aria-label="Map controls">
@@ -626,6 +642,38 @@
   // PROVENANCE_FIELDS, hostOf, siteFieldBasis, siteFieldHasProvenance,
   // siteEvidenceFor, FIELD_LABELS) from data/sources.js — all loaded
   // before this script.
+  //
+  // ── Map of this script ─────────────────────────────────────────────────
+  // Each section below opens with a ═══ banner; search for the banner text
+  // to jump there. The DOM ids each one owns are listed so a change to the
+  // markup can be traced without reading the whole file.
+  //
+  //   Helpers            esc, ICON (sprite icons), fmtDate, statusSlug
+  //   Provider colors    colorFor, providerOrder, tableSortCompare
+  //   Confidence         confBadge, classChip, verdictInline, siteVerdict
+  //   Sky                #sky #starfield · the seeded star canvas
+  //   Map                #map #mapLoading · globe + atmosphere, pins
+  //                      (pinEls), fitTo/fitSites,
+  //                      zoomToSite (offsets for the inspector), #zoomIn
+  //                      #zoomOut [data-fit]
+  //   Operators list     #provList #opsMeta · capacitySplit, racksHtml
+  //                      (the rack pictogram), renderRail
+  //   Sites tab          #rows #q #statusSeg #sitesMeta · visibleSites,
+  //                      siteRowHtml (shared with the operator page)
+  //   Site inspector     #detail · selectSite, closeDetail
+  //   Sources & method   #viewSourcesMethod · renderSourcesMethodView
+  //   Operator page      #providerPanelBody · renderProviderView, and the
+  //                      panel views #panelOperators #panelOperator
+  //                      #panelSites #panelSeg · setPanelView,
+  //                      openProviderView, closeProviderPanel
+  //   Site page          #viewSite · renderSiteView, openSiteView
+  //   View switching     #rail [data-view] · switchMainView (atlas /
+  //                      sources / site)
+  //   Pipeline diagram   PIPELINE_SVG (hand-written; keep in step with the
+  //                      auto-apply policy in CLAUDE.md)
+  //   Boot               #statusMeta #footMW #footCount
+  //
+  // tools/check.js verifies every id above exists before a push.
 
   var TODAY = new Date().toISOString().slice(0, 10);
 
@@ -719,6 +767,77 @@
   }
 
   // ════════════════════════════════════════════════════════════════════
+  // Sky — a still starfield behind the globe
+  // ════════════════════════════════════════════════════════════════════
+  // Drawn to a canvas rather than assembled from CSS gradients or a pile of
+  // box-shadows: a few hundred dots with varying size, brightness and colour
+  // cost one paint and stay crisp on a HiDPI screen, where a tiled gradient
+  // would visibly repeat.
+  //
+  // Deliberately NOT animated. A twinkle would mean a permanent rAF loop
+  // running alongside a WebGL globe for decoration, and the globe is what the
+  // frame budget is for.
+  (function sky(){
+    var cv = document.getElementById("starfield");
+    if (!cv || !cv.getContext) return;
+    var ctx = cv.getContext("2d");
+
+    // Seeded, so the same sky comes back after a resize instead of the stars
+    // reshuffling themselves every time the window moves.
+    function rng(seed){
+      return function(){
+        seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+        var t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+        t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+        return ((t ^ t >>> 14) >>> 0) / 4294967296;
+      };
+    }
+
+    // Starlight isn't white — most stars read faintly blue, a few warm.
+    var TINTS = ["255,255,255", "214,226,255", "186,205,255", "255,236,214"];
+
+    function draw(){
+      var w = cv.clientWidth, h = cv.clientHeight;
+      if (!w || !h) return;
+      var dpr = Math.min(window.devicePixelRatio || 1, 2);
+      cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, w, h);
+
+      var rand = rng(20260915);
+      var count = Math.round(w * h / 5200); // density, not a fixed count
+      for (var i = 0; i < count; i++) {
+        var x = rand() * w, y = rand() * h;
+        // Cube the roll so the big bright stars stay rare.
+        var t = Math.pow(rand(), 3);
+        var r = 0.35 + t * 1.25;
+        var a = 0.22 + Math.pow(rand(), 1.6) * 0.62;
+        var tint = TINTS[Math.floor(rand() * TINTS.length)];
+
+        // The handful of largest stars get a soft bloom, which is most of what
+        // sells this as a sky rather than as noise.
+        if (t > 0.55) {
+          var g = ctx.createRadialGradient(x, y, 0, x, y, r * 5.5);
+          g.addColorStop(0, "rgba(" + tint + "," + (a * 0.5) + ")");
+          g.addColorStop(1, "rgba(" + tint + ",0)");
+          ctx.fillStyle = g;
+          ctx.beginPath(); ctx.arc(x, y, r * 5.5, 0, 6.2832); ctx.fill();
+        }
+        ctx.fillStyle = "rgba(" + tint + "," + a + ")";
+        ctx.beginPath(); ctx.arc(x, y, r, 0, 6.2832); ctx.fill();
+      }
+    }
+
+    draw();
+    var pending;
+    window.addEventListener("resize", function(){
+      clearTimeout(pending);
+      pending = setTimeout(draw, 150);
+    });
+  })();
+
+
+  // ════════════════════════════════════════════════════════════════════
   // Map — MapLibre GL, CARTO Dark Matter vector basemap, globe projection
   // ════════════════════════════════════════════════════════════════════
   var pinEls = {};
@@ -737,7 +856,7 @@
     style: "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
     center: DEFAULT_CENTER,
     zoom: DEFAULT_ZOOM,
-    minZoom: 1.2,
+    minZoom: 0.8,
     maxZoom: 14,
     dragRotate: false,
     pitchWithRotate: false,
@@ -745,6 +864,29 @@
   });
   map.touchZoomRotate.disableRotation();
   map.addControl(new maplibregl.ScaleControl({ maxWidth: 90, unit: "metric" }), "bottom-left");
+  // Globe instead of flat Mercator: vector tiles are Mercator-projected at
+  // the data level regardless, but rendering them onto a sphere removes the
+  // flat projection's area/distance distortion since a globe has no
+  // projection to distort in the first place.
+  map.on("style.load", function(){
+    map.setProjection({ type: "globe" });
+    // The default atmosphere is tuned for a bright sky and hazes the whole
+    // sphere to a pale grey disc — which, over a starfield, reads as fog
+    // rather than as a planet. Darkened to the graphite palette (no blue
+    // horizon any more), and faded out entirely by the zoom at which the
+    // projection stops being a globe anyway.
+    try {
+      map.setSky({
+        "sky-color": "#08080a",
+        "horizon-color": "#1e1e22",
+        "fog-color": "#0d0d10",
+        "sky-horizon-blend": 0.5,
+        "horizon-fog-blend": 0.6,
+        "fog-ground-blend": 0.2,
+        "atmosphere-blend": ["interpolate", ["linear"], ["zoom"], 0, 0.6, 5, 0.25, 7, 0]
+      });
+    } catch (e) { console.warn("Site Atlas: sky styling unavailable", e); }
+  });
 
   var CAP_MAX = Math.max.apply(null, SITES.map(function(s){ return s.capacityMW || 0; })) || 1;
   function pinDiameter(mw){
@@ -846,7 +988,7 @@
   document.getElementById("zoomOut").addEventListener("click", function(){ map.zoomOut(); });
 
   // ════════════════════════════════════════════════════════════════════
-  // Rail — disclosed capacity + operator filter
+  // Operators list — disclosed capacity as racks, one row per operator
   // ════════════════════════════════════════════════════════════════════
   var activeProviders = {};
   providerOrder.forEach(function(p){ activeProviders[p] = true; });
@@ -945,7 +1087,7 @@
   }
 
   // ════════════════════════════════════════════════════════════════════
-  // Drawer — searchable, filterable site list
+  // Sites tab — searchable, filterable site list, shared row markup
   // ════════════════════════════════════════════════════════════════════
   var query = "";
   var statusFilter = "all";
@@ -1005,7 +1147,7 @@
   });
 
   // ════════════════════════════════════════════════════════════════════
-  // Detail panel — verdict-first per-field display + evidence on file
+  // Site inspector — one site, its figure as racks, notes and sources
   // ════════════════════════════════════════════════════════════════════
   var detailEl = document.getElementById("detail");
 
@@ -1173,8 +1315,8 @@
 
       '<div class="band"><h4>The confidence rules</h4></div>' +
       '<ul class="rule-list">' +
-        '<li><strong>High</strong><span>Two or more distinct classes agree, at least one of them independent (regulatory, network, or observed), and the freshest evidence is inside this field\'s re-check window. The only level applied and pushed without asking.</span></li>' +
-        '<li><strong>Medium</strong><span>Two or more classes agree but all of them are the operator or outlets restating the operator — or a single regulatory record standing alone. Believable, uncorroborated.</span></li>' +
+        '<li><strong>High</strong><span>Two or more distinct classes agree, at least one of them independent (regulatory, network, or observed), and the freshest evidence is inside this field\'s re-check window. Renders as <em>Independently verified</em>.</span></li>' +
+        '<li><strong>Medium</strong><span>Two or more classes agree but all of them are the operator or outlets restating the operator — or a single regulatory record standing alone. Believable, uncorroborated — written and shown as <em>Operator\'s word</em>.</span></li>' +
         '<li><strong>Low</strong><span>One class only, or every source is past its window, or sources genuinely conflict. Conflicts are never silently resolved.</span></li>' +
         '<li><strong>Unverified</strong><span>Nothing usable. Directory and unattributed sources are still cited on the entry, but they cannot lift a claim above this.</span></li>' +
       '</ul>' +
@@ -1433,8 +1575,8 @@
   }
 
   // ════════════════════════════════════════════════════════════════════
-  // View switching — Atlas (map+rail+drawer+detail) vs. the three
-  // full-screen overlays (Sources & method, provider, site).
+  // View switching — Atlas (map+panel+inspector) vs. the two full-screen
+  // overlays (Sources & method, site page). The rail is the navigation.
   // ════════════════════════════════════════════════════════════════════
   var ATLAS_PARTS = ["panel", "detail", "mapwrap"];
   var OVERLAYS = { sources: "viewSourcesMethod", site: "viewSite" };
@@ -1460,14 +1602,15 @@
   });
 
   // ════════════════════════════════════════════════════════════════════
-  // Pipeline diagram — unchanged from the previous Method tab, reused
-  // verbatim (via the --surface-2/--border/--ink/--ink-soft/--accent/
-  // --font-mono/--font-sans compat aliases) so the hand-tuned layout isn't
-  // put at risk by the redesign.
+  // Pipeline diagram — hand-written SVG (via the --surface-2/--border/--ink/
+  // --ink-soft/--accent/--font-mono/--font-sans compat aliases). Unlike the
+  // tally and class cards, nothing renders this from data/sources.js, so its
+  // applier boxes have to be kept in step with the auto-apply policy in
+  // CLAUDE.md by hand.
   // ════════════════════════════════════════════════════════════════════
   var PIPELINE_SVG = '<svg viewBox="0 0 1280 830" role="img" aria-labelledby="pipelineTitle pipelineDesc">' +
     '<title id="pipelineTitle">Site Atlas evidence pipeline</title>' +
-    '<desc id="pipelineDesc">Four layers. A trigger (you in chat, or the reconcile slash command) starts a subagent. The subagents research and return a report; none of them can write files. The main Claude session is the only thing holding write and git access, and it routes findings by confidence: high confidence is applied and pushed, everything else is shown to you. The data files feed the page. data/sources.js is a shared ruleset read by both research-agent and the page, not a stage in the flow.</desc>' +
+    '<desc id="pipelineDesc">Four layers. A trigger (you in chat, or the reconcile slash command) starts a subagent. The subagents research and return a report; none of them can write files. The main Claude session is the only thing holding write and git access, and it applies findings by what the evidence supports: High and Medium are written with their verdict, Low only into an empty field, conflicts are recorded in notes with no value written, and everything lands in git with the changelog in the commit message. The data files feed the page. data/sources.js is a shared ruleset read by both research-agent and the page, not a stage in the flow.</desc>' +
     '<defs>' +
       '<marker id="arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#6b6964"/></marker>' +
       '<marker id="arwd" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#b9b1a2"/></marker>' +
@@ -1551,18 +1694,18 @@
     '<text class="bnd" x="40" y="430">3 · Applier</text>' +
     '<rect x="40" y="440" width="860" height="164" rx="6" fill="var(--surface-2)" stroke="var(--accent)" stroke-opacity="0.35" stroke-width="1"/>' +
     '<text class="nm" x="56" y="464">Main Claude session — the applier</text>' +
-    '<text class="sb" x="56" y="482">The only thing in this diagram holding Write, Edit and git. The subagents hand it a report; it decides what happens next.</text>' +
-    '<text class="sb" x="56" y="497">Nothing reaches a data file except through here, which is what stopped the two fabricated claims in the openrouter_ask incident.</text>' +
+    '<text class="sb" x="56" y="482">The only thing in this diagram holding Write, Edit and git. The subagents hand it a report; it applies what the evidence supports.</text>' +
+    '<text class="sb" x="56" y="497">No human review gate: doubt goes into the data as a verdict, not into an inbox. Fabrication is caught earlier, by the adversarial second pass in research-agent.</text>' +
     '<rect x="56" y="510" width="410" height="78" rx="5" fill="rgba(74,222,128,0.07)" stroke="rgba(74,222,128,0.35)"/>' +
-    '<text class="nm" x="70" y="531" fill="#4ADE80">High confidence</text>' +
-    '<text class="sb" x="70" y="549">Edit the data file, update lastUpdated and</text>' +
-    '<text class="sb" x="70" y="563">sources, commit, push. No pause to ask.</text>' +
-    '<text class="sb" x="70" y="579">2+ classes · one independent · current.</text>' +
+    '<text class="nm" x="70" y="531" fill="#4ADE80">High · Medium</text>' +
+    '<text class="sb" x="70" y="549">Write the value with its verdict — independently</text>' +
+    '<text class="sb" x="70" y="563">verified or operator\'s word. Update lastUpdated,</text>' +
+    '<text class="sb" x="70" y="579">sources and provenance; commit, push. Never lower a verdict.</text>' +
     '<rect x="480" y="510" width="404" height="78" rx="5" fill="rgba(251,191,36,0.06)" stroke="rgba(251,191,36,0.32)"/>' +
-    '<text class="nm" x="494" y="531" fill="#FBBF24">Medium · Low · conflicting · unverifiable</text>' +
-    '<text class="sb" x="494" y="549">Show you the finding and stop. No file is</text>' +
-    '<text class="sb" x="494" y="563">touched, nothing is committed.</text>' +
-    '<text class="sb" x="494" y="579">You make the call.</text>' +
+    '<text class="nm" x="494" y="531" fill="#FBBF24">Low · conflicting · unverifiable</text>' +
+    '<text class="sb" x="494" y="549">Low: written only into an empty field, else a lead in notes.</text>' +
+    '<text class="sb" x="494" y="563">Conflicting: no value; both claims dated in notes.</text>' +
+    '<text class="sb" x="494" y="579">Unverifiable: nothing written; what was searched is logged.</text>' +
     '<path class="cn" d="M 470 604 L 470 638" marker-end="url(#arw)"/>' +
     '<text class="bnd" x="40" y="632">4 · Data files</text>' +
     '<rect class="bx" x="40" y="646" width="204" height="62" rx="6"/>' +

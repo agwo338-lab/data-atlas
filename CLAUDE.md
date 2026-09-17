@@ -11,8 +11,9 @@ capacity. Built as a single static site with no backend and no build step.
   one bone accent, Geist + Geist Mono, operator colours the only saturated
   hue): a 56px icon rail (Atlas, Sources & method, reset view), one docked
   400px panel with an Operators / Sites switch, the map filling the rest
-  (MapLibre GL JS + CARTO's Dark Matter vector basemap, flat Mercator, both
-  from a public CDN, no API key currently required), and a site inspector
+  (MapLibre GL JS + CARTO's Dark Matter vector basemap in globe projection
+  over a seeded starfield canvas, both libraries from a public CDN, no API
+  key currently required), and a site inspector
   that overlays the map's right edge when a site is selected. Opening an
   operator pushes its page into the same panel (back link returns to the
   list), solos it on the map and fits the map to its sites. Capacity is
@@ -89,6 +90,14 @@ capacity. Built as a single static site with no backend and no build step.
 - To preview locally before pushing, serve the folder with any static file
   server (e.g. `npx serve .`) rather than opening `index.html` directly via
   `file://`, since the map fetches data over HTTP.
+- Before committing a change to `index.html` or a data file, run
+  `node tools/check.js`. It is a smoke check, not a test of behaviour: the
+  data files evaluate, the inline script parses, every element id and
+  sprite icon the script reaches for exists, and every site has the fields
+  the page reads unconditionally. A failure there is the kind that takes
+  the whole map down silently in production. The script also opens with a
+  map of its own sections and the DOM ids each owns — read that before
+  reading the file.
 - Commit messages are the project's changelog — write them to actually
   describe what changed, since there's no separate log kept anywhere else.
 - The user isn't a coder and reviews work by checking the live deployed
