@@ -399,6 +399,22 @@ them over `openrouter_ask` for anything a public record can settle. SEC
 asks automated callers to identify themselves; set `SEC_USER_AGENT` in
 `.env` to a real name and email.
 
+**The agents cannot read PDFs; the caller can, and must** (found Sep 2026,
+on the Effingham/Independence run). Neither subagent has a Bash tool, and
+WebFetch returns ordinary government PDFs — FERC filings, DRI reports,
+permits — as compressed streams it cannot extract. So the exact documents
+that would move a field from "operator's word" to "independently verified"
+are the ones an agent structurally cannot read. Expect reports to end with
+"I found the primary document but could not read it"; that is the tool
+working as designed, not the agent giving up, and the agent is right not to
+cite a document it never saw. The caller finishes the job: `curl` the PDF
+into the scratchpad and run `pdftotext -layout`, which is already on PATH.
+Both leads on that first run had been sitting in `notes` as "the
+highest-value thing to chase next," and reading them ruled both out —
+a document that looks like the right one and isn't is worse than no lead
+at all, because it survives indefinitely as a plausible next step. Record
+rule-outs in `notes` as explicitly as finds.
+
 Two behaviours of EPA ECHO worth knowing, both found by testing rather
 than from their docs: its `p_naics` filter is effectively ignored
 server-side (a 518210 query for North Dakota returns all 1,887 air
