@@ -226,6 +226,21 @@ named investment figure.
 
 ### Watch-only — investigated, not in scope as stated
 
+- **Irvine, CA — RULED OUT, not an AWS site.** Checked 2026-09-21 after it
+  came up as a plausible-sounding lead. There is no AWS data center in
+  Irvine. Amazon does occupy about 202,505 sq ft at 17871 Von Karman Ave,
+  but as a delivery and distribution facility for same-day and Prime
+  orders. The data center half of that same property (also addressed
+  17836 Gillette Ave) is Centersquare LAX3, already tracked. The lead
+  originates with directories that scrape an Amazon building permit and
+  template it into "a operational hyperscale data center with 0.123 MW" —
+  123kW, with placeholder 2022-01-01 dates on both application and
+  approval. Note the general trap: AMAZON.COM SERVICES LLC is Amazon's
+  catch-all operating entity and appears on fulfilment, delivery and
+  office permits, so the permittee name does not establish that a building
+  is a data center. AWS's only Southern California Direct Connect location
+  is CoreSite LA1 at One Wilshire.
+
 - **AWS European Sovereign Cloud (Brandenburg, Germany)** — a multi-AZ regional program (€7.8B→€8.8B), not a single named campus; same category the AWS scope note above excludes. Flagging as a scope question, not a sourcing gap.
 - **AWS Saudi Arabia cloud region** ($5.3B, targeted 2026) — no named campus/site found, just "a cloud region in Saudi Arabia" — doesn't meet the named-location bar.
 
