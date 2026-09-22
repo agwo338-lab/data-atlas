@@ -697,7 +697,7 @@ var SITES = [
         ]
       }
     },
-    notes: "Re-verified 2026-09-15. ADDRESS CONFIRMED independently: a TCEQ air-permit registration (Form PI-1S, Registered Entity RN111537775, filed 2025-01-30 by Galaxy Helios I LLC and signed by a named Galaxy executive) gives the site as 984 County Road 112, Afton, Dickens County, TX 79220, with construction start projected Mar 2025. That is genuine regulatory corroboration the project exists and was being built. The map pin is still a county-level approximation and was NOT updated: a precise lat/long (33.7814, -100.8791) circulates on directory/wiki sites but neither cites how it was derived (D-class), so it was not written in. CAPACITY remains operator-sourced: the 526MW critical-IT figure traces to Galaxy's own investor materials (133 + 260 + 133 across three phases), republished via PRNewswire, refiled as an SEC exhibit and written up by trade press — the arithmetic checks out against Galaxy's stated breakdown, but no regulatory, network or observed source confirms the number itself. GROSS CAPACITY HAS MOVED: ERCOT-approved grid capacity at the campus is now ~1,630MW gross (Helios I 800MW + Helios II 830MW) per Galaxy's Jan 2026 and Sep 2026 disclosures, up from the 800MW previously noted here. That is interconnection capacity, distinct from and much larger than the 526MW critical IT leased to CoreWeave — do not conflate them. Galaxy itself describes the ERCOT Batch Zero classifications as still subject to an ongoing audit, and ERCOT is not publishing Batch Zero results, so those grid figures are sponsor-disclosed rather than independently confirmable. DROPPED CLAIM: a search summary asserted a specific TCEQ document showed 120 diesel generators at this site; the cited document was fetched and turned out to cover an unrelated LNG facility in Jefferson County — misattributed, and not applied. Searched without result: EPA ECHO (zero NAICS 518210 facilities in Dickens County; full 7,784-facility TX scan, coverage complete, though data-centre gensets may simply not be registered under that code); PeeringDB (no record, expected for a single-tenant campus); Chapter 312 abatement records (the Dickens County reinvestment-zone record found states no investment or MW figure)."
+    notes: "Re-verified 2026-09-15. ADDRESS CONFIRMED independently: a TCEQ air-permit registration (Form PI-1S, Registered Entity RN111537775, filed 2025-01-30 by Galaxy Helios I LLC and signed by a named Galaxy executive) gives the site as 984 County Road 112, Afton, Dickens County, TX 79220, with construction start projected Mar 2025. That is genuine regulatory corroboration the project exists and was being built. The map pin is still a county-level approximation and was NOT updated: a precise lat/long (33.7814, -100.8791) circulates on directory/wiki sites but neither cites how it was derived (D-class), so it was not written in. CAPACITY remains operator-sourced: the 526MW critical-IT figure traces to Galaxy's own investor materials (133 + 260 + 133 across three phases), republished via PRNewswire, refiled as an SEC exhibit and written up by trade press — the arithmetic checks out against Galaxy's stated breakdown, but no regulatory, network or observed source confirms the number itself. GROSS CAPACITY HAS MOVED: ERCOT-approved grid capacity at the campus is now ~1,630MW gross (Helios I 800MW + Helios II 830MW) per Galaxy's Jan 2026 and Sep 2026 disclosures, up from the 800MW previously noted here. That is interconnection capacity, distinct from and much larger than the 526MW critical IT leased to CoreWeave — do not conflate them. Galaxy itself describes the ERCOT Batch Zero classifications as still subject to an ongoing audit, and ERCOT is not publishing Batch Zero results, so those grid figures are sponsor-disclosed rather than independently confirmable. DROPPED CLAIM: a search summary asserted a specific TCEQ document showed 120 diesel generators at this site; the cited document was fetched and turned out to cover an unrelated LNG facility in Jefferson County — misattributed, and not applied. Searched without result: EPA ECHO (zero NAICS 518210 facilities in Dickens County; full 7,784-facility TX scan, coverage complete, though data-centre gensets may simply not be registered under that code); PeeringDB (no record, expected for a single-tenant campus); Chapter 312 abatement records (the Dickens County reinvestment-zone record found states no investment or MW figure). Audited 2026-09-21: capacity did not move and stays on P+T. One live lead, unresolved only because a server was down: Global Energy Monitor's page for the \"Galaxy Helios 1 power plant\" cites a TCEQ permit document (records.tceq.texas.gov, dID=8711478) for a 252 MW figure, which matches neither the 526 MW critical-IT figure stored here nor the Phase I 133 MW critical-IT / 200 MW gross figures. GEM is an aggregator and cannot carry the number itself; the TCEQ document behind it was fetched directly and returned HTTP 503, so it is a lead, not a finding. Retry that document — it is the single most likely route to an independent capacity class on this entry. Confirmed unchanged this pass: Galaxy's Jan 2026 424B3/8-K restates the 830 MW ERCOT approval and >1.6 GW gross, both grid interconnection figures rather than critical IT, so neither bears on capacityMW. EPA ECHO for Dickens County returned zero of 7,786 Texas facilities with complete coverage, and EDGAR full-text found nothing."
   },
   {
     id: "coreweave-plano",
@@ -732,7 +732,7 @@ var SITES = [
       { label: "Core Scientific investor newsroom, Mar 2024", url: "https://investors.corescientific.com/news-events/press-releases/detail/9/core-scientific-to-provide-coreweave-up-to-16-mw-of-data-center-infrastructure-to-support-ai-and-hpc-workloads-in-long-term-hosting-contract-with-potential-revenue-of-more-than-100-million" },
       { label: "Data Center Dynamics — \"CoreWeave to lease 16MW of data center space from cryptominer Core Scientific\"", url: "https://www.datacenterdynamics.com/en/news/coreweave-to-lease-16mw-of-data-center-space-from-cryptominer-core-scientific/" }
     ],
-    notes: "CoreWeave's first Core Scientific hosting deal, signed Mar 2024 — predates the later Denton/Muskogee/Marble/Dalton deals. Former HPE hosting/HPC facility at 3301 Hibbetts Rd, 118,000 sq ft, 8-year contract, >$100M potential revenue ($97.8M in lease payments). Originally disclosed at 16MW; Core Scientific's Q4 2025 and Q1 2026 investor disclosures both list this site at 20MW as part of the company's named 590MW/5-site CoreWeave portfolio (Denton/Dalton/Muskogee/Marble/Austin) — updated to 20MW on the strength of that repeated primary-source figure, though independent trade-press confirmation is still pending. Coordinates are an Austin city-center approximation."
+    notes: "CoreWeave's first Core Scientific hosting deal, signed Mar 2024 — predates the later Denton/Muskogee/Marble/Dalton deals. Former HPE hosting/HPC facility at 3301 Hibbetts Rd, 118,000 sq ft, 8-year contract, >$100M potential revenue ($97.8M in lease payments). Originally disclosed at 16MW; Core Scientific's Q4 2025 and Q1 2026 investor disclosures both list this site at 20MW as part of the company's named 590MW/5-site CoreWeave portfolio (Denton/Dalton/Muskogee/Marble/Austin) — updated to 20MW on the strength of that repeated primary-source figure, though independent trade-press confirmation is still pending. Coordinates are an Austin city-center approximation. CONTESTED CAPACITY (found 2026-09-21, unresolved by design): Core Scientific's own Q2 FY26 earnings deck — an 8-K exhibit filed Jul 2026, the same document this atlas already cites for the Denton entry — lists Austin at ~65 MW leased / ~65 MW billing in its per-site buildout table, not 20 MW. https://www.sec.gov/Archives/edgar/data/1839341/000183934126000012/q2fy26earningsdeck728am.htm . Both figures are Core Scientific's own word at different dates, so this is a primary-vs-primary conflict and no value is written: the stored 20 MW is left untouched and neither claim is promoted. Two things make this worse than an ordinary date gap and are the reason it is recorded so prominently. First, the 20 MW figure's stated basis — \"Q4 2025 and Q1 2026 investor disclosures\" — is not actually cited in this entry's sources array, so the number on file cannot be checked against its own source. Second, the conflict surfaced from re-reading a document the atlas already trusted for a different site, which means \"already cited\" did not mean \"every figure in it was read\". The next pass should locate and date the actual Q4 2025/Q1 2026 filing and compare it properly against the Jul 2026 deck. Also searched dry this pass: PeeringDB at/near 3301 Hibbetts Rd, EPA ECHO for Austin (full state scan, complete, zero), EDGAR for \"Hibbetts Road Austin\"."
   },
   {
     id: "coreweave-cedarcreek",
@@ -748,9 +748,36 @@ var SITES = [
     sources: [
       { label: "Data Center Dynamics — \"CoreWeave to lease capacity from EdgeConneX at data center campus in Cedar Creek, Texas\"", url: "https://www.datacenterdynamics.com/en/news/coreweave-to-lease-capacity-from-edgeconnex-at-data-center-campus-in-cedar-creek-texas/" },
       { label: "Community Impact, Jul 2026 — \"AI cloud company CoreWeave to fill $440M Cedar Creek data center\"", url: "https://communityimpact.com/bastrop-cedar-creek/development/ai-cloud-company-coreweave-to-fill-440m-cedar-creek-data-center/" },
-      { label: "Community Impact — \"EdgeConneX plans second data center campus in Bastrop County\"", url: "https://communityimpact.com/austin/bastrop-cedar-creek/government/2026/03/31/edgeconnex-plans-second-data-center-campus-in-bastrop-county/" }
+      { label: "Community Impact — \"EdgeConneX plans second data center campus in Bastrop County\"", url: "https://communityimpact.com/austin/bastrop-cedar-creek/government/2026/03/31/edgeconnex-plans-second-data-center-campus-in-bastrop-county/" },
+      { label: "TX TDLR — TABS project TABS2025023484, DFW33220N LLC (EdgeConneX), 8001 Wolf Ln Bldg 2", url: "https://www.tdlr.texas.gov/TABS/Projects/TABS2025023484", cls: "R" }
     ],
-    notes: "CoreWeave named as qualifying tenant for EdgeConneX's Campus 1 at this Bastrop County site — 4 buildings, ~2.8M sq ft, ~$1.4B — confirmed via the county's Dec 2024 10-year/75% property tax abatement and a Jul 2025 Texas Comptroller large-data-center-project certification. First building ($440M) under construction as of Jul 2026, expected to open mid-to-late 2026 (local press varies between Jun and Aug 2026). Correction: the earlier \"up to 19 potential buildings\" figure conflated Campus 1 with two separate, later-announced EdgeConneX campuses (up to 9 buildings each) elsewhere in the county — those are distinct developments with no confirmed CoreWeave involvement as of this update. No MW figure disclosed by CoreWeave or EdgeConneX for Campus 1 in any source found — left null rather than guessed. Coordinates are a Cedar Creek/Bastrop County approximation."
+    provenance: {
+      // Both fields are spelled out deliberately. Provenance falls back to
+      // "every source counts" PER FIELD, not per entry, so covering only
+      // location here would have let the TDLR filing silently lift status
+      // to independently verified as well — which nobody checked it for.
+      status: {
+        basis: "disclosed",
+        asOf: "2026-09-02",
+        evidence: [
+          { source: 0, cls: "T" },
+          { source: 1, cls: "G", note: "First building under construction as of Jul 2026, opening mid-to-late 2026. The TDLR registration is deliberately NOT counted here: it evidences that a building project of a given cost and size is registered at this address, which is what it was checked for, not the construction stage." },
+          { source: 2, cls: "G" }
+        ],
+        conflicting: false
+      },
+      location: {
+        basis: "estimated",
+        asOf: "2026-09-21",
+        evidence: [
+          { source: 3, cls: "R", note: "Texas TDLR accessibility-project registration TABS2025023484 names 8001 Wolf Ln Bldg 2 / 6752 FM 535, Cedar Creek TX 78612, owner DFW33220N LLC — the EdgeConneX subsidiary named in Bastrop County's Dec 2024 abatement agreement — at $440M project cost and 578,000 sq ft. A state filing, independent of the press cycle, and it matches the trade-press figures already on file. Note the stored lat/lon is still a Cedar Creek approximation, not this address geocoded, which is why basis stays estimated." },
+          { source: 0, cls: "T" },
+          { source: 1, cls: "G" }
+        ],
+        conflicting: false
+      }
+    },
+    notes: "CoreWeave named as qualifying tenant for EdgeConneX's Campus 1 at this Bastrop County site — 4 buildings, ~2.8M sq ft, ~$1.4B — confirmed via the county's Dec 2024 10-year/75% property tax abatement and a Jul 2025 Texas Comptroller large-data-center-project certification. First building ($440M) under construction as of Jul 2026, expected to open mid-to-late 2026 (local press varies between Jun and Aug 2026). Correction: the earlier \"up to 19 potential buildings\" figure conflated Campus 1 with two separate, later-announced EdgeConneX campuses (up to 9 buildings each) elsewhere in the county — those are distinct developments with no confirmed CoreWeave involvement as of this update. No MW figure disclosed by CoreWeave or EdgeConneX for Campus 1 in any source found — left null rather than guessed. Coordinates are a Cedar Creek/Bastrop County approximation. Audited 2026-09-21: location now rests on a Texas TDLR filing (see provenance) rather than press alone, which is the first independent class on this entry. Capacity stays null, and two candidate figures were checked and rejected rather than recorded — a \"550 MW campus\" figure that a search summary attributed to a dejuremedia Substack piece is not in that article at all when the article is read directly, and compute-atlas.com's \"384 MW planned\" is a directory with no sourcing, which cannot carry a hard number here. Searched dry: EPA ECHO for Cedar Creek and for Bastrop County (statewide TX scan, 7,786 facilities, coverage complete, zero NAICS 518210 hits — a known blind spot for GPU sites rather than evidence of absence), PeeringDB, and EDGAR for \"CoreWeave Cedar Creek\" and \"CoreWeave Bastrop\". An ERCOT large-load queue entry for DFW33220N, or a TCEQ generator permit for these buildings, would give a derivable figure. One unresolved wrinkle: the TDLR record labels this \"BLDG 2\" while Community Impact calls the first delivered building AUS02 / \"the first building\" — plausibly internal numbering within the 4-building Campus 1, not a contradiction, but not resolved here."
   },
   {
     id: "coreweave-kenilworth",
@@ -776,16 +803,46 @@ var SITES = [
     site: "CTP-01 (Chirisa Technology Parks)",
     city: "Chester, VA",
     country: "United States",
-    lat: 37.3401,
-    lon: -77.4419,
+    lat: 37.36206,
+    lon: -77.32561,
     status: "Operational",
     capacityMW: 18.6,
-    lastUpdated: "2026-08-23",
+    lastUpdated: "2026-09-21",
     sources: [
       { label: "Data Center Frontier — \"CoreWeave Continues Growth With Major Collaborative Effort\"", url: "https://www.datacenterfrontier.com/site-selection/article/55140492/coreweave-continues-growth-with-major-collaborative-effort-on-new-ai-data-center-project" },
-      { label: "Data Center Dynamics — \"Blue Owl, Chirisa and PowerHouse announce $5bn data center JV for CoreWeave\"", url: "https://www.datacenterdynamics.com/en/news/blue-owl-chirisa-and-powerhouse-announce-5bn-data-center-jv-for-coreweave/" }
+      { label: "Data Center Dynamics — \"Blue Owl, Chirisa and PowerHouse announce $5bn data center JV for CoreWeave\"", url: "https://www.datacenterdynamics.com/en/news/blue-owl-chirisa-and-powerhouse-announce-5bn-data-center-jv-for-coreweave/" },
+      { label: "EPA ECHO — Chirisa Richmond LLC, 1401 Meadowville Technology Pkwy, Chester VA", url: "https://echo.epa.gov/detailed-facility-report?fid=110046467658", cls: "R" }
     ],
-    notes: "1401 Meadowville Technology Parkway, Chesterfield County. Operational since ~Aug 2024; 12-year license with two 5-year extension options, initially ~18.6MW at $115/kW/month. Owned/operated by Chirisa Technology Parks, part of a $5B Blue Owl/Chirisa/PowerHouse JV for CoreWeave capacity. Secondary/directory sources (Epoch AI, Baxtel, morethanjustparks.com) describe scaling toward 28MW, and separately float much larger figures (82–113MW) tied to a $3–4B multi-phase buildout — those larger numbers aren't corroborated by named trade press or a primary release, so 18.6MW (the figure agreed by Tier 2 sources) is used here; re-check for a confirmed expansion. Coordinates are a Chester, VA approximation, not geocoded to the Meadowville Technology Parkway address."
+    provenance: {
+      status: {
+        basis: "disclosed",
+        asOf: "2026-09-21",
+        evidence: [
+          { source: 2, cls: "R", note: "EPA ECHO lists CHIRISA RICHMOND LLC at 1401 Meadowville Technology Pkwy, Chester VA under NAICS 518210/541513 with an operating status — an exact street-address match to the address already in these notes, and a regulatory record independent of both Chirisa's and CoreWeave's own statements." },
+          { source: 0, cls: "T" },
+          { source: 1, cls: "T" }
+        ],
+        conflicting: false
+      },
+      location: {
+        basis: "observed",
+        asOf: "2026-09-21",
+        evidence: [
+          { source: 2, cls: "R", note: "ECHO's parcel coordinates for the permitted address. These replace a Chester city-centre approximation that sat about 9km off the real site. Only one class backs this, so it is not High — a Chesterfield County GIS or parcel record would be the second." }
+        ],
+        conflicting: false
+      },
+      capacityMW: {
+        basis: "disclosed",
+        asOf: "2026-08-23",
+        evidence: [
+          { source: 0, cls: "T", note: "18.6MW initial licensed capacity. Both trade sources are T, so this is a single class however many articles agree — capacity did not move this pass and is deliberately scored separately from the address." },
+          { source: 1, cls: "T" }
+        ],
+        conflicting: false
+      }
+    },
+    notes: "1401 Meadowville Technology Parkway, Chesterfield County. Operational since ~Aug 2024; 12-year license with two 5-year extension options, initially ~18.6MW at $115/kW/month. Owned/operated by Chirisa Technology Parks, part of a $5B Blue Owl/Chirisa/PowerHouse JV for CoreWeave capacity. Secondary/directory sources (Epoch AI, Baxtel, morethanjustparks.com) describe scaling toward 28MW, and separately float much larger figures (82–113MW) tied to a $3–4B multi-phase buildout — those larger numbers aren't corroborated by named trade press or a primary release, so 18.6MW (the figure agreed by Tier 2 sources) is used here; re-check for a confirmed expansion. Audited 2026-09-21: EPA ECHO's Virginia sweep (10,288 air facilities, paginated past the 5,000-row cap, coverage complete) returned CHIRISA RICHMOND LLC at exactly 1401 Meadowville Technology Pkwy with an operating status. That is the first independent class on this entry: status now rests on R+T rather than trade press alone, and the coordinates above are ECHO's parcel figures, replacing a city-centre approximation that was about 9km off. Capacity is untouched and still rests on two T-class articles, which is one class however many of them agree — a VA DEQ generator nameplate would give a derived figure, and Dominion runs no ISO queue, so the permit itself is the route. Context found but deliberately not counted as evidence for this site: a Bloom Energy 8-K (2024-08-08) confirms Chirisa Technology Parks is a real multi-site CoreWeave power partner, but it names a different Chirisa/CoreWeave site in Volo, Illinois. Also noted and not used: a neighbouring ECHO facility at 11751 Meadowville Ln under \"11751 Meadowville Owner LLC c/o GFH Capital\" — a neighbour, not this site. PeeringDB has no Chester or Chirisa record."
   },
   {
     id: "coreweave-hammond",
@@ -797,12 +854,50 @@ var SITES = [
     lon: -87.5000,
     status: "Planned",
     capacityMW: 180,
-    lastUpdated: "2026-08-23",
+    lastUpdated: "2026-09-21",
     sources: [
       { label: "Data Center Dynamics — \"CoreWeave to develop 180MW data center at Digital Crossroads campus\"", url: "https://www.datacenterdynamics.com/en/news/coreweave-to-develop-180mw-data-center-at-digital-crossroads-campus-in-hammond-indiana/" },
-      { label: "City of Hammond, Indiana — official approval notice", url: "https://www.gohammond.com/hammond-approves-development-agreement-for-new-data-center/" }
+      { label: "City of Hammond, Indiana — official approval notice", url: "https://www.gohammond.com/hammond-approves-development-agreement-for-new-data-center/" },
+      { label: "City of Hammond, IN — \"Hammond Announces Expiration of Data Center Development Agreement\"", url: "https://www.gohammond.com/hammond-announces-expiration-of-data-center-development-agreement/", cls: "R" },
+      { label: "EPA ECHO — DX Hammond JV LLC, 100 Digital Crossroads Drive, Hammond IN", url: "https://echo.epa.gov/detailed-facility-report?fid=110071272597", cls: "R" }
     ],
-    notes: "New 180MW, 450,000 sq ft building (301 Digital Crossroads Drive) on the former State Line Generating Plant coal site, developed by Decennial Group under a 20-year CoreWeave lease, approved by Hammond City Council Jun 9, 2025, targeted operational 2027 — contingent on a NIPSCO power agreement, so kept as \"Planned\" rather than \"Under construction\" pending confirmation groundbreaking has started. CoreWeave separately already occupies a smaller, existing Digital Crossroads facility on the same campus (100 Digital Crossroads Drive, ~105,000 sq ft) — no MW figure or start date found for that one; not enough to log as its own entry yet. Coordinates are a Hammond city-center approximation, not geocoded to the campus address."
+    provenance: {
+      // Spelled out for every field on purpose. Provenance falls back to
+      // "every source counts" PER FIELD, so leaving any field out here
+      // would let the two R-class sources below vouch for it — and one of
+      // them says the project is dead while the other is a different
+      // building. Without this block the entry read as fully independently
+      // verified, which was the exact opposite of the truth.
+      capacityMW: {
+        basis: "disclosed",
+        asOf: "2026-08-23",
+        evidence: [
+          { source: 0, cls: "T", note: "The 180MW figure is the announcement's, and nothing independent ever corroborated it. It is retained only to describe what was proposed — the agreement behind it has since lapsed." },
+          { source: 1, cls: "G" }
+        ],
+        conflicting: false
+      },
+      status: {
+        basis: "disclosed",
+        asOf: "2026-09-21",
+        evidence: [
+          { source: 2, cls: "R", note: "CONTRADICTS the stored status. The City of Hammond's own notice, 2026-07-01, that the Development Agreement expired 2026-06-30 with no further extensions on offer. This is the strongest source on the entry and it says the project is not going ahead." },
+          { source: 0, cls: "T", note: "The original announcement, on which the \"Planned\" status rests. Superseded in substance by the city notice above." },
+          { source: 1, cls: "G" }
+        ],
+        conflicting: true
+      },
+      location: {
+        basis: "estimated",
+        asOf: "2026-08-23",
+        evidence: [
+          { source: 0, cls: "T", note: "301 Digital Crossroads, from the announcement. Deliberately NOT supported by the ECHO record on this entry: that record is 100 Digital Crossroads Drive, the existing facility CoreWeave already occupies, which is a different building." },
+          { source: 1, cls: "G" }
+        ],
+        conflicting: false
+      }
+    },
+    notes: "STATUS FLAG, THE ENTRY IS STALE AND THE SCHEMA CANNOT YET SAY SO (found 2026-09-21): the City of Hammond announced on 2026-07-01 that the Development Agreement behind this 180MW project expired on 2026-06-30. Two extensions had already been granted, required milestones were not met, and the city states plainly that no further extensions will be offered. Neither CoreWeave, Decennial Group nor the city has announced any plan to revive it, and the project never broke ground. This is the city's own record of its own binding agreement, published against its own economic interest, and it is classed R. The status field below still reads \"Planned\" only because the schema's status enum has exactly three values — Operational, Under construction, Planned — with no state for a cancelled or lapsed project. Leaving it as Planned is wrong and is known to be wrong: it keeps 180MW in CoreWeave's planned pipeline total on the dashboard. It was not silently changed to something else, and no value was invented, because adding a fourth status is a design change to how the atlas represents dead projects, not a research finding to apply. Pending that decision, read this entry as lapsed regardless of what the status pill says. Separately, note the EPA ECHO record for DX HAMMOND JV LLC at 100 Digital Crossroads Drive is the EXISTING facility CoreWeave already occupies, NOT the 301 Digital Crossroads building this entry describes — it is recorded here so it is not mistaken for corroboration of this project. A Northwest Indiana Times piece headlined that the expansion is dead, but it sits behind a paywall and could not be read, so it is a consistent lead rather than a second class. ORIGINAL NOTES FOLLOW. New 180MW, 450,000 sq ft building (301 Digital Crossroads Drive) on the former State Line Generating Plant coal site, developed by Decennial Group under a 20-year CoreWeave lease, approved by Hammond City Council Jun 9, 2025, targeted operational 2027 — contingent on a NIPSCO power agreement, so kept as \"Planned\" rather than \"Under construction\" pending confirmation groundbreaking has started. CoreWeave separately already occupies a smaller, existing Digital Crossroads facility on the same campus (100 Digital Crossroads Drive, ~105,000 sq ft) — no MW figure or start date found for that one; not enough to log as its own entry yet. Coordinates are a Hammond city-center approximation, not geocoded to the campus address."
   },
   {
     id: "coreweave-cheyenne",
@@ -1207,16 +1302,45 @@ var SITES = [
     site: "Colossus 1",
     city: "Memphis, TN",
     country: "United States",
-    lat: 35.0454,
-    lon: -90.0715,
+    lat: 35.05928,
+    lon: -90.15255,
     status: "Operational",
     capacityMW: null,
-    lastUpdated: "2026-08-23",
+    lastUpdated: "2026-09-21",
     sources: [
       { label: "NVIDIA Newsroom — \"NVIDIA Ethernet Networking Accelerates World's Largest AI Supercomputer, Built by xAI\"", url: "https://nvidianews.nvidia.com/news/spectrum-x-ethernet-networking-xai-colossus" },
-      { label: "Data Center Dynamics — \"xAI targets one million GPUs for Colossus supercomputer in Memphis\"", url: "https://www.datacenterdynamics.com/en/news/xai-elon-musk-memphis-colossus-gpu/" }
+      { label: "Data Center Dynamics — \"xAI targets one million GPUs for Colossus supercomputer in Memphis\"", url: "https://www.datacenterdynamics.com/en/news/xai-elon-musk-memphis-colossus-gpu/" },
+      { label: "EPA ECHO — COLOSSUS DATA CENTER, 3231 Paul R Lowery, Memphis TN (registry 110071992829)", url: "https://echo.epa.gov/detailed-facility-report?fid=110071992829", cls: "R" },
+      { label: "SEC S-1/A roadshow FWP — Space Exploration Technologies Corp", url: "https://www.sec.gov/Archives/edgar/data/1181412/000162828026040610/spacexfwp.htm", cls: "R" }
     ],
-    notes: "Former Electrolux manufacturing plant, 3231 Paul R. Lowry Road, South Memphis — built and made operational in a widely-reported \"122 days\" starting mid-2024, originally under the xAI name (xAI folded into SpaceX's \"SpaceXAI\" division May 2026 after the Feb 2026 SpaceX/xAI merger — see data/providers.js). GPU/power figures are contested and keep moving: reported at ~100,000 GPUs at 2024 launch, later ~230,000 (150k H100 + 50k H200 + 30k GB200), and a Jan 2026 Musk claim of 555,000 GPUs / 2GW / $18B tied to a third building on the campus — that largest figure traces mainly to Musk's own statements and vendor/newsletter blogs (Introl, SemiAnalysis), not independently verified trade press, so capacityMW is left null rather than picking one contested number. In May 2026, xAI/SpaceXAI reportedly signed a 4-year deal giving Anthropic most of this facility's compute (~220,000 GPUs, ~300MW) for ~$1.25B/month, tied to SpaceX's IPO-related SEC disclosures (TechCrunch, The Verge, Data Center Dynamics) — that's a compute lease figure, not necessarily the site's full built capacity. Coordinates are a South Memphis-area approximation, not geocoded to the exact parcel."
+    provenance: {
+      status: {
+        basis: "disclosed",
+        asOf: "2026-09-21",
+        evidence: [
+          { source: 2, cls: "R", note: "EPA ECHO carries a facility literally named COLOSSUS DATA CENTER at 3231 Paul R Lowery, Memphis TN, under NAICS 518210 with an operating status. Federal record, independent of anything xAI or NVIDIA said." },
+          { source: 1, cls: "T" }
+        ],
+        conflicting: false
+      },
+      location: {
+        basis: "observed",
+        asOf: "2026-09-21",
+        evidence: [
+          { source: 2, cls: "R", note: "ECHO's registered parcel coordinates for the exact street address already named in these notes (the federal record spells it Lowery, the press Lowry). These replace a South Memphis area approximation." }
+        ],
+        conflicting: false
+      },
+      capacityMW: {
+        basis: "disclosed",
+        asOf: "2026-09-21",
+        evidence: [
+          { source: 3, cls: "R", note: "SpaceX's own S-1/A roadshow FWP gives a 1GW+ nameplate compute draw, but footnotes it as COMBINED across Colossus I and Colossus II as of 2026-03-31. It therefore cannot be attributed to this site, and is recorded to show that the one regulatory-grade figure available is not site-specific." }
+        ],
+        conflicting: true
+      }
+    },
+    notes: "Former Electrolux manufacturing plant, 3231 Paul R. Lowry Road, South Memphis — built and made operational in a widely-reported \"122 days\" starting mid-2024, originally under the xAI name (xAI folded into SpaceX's \"SpaceXAI\" division May 2026 after the Feb 2026 SpaceX/xAI merger — see data/providers.js). GPU/power figures are contested and keep moving: reported at ~100,000 GPUs at 2024 launch, later ~230,000 (150k H100 + 50k H200 + 30k GB200), and a Jan 2026 Musk claim of 555,000 GPUs / 2GW / $18B tied to a third building on the campus — that largest figure traces mainly to Musk's own statements and vendor/newsletter blogs (Introl, SemiAnalysis), not independently verified trade press, so capacityMW is left null rather than picking one contested number. In May 2026, xAI/SpaceXAI reportedly signed a 4-year deal giving Anthropic most of this facility's compute (~220,000 GPUs, ~300MW) for ~$1.25B/month, tied to SpaceX's IPO-related SEC disclosures (TechCrunch, The Verge, Data Center Dynamics) — that's a compute lease figure, not necessarily the site's full built capacity. CORRECTION TO THAT READING (2026-09-21, from the filing rather than the coverage): SpaceX's own S-1/A roadshow FWP was read directly, and it describes the $1.25B monthly fee as buying compute \"across COLOSSUS and COLOSSUS II\" through May 2029 — it does not name the counterparty and it does not scope the deal to this site. The widely repeated framing of \"most of Colossus 1's compute\" is the press's, not the filing's, and the two-campus scope is the reason no MW figure from that deal can be attached to this entry. Audited 2026-09-21: status and location now rest on EPA ECHO (see provenance) rather than on vendor and trade sources alone — a full Tennessee scan of 4,096 air facilities with complete coverage. Capacity stays null and is now explicitly flagged conflicting. Also checked and deliberately not used: the filing's 400MW+ for \"the next phase of Colossus II\" and 220K+ additional GB300s both sit under a 2028 roadmap heading, so they are forward targets, not built capacity; and the SELC release on the Jul 2025 Shelby County air permit confirms the permit covers 15 methane turbines but gives no nameplate rating, so no derived figure is available from it either. The route to a real number is a post-IPO 10-K or 10-Q that splits Colossus from Colossus II by MW, or the Shelby County permit document itself."
   },
   {
     id: "spacexai-southaven",
@@ -1231,9 +1355,40 @@ var SITES = [
     lastUpdated: "2026-08-23",
     sources: [
       { label: "Office of Mississippi Governor Tate Reeves — official announcement", url: "https://governorreeves.ms.gov/tech-leader-xai-investing-more-than-20-billion-in-southaven/" },
-      { label: "Data Center Dynamics — \"xAI confirms new data center in Mississippi, Elon Musk pledges $20bn investment in state\"", url: "https://www.datacenterdynamics.com/en/news/xai-confirms-new-data-center-in-mississippi-elon-musk-pledges-20bn-investment-in-state/" }
+      { label: "Data Center Dynamics — \"xAI confirms new data center in Mississippi, Elon Musk pledges $20bn investment in state\"", url: "https://www.datacenterdynamics.com/en/news/xai-confirms-new-data-center-in-mississippi-elon-musk-pledges-20bn-investment-in-state/" },
+      { label: "Mississippi Today — \"State sets dates to retire temporary xAI turbines\"", url: "https://mississippitoday.org/2026/07/31/southaven-xai-turbines-deadline/", cls: "G" },
+      { label: "Mississippi Free Press — \"Mississippi Permit Board Grants xAI's Request for 41 Southaven Gas Turbines\"", url: "https://www.mississippifreepress.org/mississippi-permit-board-grants-xais-request-for-41-southaven-gas-turbines-to-power-memphis-data-center/", cls: "G" }
     ],
-    notes: "2400 Stateline Road West, Southaven, MS (DeSoto County) — announced Jan 8, 2026 via the Mississippi Governor's office: >$20B investment in a data center plus adjacent power plant, described as SpaceXAI's (then xAI's) third Memphis-metro facility. Stated goal on completion is to bring the combined Memphis-metro cluster to \"nearly 2GW\" — that's an announced target, not a confirmed built figure, so capacityMW is left null. Site currently runs 69 temporary gas turbines for on-site power, under an agreed regulatory order to remove them by Jul 2027 and replace them with a permitted 1.2GW/41-turbine permanent plant. Subject of active federal litigation as of Apr 2026 (NAACP, via the Southern Environmental Law Center and Earthjustice) alleging Clean Air Act violations from the unpermitted turbines in a majority-Black community, with the U.S. DOJ moving to intervene on xAI's side in Jun 2026 citing national security — a live regulatory/reputational risk worth tracking, not routine controversy. Operations were targeted to begin Feb 2026. Coordinates are a Southaven-area approximation, not geocoded to the exact parcel."
+    provenance: {
+      capacityMW: {
+        basis: "disclosed",
+        asOf: "2026-09-21",
+        evidence: [
+          { source: 1, cls: "T", note: "The ~1.2GW / 41-turbine figure for the permanent plant, from the announcement cycle." },
+          { source: 2, cls: "G", note: "CONFLICTS with the above: Mississippi Today attributes a \"420-megawatt fossil-fueled power station\" characterisation to unnamed environmental lawyers. Neither figure comes from the permit document itself, so neither is promoted and no value is written." }
+        ],
+        conflicting: true
+      },
+      status: {
+        basis: "disclosed",
+        asOf: "2026-09-21",
+        evidence: [
+          { source: 0, cls: "P" },
+          { source: 1, cls: "T" }
+        ],
+        conflicting: false
+      },
+      location: {
+        basis: "disclosed",
+        asOf: "2026-09-21",
+        evidence: [
+          { source: 0, cls: "P" },
+          { source: 1, cls: "T" }
+        ],
+        conflicting: false
+      }
+    },
+    notes: "2400 Stateline Road West, Southaven, MS (DeSoto County) — announced Jan 8, 2026 via the Mississippi Governor's office: >$20B investment in a data center plus adjacent power plant, described as SpaceXAI's (then xAI's) third Memphis-metro facility. Stated goal on completion is to bring the combined Memphis-metro cluster to \"nearly 2GW\" — that's an announced target, not a confirmed built figure, so capacityMW is left null. Site currently runs 69 temporary gas turbines for on-site power, under an agreed regulatory order to remove them by Jul 2027 and replace them with a permitted 1.2GW/41-turbine permanent plant. Subject of active federal litigation as of Apr 2026 (NAACP, via the Southern Environmental Law Center and Earthjustice) alleging Clean Air Act violations from the unpermitted turbines in a majority-Black community, with the U.S. DOJ moving to intervene on xAI's side in Jun 2026 citing national security — a live regulatory/reputational risk worth tracking, not routine controversy. Operations were targeted to begin Feb 2026. Audited 2026-09-21. CONTESTED PLANT CAPACITY, unresolved by design: the Mississippi Permit Board approved 41 permanent turbines on 2026-03-10, which is confirmed by three separate outlets — but none of them quote the permit's own rating. Mississippi Today separately attributes a \"420-megawatt fossil-fueled power station\" description to unnamed environmental lawyers, against the ~1.2GW figure recorded above. Neither is R-class, both describe the POWER PLANT rather than the data center's IT load, and no value is written for either. The MDEQ Permit Board's actual March 2026 order would settle it as a derived figure and is the single best next document. Searched dry this pass: EPA ECHO for Mississippi under NAICS 518210 (full state, 1,694 facilities, complete coverage, no Southaven match — consistent with an early-stage site whose permit may not carry that code), ECHO under NAICS 2211 for DeSoto County (returns TVA's Southaven Combined Cycle Plant on the same road and a permanently-closed AP Holdings site, neither of which is this facility and neither of which should be conflated with it), and PeeringDB for Southaven (nothing listed). Coordinates are a Southaven-area approximation, not geocoded to the exact parcel."
   },
   {
     id: "spacexai-colossus2",
@@ -1251,7 +1406,7 @@ var SITES = [
       { label: "WREG — \"Residents react after xAI says second supercomputer to power up soon\"", url: "https://wreg.com/news/local/xai-memphis/residents-react-after-xai-says-second-supercomputer-to-power-up-soon/" },
       { label: "WREG — \"The ongoing development of xAI's 'Colossus 2' supercomputer\"", url: "https://wreg.com/news-3-at-3/the-ongoing-development-of-xais-colossus-2-supercomputer/" }
     ],
-    notes: "5420 Tulane Road, Whitehaven, Memphis — a 1M sq ft site (existing warehouse + two adjacent parcels, ~100 acres total), ~$80M acquisition, ~Feb/Mar 2025. Only one of these sources (Data Center Dynamics) is trade press proper; the rest of this site's extensive coverage (WREG's ongoing local reporting, Bloomberg via Kurt Wagner, Yahoo, Climate and Capital Media) is general/regional press rather than industry-specialist trade press, so strictly it falls just short of this project's usual \"2 independent trade/primary-grade sources\" bar for auto-adding — logged anyway given how many independent, named, dated outlets converge on the same facts over months; that's a case where source-type grading undersells real-world confidence. First cluster reported online ~Jan 2026 (~110,000 GB200-class GPUs, ~210MW); by mid-2026 multiple outlets converge on a 300,000-350,000+ GPU range as more defensible than the higher-end figures floating around. A separate, single-sourced claim (vendor blog Introl, plus a SemiAnalysis newsletter piece) of 555,000 GPUs/$18B/2GW is NOT used here — that figure is more properly tied to the campus's later third building (see spacexai-colossus1's notes) and reads as a forward target rather than this site's built capacity. In Jun 2026, Google reportedly agreed to pay ~$920M/month (Oct 2026-Jun 2029, ~$30B total) for ~110,000 GPUs of capacity somewhere on the Memphis campus — the specific facility wasn't identified in any source found, so not attributed here. Coordinates are a Whitehaven-area approximation, not geocoded to the exact parcel."
+    notes: "5420 Tulane Road, Whitehaven, Memphis — a 1M sq ft site (existing warehouse + two adjacent parcels, ~100 acres total), ~$80M acquisition, ~Feb/Mar 2025. Only one of these sources (Data Center Dynamics) is trade press proper; the rest of this site's extensive coverage (WREG's ongoing local reporting, Bloomberg via Kurt Wagner, Yahoo, Climate and Capital Media) is general/regional press rather than industry-specialist trade press, so strictly it falls just short of this project's usual \"2 independent trade/primary-grade sources\" bar for auto-adding — logged anyway given how many independent, named, dated outlets converge on the same facts over months; that's a case where source-type grading undersells real-world confidence. First cluster reported online ~Jan 2026 (~110,000 GB200-class GPUs, ~210MW); by mid-2026 multiple outlets converge on a 300,000-350,000+ GPU range as more defensible than the higher-end figures floating around. A separate, single-sourced claim (vendor blog Introl, plus a SemiAnalysis newsletter piece) of 555,000 GPUs/$18B/2GW is NOT used here — that figure is more properly tied to the campus's later third building (see spacexai-colossus1's notes) and reads as a forward target rather than this site's built capacity. In Jun 2026, Google reportedly agreed to pay ~$920M/month (Oct 2026-Jun 2029, ~$30B total) for ~110,000 GPUs of capacity somewhere on the Memphis campus — the specific facility wasn't identified in any source found, so not attributed here. Coordinates are a Whitehaven-area approximation, not geocoded to the exact parcel. Audited 2026-09-21: nothing moved, no independent class found. EPA ECHO was scanned across Tennessee under both NAICS 518210 and 2211 (all 4,096 state air facilities, coverage complete) with no facility at or near 5420 Tulane Road — consistent with a permit not yet filed, or filed under a name that does not carry \"Colossus\" in the permittee string. RULED OUT, do not re-chase: the only other 518210 hit in the whole state besides Colossus 1 is \"5C MEM01 INC\" at 4300 Getwell Rd, which looks like a lead and is not one — it is 5C Data Centers, an unrelated colocation operator in the former Fred's headquarters, confirmed across three separate directory listings. PeeringDB returns four Memphis facilities (Level3, EdgeConneX, DataBank, Expedient), none at this address. Worth trying next, by analogy with the AWS site-code discovery: a dictionary of SpaceXAI/xAI internal site-code prefixes rather than a name search, since the permittee string may never say Colossus."
   },
   {
     id: "openai-effingham",
