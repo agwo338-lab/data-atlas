@@ -52,6 +52,30 @@ if (Array.isArray(ctx.SITES)) {
     if (typeof s.lat !== "number" || typeof s.lon !== "number") problems.push("sites.js " + label + ": lat/lon must be numbers");
     if (s.capacityMW != null && typeof s.capacityMW !== "number") problems.push("sites.js " + label + ": capacityMW must be a number or null");
     if (s.id) { if (seen[s.id]) problems.push("sites.js: duplicate id " + s.id); seen[s.id] = true; }
+
+    // A location claiming basis "observed" says its coordinates came off a
+    // record — a PeeringDB facility, an ECHO parcel, a permit. Those carry
+    // five or six decimal places. Four decimals is roughly 11m of precision
+    // and is what a hand-typed approximation looks like, so the combination
+    // of "observed" and a short coordinate almost always means someone cited
+    // a record and then typed a guess instead of copying its numbers.
+    //
+    // This is not hypothetical: nine Southern California entries were added
+    // in Sep 2026 citing PeeringDB for location, eight of them with invented
+    // coordinates, the worst 3.4km out — one landed a building in the middle
+    // of an intersection. Caught by someone who lives there, not by any tool.
+    var prov = s.provenance && s.provenance.location;
+    if (prov && prov.basis === "observed") {
+      var thin = [s.lat, s.lon].filter(function(v){
+        var d = String(v).split(".")[1];
+        return !d || d.length <= 4;
+      });
+      if (thin.length) {
+        problems.push("sites.js " + label + ": location basis is \"observed\" but the " +
+          "coordinates (" + s.lat + ", " + s.lon + ") are rounded to 4dp or fewer — " +
+          "copy the exact figures from the cited record, or set basis to \"estimated\"");
+      }
+    }
   });
   notes.push(ctx.SITES.length + " sites");
 }
