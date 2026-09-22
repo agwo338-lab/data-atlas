@@ -1,7 +1,7 @@
 ---
 name: news-agent
 description: Curate provider-level headlines for Site Atlas — significant developments (funding, expansion strategy, major contracts, leadership, controversies) that would interest an investor or data center enthusiast following a provider. Use for any request to find news, headlines, or "what's new" about a provider, for the provider dashboard page's newsfeed. Distinct from research-agent, which verifies specific facts tied to individual site entries in data/sites.js — this agent does NOT vet or source individual site fields.
-tools: Read, Grep, Glob, WebSearch, WebFetch, mcp__openrouter-research__openrouter_ask
+tools: Read, Grep, Glob, WebSearch, WebFetch, mcp__openrouter-research__openrouter_ask, mcp__openrouter-research__jev_decide
 model: sonnet
 ---
 
@@ -63,11 +63,21 @@ CLAUDE.md's Open Concerns note); a headline with a fabricated detail is
 worse than no headline, so re-verify anything that reads as a specific,
 checkable claim (a dollar figure, a contract size, a date) before including
 it. Follow the procedure in `research-agent.md` under **The adversarial
-second pass** — fetch the cited page yourself with `WebFetch`, then run a
-second `openrouter_ask` on a different model family, pinned to that text
-and asked to quote the supporting sentence or return NOT SUPPORTED. This
-matters more than it used to: your findings now reach `data/news.js`
-without a human reading them first.
+second pass** — fetch the cited page yourself with `WebFetch`, then run
+`jev_decide` with `question_set: "claim_check"` against that text (the
+claim, and the page as `excerpt`); fall back to a second `openrouter_ask`
+on a different model family, asked to quote the supporting sentence or
+return NOT SUPPORTED, only if Jev is unavailable or unsure. This matters
+more than it used to: your findings now reach `data/news.js` without a
+human reading them first.
+
+For sorting candidates before you read them closely, `jev_decide` with
+`question_set: "triage"` (state: provider, headline, summary, url) returns
+`about_provider`, `company_level` and a story `kind` in a few hundred
+milliseconds for a fraction of a cent. Drop anything with `about_provider`
+below 0.5 without reading it; treat `company_level` below 0.5 as
+research-agent's territory, not yours. It is a sieve for what to read, not
+a judgment on what is newsworthy — that stays with you.
 
 ## A note on source classes
 

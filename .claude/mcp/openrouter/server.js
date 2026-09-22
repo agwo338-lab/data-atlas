@@ -1,11 +1,13 @@
 // A small, self-contained MCP server for Site Atlas research tooling.
 //
-// Two kinds of tool live here:
+// Three kinds of tool live here:
 //   - openrouter_ask: put a question to a cheap model on OpenRouter, to keep
 //     token-heavy legwork off the main session.
 //   - the structured feeds (edgar_search, peeringdb_facility,
 //     epa_echo_facilities): fetch public records directly, with no model in
 //     the loop at all.
+//   - jev_decide: typed yes/no and pick-one decisions from a model that
+//     cannot generate text (see jev.js). The adversarial second pass.
 //
 // Deliberately minimal — no third-party wrapper packages, just direct fetch()
 // calls to public REST APIs, so it's easy to read top to bottom.
@@ -13,11 +15,12 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
+import { QUESTION_SETS, jevDecide, renderAnswers, JEV_MODEL } from "./jev.js";
 
 const API_KEY = process.env.OPENROUTER_API_KEY;
 const DEFAULT_MODEL = process.env.OPENROUTER_DEFAULT_MODEL || "deepseek/deepseek-chat";
 
-const server = new McpServer({ name: "openrouter-research", version: "1.1.0" });
+const server = new McpServer({ name: "openrouter-research", version: "1.2.0" });
 
 server.tool(
   "openrouter_ask",
@@ -94,6 +97,36 @@ const SEC_UA = process.env.SEC_USER_AGENT || "SiteAtlas research tool (contact u
 
 const ok = (text) => ({ content: [{ type: "text", text }] });
 const fail = (text) => ({ isError: true, content: [{ type: "text", text }] });
+
+// --- Jev: typed decisions, no text generation ------------------------------
+// A third kind of tool. openrouter_ask produces prose a model could have
+// invented; the feeds produce records no model touched. Jev sits between:
+// a model is involved, but it can only pick from options this repo wrote
+// (see jev.js), so it cannot fabricate a source or a figure. Used as the
+// adversarial second pass and for the dataset-wide citation audit
+// (tools/jev-audit.mjs). It is a filter, never evidence — a Jev answer is
+// not a source class and does not go in a provenance block.
+const SET_HELP = Object.entries(QUESTION_SETS)
+  .map(([k, v]) => k + " — " + v.describe + " Required state: " + v.required.join(", ") + ".")
+  .join(" ");
+server.tool(
+  "jev_decide",
+  "Ask Jev (TypeSafe decision model, via OpenRouter) a FIXED set of typed questions about a piece of evidence. Returns probabilities, not text; cannot invent citations. Question sets: " + SET_HELP +
+    " Use claim_check for the adversarial second pass (state: claim, field, site, operator, source_url, excerpt = the fetched page text). Jev output is a filter that can kill a claim; it never raises confidence and is never a source.",
+  {
+    question_set: z.enum(Object.keys(QUESTION_SETS)).describe("Which baked-in question set to run."),
+    state: z.record(z.string(), z.any()).describe("The evidence, as a flat object. For claim_check/source_check put the fetched page text in 'excerpt' (truncated to ~20k chars server-side)."),
+  },
+  async ({ question_set, state }) => {
+    if (!API_KEY) return fail("OPENROUTER_API_KEY is not set. Create a .env file in the project root (see .env.example) and restart Claude Code.");
+    try {
+      const data = await jevDecide(API_KEY, question_set, state);
+      return { content: [{ type: "text", text: renderAnswers(data) }], _meta: { model: data.model || JEV_MODEL, usage: data.usage, answers: data.answers } };
+    } catch (e) {
+      return fail(String(e.message || e));
+    }
+  }
+);
 
 // --- R class: SEC EDGAR full-text search ------------------------------------
 // Full text of filings since 2001. A 10-K naming a site is filed under legal

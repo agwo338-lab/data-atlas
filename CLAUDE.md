@@ -74,7 +74,14 @@ capacity. Built as a single static site with no backend and no build step.
     - `show <id>` — full detail for named entries only.
     - `stats`, `sources` — dataset tally and the channel catalog.
   Neither subagent has a Bash tool, so neither can run this; the caller runs
-  it and passes the relevant slice into the agent's prompt. That is
+  it and passes the relevant slice into the agent's prompt.
+- `tools/jev-audit.mjs` — the citation audit: fetches every cited page and
+  asks Jev (see Research cost) whether it is about the site, which source
+  class its *content* reads as, and whether it states each value it is
+  cited for. Read-only, prints flags. Needs the network and the OpenRouter
+  key, so it is deliberately not part of `tools/check.js`. Run it after a
+  data change the way `check.js` runs before a commit:
+  `node tools/jev-audit.mjs [--provider X | --site id] [--all]`. That is
   deliberate — a shell would hand them a write path through redirection and
   quietly undo the guarantee that research can't modify a data file. Don't
   add Bash to those agents to make the CLI more convenient.
@@ -400,12 +407,11 @@ OpenRouter instead of running everything on the main model. Needs an
 that key. It supports a `search` param (OpenRouter's web plugin) for live
 lookups, not just reasoning over text handed to it. Model selection has
 three levels: the per-call `model` param, then `OPENROUTER_DEFAULT_MODEL`
-in `.env`, then a hardcoded fallback. Note that nothing currently passes
-the per-call param, so the adversarial second pass described under Open
-concerns is at present re-asking *the same model that made the error* —
-pass a different `model` explicitly when re-checking a hard number, and
-prefer a different model *family*, since two revisions of one model tend
-to share their blind spots.
+in `.env`, then a hardcoded fallback. The adversarial second pass now runs
+on Jev first (below); when it falls back to `openrouter_ask`, pass a
+different `model` explicitly, and prefer a different model *family*, since
+two revisions of one model tend to share their blind spots — without the
+param the fallback re-asks the same model that made the error.
 
 **Pin a specific model; never a floating alias.** The default was
 `deepseek/deepseek-chat` for a long time, which is an alias that follows
@@ -426,6 +432,50 @@ are public, keyless, and read live — nothing is cached or stored. Prefer
 them over `openrouter_ask` for anything a public record can settle. SEC
 asks automated callers to identify themselves; set `SEC_USER_AGENT` in
 `.env` to a real name and email.
+
+**`jev_decide`** (added 2026-09-21) is a third kind. Jev is TypeSafe AI's
+"System One" decision model: it takes a state blob and typed questions and
+returns probabilities — a 0–1 for a yes/no, a pick from a list with a
+confidence — and generates no text at all. So a model is involved, but it
+cannot invent a citation, a sentence, or a figure; it can only choose among
+options this repo wrote. The questions are baked into
+`.claude/mcp/openrouter/jev.js` as named sets (`claim_check`,
+`source_check`, `triage`) precisely so an agent reading an untrusted page
+cannot be steered into asking something else. OpenRouter serves it on its
+own alpha route, `POST /api/alpha/decisions`, not chat/completions, with
+the same key; `JEV_MODEL` in `.env` pins the version. Measured on the
+first run: about 350 ms and $0.00003 per call, $0.016 for the whole
+dataset.
+
+Three uses, and a hard limit on what it earns:
+
+1. **The adversarial second pass** in `research-agent.md` now calls Jev
+   first (`claim_check`: does the fetched page state this exact claim, for
+   this site, and where does the page say the information came from), and
+   falls back to a different-family `openrouter_ask` only when Jev is
+   unavailable or in between. Jev is a different *kind* of checker, not
+   just a different model family, which is what that pass wanted.
+2. **The citation audit**, `tools/jev-audit.mjs`, runs `source_check` over
+   every citation on file. First run, 2026-09-21: 191 citations, 50
+   flagged, 66 unreadable (mostly trade-press sites returning 403 to
+   scripts — those need WebFetch or a browser), 75 clean. The flags were
+   real: citations pointing at a homepage rather than the document, a 10-K
+   subsidiaries exhibit cited for build status, county and city government
+   pages the host rule classes as G that are R, and seven MW figures that
+   read as utility or generator capacity rather than IT load.
+3. **Headline triage** for news-agent, so it can drop off-topic candidates
+   before reading them.
+
+**A Jev answer is a filter, never evidence.** It is not a source class, it
+never goes in a `provenance` block or a `notes` field as support, and a
+high "supported" earns a claim nothing — the same rule as for two LLM
+calls agreeing. It has no reasoning to cite even in principle. And it
+judges each question in isolation: on the probe it said a 28 MW figure
+matched none of the operator's published quantities *and* that it did not
+conflict with them. Never ask it the question that needs the inference;
+ask it the two questions on either side and do the inference in code or
+in the agent. Its own "cannot hallucinate" claim means only that it
+cannot answer outside the schema; inside it, it can still be wrong.
 
 **The agents cannot read PDFs; the caller can, and must** (found Sep 2026,
 on the Effingham/Independence run). Neither subagent has a Bash tool, and
