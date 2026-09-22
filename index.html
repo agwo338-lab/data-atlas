@@ -286,6 +286,9 @@
   .vd.independent{ color:var(--color-text); } .vd.independent i{ background:var(--color-accent); }
   .vd.operator{ color:var(--color-neutral-400); } .vd.operator i{ background:#5a5955; }
   .vd.unsourced{ color:var(--color-neutral-500); } .vd.unsourced i{ background:repeating-linear-gradient(to bottom, #5a5955 0 2px, transparent 2px 4px); }
+  /* The only verdict allowed a warning colour: a source on file is actively
+     contradicting the stored value, which a reader should not skim past. */
+  .vd.contested{ color:#F19B9B; } .vd.contested i{ background:#F87171; }
 
   /* ---- operator page (inside the panel) ---- */
   .op-nav{ display:flex; align-items:center; justify-content:space-between; padding:12px 20px 0; }

@@ -61,7 +61,10 @@ function flag(name, fallback) {
 
 function verdictCode(site, field) {
   const v = D.verdictFor(D.scoreSiteField(site, field, TODAY));
-  return v.key === "independent" ? "IND" : v.key === "operator" ? "OPR" : "---";
+  return v.key === "independent" ? "IND"
+    : v.key === "operator" ? "OPR"
+    : v.key === "contested" ? "!CON"
+    : "---";
 }
 
 function scoredFields(site) {
@@ -79,7 +82,8 @@ function cmdIndex() {
   if (typeof fs_ === "string") sites = sites.filter(s => s.status.toLowerCase().includes(fs_.toLowerCase()));
 
   console.log("# id | provider | location | status | MW | verified | cap/status/loc verdict");
-  console.log("# verdict: IND = an independent source backs it, OPR = operator's word only, --- = unsourced");
+  console.log("# verdict: IND = an independent source backs it, OPR = operator's word only,");
+  console.log("#          !CON = sources on file disagree, --- = unsourced");
   for (const s of sites) {
     const v = ["capacityMW", "status", "location"]
       .map(f => (f === "capacityMW" && s.capacityMW == null) ? "n/a" : verdictCode(s, f))
@@ -226,7 +230,7 @@ function cmdStats() {
   console.log("\nby confidence:");
   for (const k of ["high", "medium", "low", "unverified"]) console.log("  " + k.padEnd(11) + (lvl[k] || 0));
   console.log("\nfields by verdict:");
-  for (const k of ["independent", "operator", "unsourced"]) console.log("  " + k.padEnd(13) + (verd[k] || 0));
+  for (const k of ["independent", "operator", "contested", "unsourced"]) console.log("  " + k.padEnd(13) + (verd[k] || 0));
   console.log("\ncitations by class:");
   for (const c of D.SOURCE_CLASS_ORDER) if (cls[c]) console.log("  " + c + "  " + String(cls[c]).padStart(3) + "  " + D.SOURCE_CLASSES[c].label);
 }

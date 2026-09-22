@@ -315,6 +315,15 @@ var HOST_CLASS_RULES = [
   { match: /(^|\.)epa\.gov$/,                     cls: "R" },
   { match: /\.gov$/,                              cls: "R" },
   { match: /\.gov\.uk$/,                          cls: "R" },
+
+  // Municipal governments that publish on a .com rather than a .gov. The
+  // blanket /\.gov$/ rule above misses these, so a city's own record of
+  // its own binding agreement was scoring G — below local news — purely
+  // on the domain suffix. Each has to be named explicitly; add them as
+  // they turn up. gohammond.com went in Sep 2026, when Hammond IN's own
+  // notice that a data center development agreement had lapsed came in
+  // under-classed.
+  { match: /(^|\.)gohammond\.com$/,               cls: "R" },
   { match: /(^|\.)europa\.eu$/,                   cls: "R" },
   { match: /(^|\.)fingrid\.fi$/,                  cls: "R" },
   { match: /(^|\.)neso\.energy$/,                 cls: "R" },
@@ -350,6 +359,9 @@ var HOST_CLASS_RULES = [
   { match: /(^|\.)baxtel\.com$/,                  cls: "D" },
   { match: /(^|\.)datacenters\.com$/,             cls: "D" },
   { match: /(^|\.)cloudscene\.com$/,              cls: "D" },
+  { match: /(^|\.)cleanview\.co$/,                cls: "D" },
+  { match: /(^|\.)compute-atlas\.com$/,           cls: "D" },
+  { match: /(^|\.)gem\.wiki$/,                    cls: "D" },
 
   // General / financial press.
   { match: /(^|\.)reuters\.com$/,                 cls: "G" },
@@ -411,6 +423,16 @@ function classifySource(source, provider){
   // news, regional business journals, niche publications. Class G is the
   // honest default — a real publisher with no data center specialism, which
   // does not corroborate a corporate claim on its own.
+  //
+  // The one case where this default is too generous is an uncatalogued
+  // DIRECTORY. A site that aggregates facility rows with no stated
+  // provenance is weaker than local news, not equal to it, but it lands
+  // on G here — and G does corroborate across classes, so an unsourced
+  // listing could help push a field to High. Directories therefore have
+  // to be named in the D list above to be scored honestly. Add them as
+  // they turn up; cleanview.co, compute-atlas.com and gem.wiki went in
+  // Sep 2026 for exactly this reason, each having surfaced in a research
+  // run carrying a hard MW figure with nothing behind it.
   return "G";
 }
 
@@ -511,6 +533,10 @@ function scoreEvidence(evidence, opts){
     stale: stale,
     counted: counting.length,
     discounted: list.length - counting.length,
+    // Carried through so verdictFor can see it. Without this the flag reached
+    // the level calculation but not the verdict, so a field whose regulatory
+    // source contradicts it still rendered as "Independently verified".
+    conflicting: !!opts.conflicting,
     // A short, honest sentence about why it landed where it did. This is what
     // the UI shows, and it is the whole point of the exercise.
     reason: explainScore(classes, hasIndependent, hasRegulatory, stale, opts)
@@ -518,7 +544,7 @@ function scoreEvidence(evidence, opts){
 }
 
 function explainScore(classes, hasIndependent, hasRegulatory, stale, opts){
-  if (opts.conflicting) return "Sources conflict on this field — flagged for a human call rather than silently resolved.";
+  if (opts.conflicting) return "Sources on file disagree. No value is claimed for this field rather than one being picked — see the entry notes for both claims.";
   if (!classes.length) return "No usable evidence recorded — nothing above directory or unattributed grade.";
   var names = classes.map(function(c){ return SOURCE_CLASSES[c].short.toLowerCase(); }).join(" + ");
   if (classes.length >= 2 && hasIndependent && !stale) {
@@ -648,11 +674,28 @@ var VERDICTS = {
     short: "Unsourced",
     color: "#8FA39C",
     blurb: "Nothing usable is on file — only directory listings or unattributed material, or nothing at all."
+  },
+  // A fourth verdict, added Sep 2026 after the Hammond entry exposed the gap.
+  // hasIndependent only asks whether an independent source is PRESENT, not
+  // whether it agrees. So an entry whose regulatory source flatly contradicts
+  // the stored value — a city notice saying the project was cancelled, filed
+  // against a status of "Planned" — rendered as "Independently verified",
+  // which is the opposite of what the record says. Conflict now outranks the
+  // independent/operator split, because "our best source disagrees with this"
+  // is the first thing a reader needs, ahead of who the sources are.
+  contested: {
+    key: "contested",
+    label: "Sources conflict",
+    short: "Contested",
+    color: "#F87171",
+    blurb: "The sources on file disagree with each other, and this project does not resolve that by picking a winner. Read the notes before relying on this figure — one of the sources may be saying the value is wrong."
   }
 };
 
 function verdictFor(score){
   if (!score || !score.classes.length) return VERDICTS.unsourced;
+  // Checked before hasIndependent on purpose — see VERDICTS.contested.
+  if (score.conflicting) return VERDICTS.contested;
   return score.hasIndependent ? VERDICTS.independent : VERDICTS.operator;
 }
 
