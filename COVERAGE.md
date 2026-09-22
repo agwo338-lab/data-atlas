@@ -41,16 +41,16 @@ declined. See "The enumeration question" under AWS below.
 
 | Operator | Tracked | Missing (high conf.) | Missing (medium conf.) | Watch-only / not actionable |
 |---|---|---|---|---|
-| CoreWeave | 24 | 3 | 5 | 4 |
+| CoreWeave | 23 | 3 | 5 | 5 |
 | Nebius | 17 | 0 | 0 | 2 |
 | AWS | 9 | 4 | 1 | 2 |
 | SpaceXAI (xAI) | 3 | 1 | 1 | 2 |
 | OpenAI | 1 | — | — | — |
-| _Southern California (region)_ | 0 | — | — | 16 unvetted leads |
+| _Southern California (region)_ | 13 | — | — | 3 ruled out |
 
 ---
 
-## CoreWeave — 24 tracked
+## CoreWeave — 23 tracked
 
 <details><summary>Currently tracked (click to expand)</summary>
 
@@ -82,6 +82,18 @@ GA (Flexential) · Las Vegas NV (Switch) · Weehawken NJ (LGA1)
 - [ ] **Auburn, AL** ("AUBix", Core Scientific) — status unclear, ~16MW lease reported. Both citations found are DCD (same class) — confirm the Auburn/16MW link via a Core Scientific SEC 8-K before adding.
 
 ### Watch-only — investigated, not currently actionable
+
+- **Hammond IN (301 Digital Crossroads, 180MW)** — was tracked; REMOVED from
+  `data/sites.js` on 2026-09-21. The City of Hammond announced 2026-07-01 that
+  the development agreement expired 2026-06-30 after two extensions, with
+  milestones unmet and no further extensions offered. Never broke ground, no
+  revival announced by CoreWeave, Decennial Group or the city. Kept here rather
+  than in the data because the atlas has no status for a dead project and
+  carrying it as "Planned" put 180MW of never-to-be-built capacity in
+  CoreWeave's pipeline total. [City of Hammond notice](https://www.gohammond.com/hammond-announces-expiration-of-data-center-development-agreement/)
+  — R-class. Note the EPA ECHO record for DX HAMMOND JV LLC at 100 Digital
+  Crossroads Drive is the EXISTING building CoreWeave occupies, not this
+  project — do not mistake it for evidence the campus went ahead.
 
 - **Calvert City, KY** (Core Scientific) — only appears in an aggregate facility-count list, no standalone CoreWeave-specific citation found.
 - **Pecos, TX** (Core Scientific) — large campus, but current tenant unclear after a hyperscaler-exclusivity agreement reportedly expired; do not attribute to CoreWeave without a direct citation.
@@ -315,7 +327,48 @@ the clear — so these are the paid-tier numbers, with no provenance of any
 kind behind them. They are recorded to show rough scale and to make the
 list sortable. **They are not evidence of anything.**
 
-### The region as cleanview sees it
+### Status: vetted 2026-09-21, 13 of 16 tracked
+
+A `research-agent` pass worked the list against PeeringDB, EPA ECHO, the
+California Energy Commission, CEQAnet and operator sources. Thirteen
+entries are now in `data/sites.js`. The scope question below was answered
+directly — track everything in the region, including ordinary commercial
+colocation — so the colo halls are in rather than deferred.
+
+**What the vetting changed about the list itself.** Almost every figure
+and label here was wrong or unconfirmable once checked against a real
+record, which is the clearest possible argument for why this source is
+class D:
+
+- **Edwards AFB is a phantom.** There is no project. In Oct 2025 the US
+  Air Force opened a land-lease solicitation across five bases, with a
+  bidder threshold of >100MW and $500M minimum investment. That
+  eligibility threshold appears to have been converted into a named
+  "Edwards AFB Data Center, 100 MW". No operator, no award, no parcel.
+  Not tracked. Worth re-checking for a selection announcement.
+- **LAX01 is a duplicate.** Prime's Vernon campus is internally
+  designated LAX01-01. The separate "LAX01, 6MW, planned" row is almost
+  certainly a stale construction-phase snapshot of the site listed a few
+  rows above it as operating at 33MW. Not tracked separately.
+- **Two of three Centersquare sites are in the wrong county.** LAX3 and
+  LAX5 are in Irvine — Orange County — despite the LAX branding. Only
+  LAX4 (Hawthorne) is in Los Angeles County.
+- **Two "operators" were wrong.** "Irvine Data Center" is legacy
+  Latisys-era branding for what is now DataBank (Latisys → Zayo 2015 →
+  zColo bought by DataBank 2020). "San Diego World Trade Data Center"
+  with a blank operator is DataBank's SAN1; the name is just its street
+  address.
+- **The DataBank Irvine capacity was overstated by ~50%.** The list gives
+  4.6 + 12.3 = 16.9MW; DataBank's own site says 2.64 + 8, "almost 11
+  megawatts" combined.
+- **1977 Saturn is genuinely cancelled** — withdrawn amid opposition, and
+  Monterey Park then became the first US municipality to ban data centers
+  outright by ballot measure (June 2026). Not tracked, per the project's
+  decision not to carry dead projects as live entries. It is real history
+  and is recorded here rather than in `sites.js`. Capacity was disputed
+  between 49.5MW and 56MW even at withdrawal.
+
+### The original lead list, for reference
 
 | MW | Status | Facility | Operator | County |
 |---:|---|---|---|---|
@@ -336,13 +389,31 @@ list sortable. **They are not evidence of anything.**
 | 3.1 | Operating | One Wilshire Data Center: LAX1 | — | Los Angeles |
 | — | Operating | EdgeConneX SDG01 | EdgeConneX | San Diego |
 
-Sixteen facilities, ~723 MW claimed, eleven distinct operators — none of
-which the atlas currently tracks. Two entries (Imperial Valley, Edwards
-AFB) account for 59% of the claimed MW and are both Planned, which is the
-usual shape: the large numbers are announcements, the operating sites are
-small.
+Sixteen facilities, ~723 MW claimed, eleven distinct operators. Note that
+Imperial Valley and Edwards AFB alone accounted for 59% of the claimed
+MW — and one of those two turned out not to exist.
+
+**Still unvetted, and a real gap in the source:** there is not one San
+Bernardino, Riverside or Ventura county facility in cleanview's entire
+California dataset. The Inland Empire is an active market. Nobody has
+searched it yet; that is the obvious next sweep for this region, and it
+should start from county and SCAQMD records rather than from any list.
 
 ### How to vet this region, in priority order
+
+_PeeringDB paid off exactly as predicted on the 2026-09-21 pass: every LA,
+Orange and San Diego colo facility on the list except Prime's returned a
+real street-address record, and those N-class citations are most of why
+the atlas's independent-field count rose from 43 to 62 in one pass. Prime's
+absence is itself informative — it is a wholesale shell, not carrier-neutral
+space, the same blind spot the CoreWeave and Nebius compute sites show._
+
+_EPA ECHO, by contrast, was useless here and the reason is worth recording:
+a statewide California sweep under NAICS 518210 returned exactly ONE
+facility in the whole state. California delegates air permitting to local
+districts, so these permits never reach the federal ICIS-AIR system. Treat
+every California ECHO negative as inconclusive and go to SCAQMD or the
+county APCD instead._
 
 The region is unusually well served by public records, and the operators
 here are mostly colocation rather than hyperscale — which changes which
@@ -371,17 +442,28 @@ because those are single-tenant compute sites.
    municipal utility. Vernon Public Utilities publishes load and contract
    records, which is an unusually direct R-class route.
 
-### Before adding anything
+### Scope: decided 2026-09-21
 
-Decide the scope question first, because it determines whether this list
-is 16 entries or several hundred. The atlas currently curates *individually
-newsworthy* sites — named campuses with their own press cycle — and
-explicitly declines to enumerate AWS's full region footprint for that
-reason (see the AWS scope note above). Most of the operating sites in this
-table are ordinary commercial colocation, which is a different kind of
-object: there are many, they rarely make news, and tracking them well means
-tracking all of them. Either that is in scope for this region or it is not;
-the decision belongs in this file before the first entry lands, not after.
+The question was whether ordinary commercial colocation belongs here at
+all. The atlas otherwise curates *individually newsworthy* sites — named
+campuses with their own press cycle — and explicitly declines to enumerate
+AWS's full region footprint on those grounds (see the AWS scope note
+above). Most of the operating sites in this region are not that: they are
+multi-tenant colo halls that rarely make news, and tracking them well
+means tracking all of them.
+
+**Decision: for Southern California, track everything.** This region is
+enumerated rather than curated, which makes it deliberately different from
+the operator sections. Two consequences to keep in mind. The region's
+entries will skew toward small operational colo with PeeringDB as their
+only source, which is a thin but genuinely independent basis — better
+sourced than most of the atlas, and less interesting. And the count here
+is not comparable to an operator's "tracked" number, because it is
+answering a different question.
+
+Left open, and worth deciding before the next region: whether this
+enumerate-everything rule is specific to Southern California or is how
+regions work generally.
 
 ---
 

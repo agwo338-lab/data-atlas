@@ -845,61 +845,6 @@ var SITES = [
     notes: "1401 Meadowville Technology Parkway, Chesterfield County. Operational since ~Aug 2024; 12-year license with two 5-year extension options, initially ~18.6MW at $115/kW/month. Owned/operated by Chirisa Technology Parks, part of a $5B Blue Owl/Chirisa/PowerHouse JV for CoreWeave capacity. Secondary/directory sources (Epoch AI, Baxtel, morethanjustparks.com) describe scaling toward 28MW, and separately float much larger figures (82–113MW) tied to a $3–4B multi-phase buildout — those larger numbers aren't corroborated by named trade press or a primary release, so 18.6MW (the figure agreed by Tier 2 sources) is used here; re-check for a confirmed expansion. Audited 2026-09-21: EPA ECHO's Virginia sweep (10,288 air facilities, paginated past the 5,000-row cap, coverage complete) returned CHIRISA RICHMOND LLC at exactly 1401 Meadowville Technology Pkwy with an operating status. That is the first independent class on this entry: status now rests on R+T rather than trade press alone, and the coordinates above are ECHO's parcel figures, replacing a city-centre approximation that was about 9km off. Capacity is untouched and still rests on two T-class articles, which is one class however many of them agree — a VA DEQ generator nameplate would give a derived figure, and Dominion runs no ISO queue, so the permit itself is the route. Context found but deliberately not counted as evidence for this site: a Bloom Energy 8-K (2024-08-08) confirms Chirisa Technology Parks is a real multi-site CoreWeave power partner, but it names a different Chirisa/CoreWeave site in Volo, Illinois. Also noted and not used: a neighbouring ECHO facility at 11751 Meadowville Ln under \"11751 Meadowville Owner LLC c/o GFH Capital\" — a neighbour, not this site. PeeringDB has no Chester or Chirisa record."
   },
   {
-    id: "coreweave-hammond",
-    provider: "CoreWeave",
-    site: "Digital Crossroads — 301 Digital Crossroads Dr",
-    city: "Hammond, IN",
-    country: "United States",
-    lat: 41.5834,
-    lon: -87.5000,
-    status: "Planned",
-    capacityMW: 180,
-    lastUpdated: "2026-09-21",
-    sources: [
-      { label: "Data Center Dynamics — \"CoreWeave to develop 180MW data center at Digital Crossroads campus\"", url: "https://www.datacenterdynamics.com/en/news/coreweave-to-develop-180mw-data-center-at-digital-crossroads-campus-in-hammond-indiana/" },
-      { label: "City of Hammond, Indiana — official approval notice", url: "https://www.gohammond.com/hammond-approves-development-agreement-for-new-data-center/" },
-      { label: "City of Hammond, IN — \"Hammond Announces Expiration of Data Center Development Agreement\"", url: "https://www.gohammond.com/hammond-announces-expiration-of-data-center-development-agreement/", cls: "R" },
-      { label: "EPA ECHO — DX Hammond JV LLC, 100 Digital Crossroads Drive, Hammond IN", url: "https://echo.epa.gov/detailed-facility-report?fid=110071272597", cls: "R" }
-    ],
-    provenance: {
-      // Spelled out for every field on purpose. Provenance falls back to
-      // "every source counts" PER FIELD, so leaving any field out here
-      // would let the two R-class sources below vouch for it — and one of
-      // them says the project is dead while the other is a different
-      // building. Without this block the entry read as fully independently
-      // verified, which was the exact opposite of the truth.
-      capacityMW: {
-        basis: "disclosed",
-        asOf: "2026-08-23",
-        evidence: [
-          { source: 0, cls: "T", note: "The 180MW figure is the announcement's, and nothing independent ever corroborated it. It is retained only to describe what was proposed — the agreement behind it has since lapsed." },
-          { source: 1, cls: "G" }
-        ],
-        conflicting: false
-      },
-      status: {
-        basis: "disclosed",
-        asOf: "2026-09-21",
-        evidence: [
-          { source: 2, cls: "R", note: "CONTRADICTS the stored status. The City of Hammond's own notice, 2026-07-01, that the Development Agreement expired 2026-06-30 with no further extensions on offer. This is the strongest source on the entry and it says the project is not going ahead." },
-          { source: 0, cls: "T", note: "The original announcement, on which the \"Planned\" status rests. Superseded in substance by the city notice above." },
-          { source: 1, cls: "G" }
-        ],
-        conflicting: true
-      },
-      location: {
-        basis: "estimated",
-        asOf: "2026-08-23",
-        evidence: [
-          { source: 0, cls: "T", note: "301 Digital Crossroads, from the announcement. Deliberately NOT supported by the ECHO record on this entry: that record is 100 Digital Crossroads Drive, the existing facility CoreWeave already occupies, which is a different building." },
-          { source: 1, cls: "G" }
-        ],
-        conflicting: false
-      }
-    },
-    notes: "STATUS FLAG, THE ENTRY IS STALE AND THE SCHEMA CANNOT YET SAY SO (found 2026-09-21): the City of Hammond announced on 2026-07-01 that the Development Agreement behind this 180MW project expired on 2026-06-30. Two extensions had already been granted, required milestones were not met, and the city states plainly that no further extensions will be offered. Neither CoreWeave, Decennial Group nor the city has announced any plan to revive it, and the project never broke ground. This is the city's own record of its own binding agreement, published against its own economic interest, and it is classed R. The status field below still reads \"Planned\" only because the schema's status enum has exactly three values — Operational, Under construction, Planned — with no state for a cancelled or lapsed project. Leaving it as Planned is wrong and is known to be wrong: it keeps 180MW in CoreWeave's planned pipeline total on the dashboard. It was not silently changed to something else, and no value was invented, because adding a fourth status is a design change to how the atlas represents dead projects, not a research finding to apply. Pending that decision, read this entry as lapsed regardless of what the status pill says. Separately, note the EPA ECHO record for DX HAMMOND JV LLC at 100 Digital Crossroads Drive is the EXISTING facility CoreWeave already occupies, NOT the 301 Digital Crossroads building this entry describes — it is recorded here so it is not mistaken for corroboration of this project. A Northwest Indiana Times piece headlined that the expansion is dead, but it sits behind a paywall and could not be read, so it is a consistent lead rather than a second class. ORIGINAL NOTES FOLLOW. New 180MW, 450,000 sq ft building (301 Digital Crossroads Drive) on the former State Line Generating Plant coal site, developed by Decennial Group under a 20-year CoreWeave lease, approved by Hammond City Council Jun 9, 2025, targeted operational 2027 — contingent on a NIPSCO power agreement, so kept as \"Planned\" rather than \"Under construction\" pending confirmation groundbreaking has started. CoreWeave separately already occupies a smaller, existing Digital Crossroads facility on the same campus (100 Digital Crossroads Drive, ~105,000 sq ft) — no MW figure or start date found for that one; not enough to log as its own entry yet. Coordinates are a Hammond city-center approximation, not geocoded to the campus address."
-  },
-  {
     id: "coreweave-cheyenne",
     provider: "CoreWeave",
     site: "Related Digital Cheyenne Campus",
@@ -1867,5 +1812,542 @@ var SITES = [
       }
     },
     notes: "CAPACITY GENUINELY UNDISCLOSED, not merely unfound — Vantage's own release says outright that the deployment size was not being disclosed, so there is nothing to look for and nothing to estimate. Do not fill it from the campus's grid tie: CWL1 has a dedicated 400kV SuperGrid connection reported elsewhere at ~150-180MW, and that is the WHOLE CAMPUS's draw under Vantage, not Nebius's allocation. Conflating those two would be the same rack-math error that produced the discredited Paris figure. This entry is a genuine single-class claim and the verdict should be read that way: Vantage naming Nebius in its own newsroom, tied to a named campus and to Nvidia's DSX reference design, is not the kind of thing a landlord fabricates — but every other outlet covering it is visibly relaying the same release, so there is no second class anywhere. Deliberately NOT applied to this entry: the campus is widely referenced as 'Next Generation Data Newport' (its pre-2020 name) or as 'Vantage Cardiff CWL1' despite sitting in Newport, not Cardiff — do not 'correct' the city. Also do not use this entry to imply anything about the unnamed fourth UK site in Nebius's Jun 2026 £1.7B announcement; an anonymous post names Green Mountain's Romford campus while DCD's own reporting on that deal calls the customer an unnamed neocloud operator, and that identification stays unused. Searched and empty, so don't redo: EDGAR full-text for 'Vantage Data Centers', 'CWL1', 'Newport, Wales' and 'South Wales AI Growth Zone' against Nebius Group's filings — nothing, which is informative given Nebius DOES name its Independence, Missouri site in an SEC filing; PeeringDB for CWL1, Vantage in GB, and Newport GB — no record under any name. The DCD write-up of the same announcement returned 403 and, being downstream of the same release, would add no class even if read. Best next steps: the Newport City Council planning portal (only reached via general web search this run, which surfaced a different Vantage campus's document) and NESO's connection register — a campus with its own 400kV substation leaves a real regulatory trail if Nebius's load appears in it."
+  },
+  {
+    id: "coresite-onewilshire-la1",
+    provider: "CoreSite",
+    site: "LA1 — One Wilshire",
+    city: "Los Angeles, CA",
+    country: "United States",
+    lat: 34.047942,
+    lon: -118.255564,
+    status: "Operational",
+    capacityMW: 30,
+    lastUpdated: "2026-09-21",
+    sources: [
+      { label: "PeeringDB — CoreSite Los Angeles (LA1) One Wilshire", url: "https://www.peeringdb.com/fac/19", cls: "N" },
+      { label: "CoreSite — LA1 facility spec sheet", url: "https://www.coresite.com/spec-sheets/los-angeles-la1-facility-spec-sheet", cls: "P" },
+      { label: "PeeringDB — DataBank LAX1, 624 S Grand Ave", url: "https://www.peeringdb.com/fac/10932", cls: "N" }
+    ],
+    provenance: {
+      capacityMW: {
+        basis: "disclosed",
+        asOf: "2026-09-21",
+        evidence: [
+          { source: 1, cls: "P", note: "CoreSite's own spec sheet: 30MW Phase I utility capacity, expandable to 47MW. The operator's own figure, uncorroborated by any independent class." }
+        ],
+        conflicting: false
+      },
+      status: {
+        basis: "disclosed",
+        asOf: "2026-09-21",
+        evidence: [
+          { source: 0, cls: "N", note: "334 networks and 5 exchanges present on the PeeringDB facility record — a live interconnection hub, not a claim." },
+          { source: 1, cls: "P" }
+        ],
+        conflicting: false
+      },
+      location: {
+        basis: "observed",
+        asOf: "2026-09-21",
+        evidence: [
+          { source: 0, cls: "N", note: "PeeringDB's street address for 624 S Grand Ave." },
+          { source: 1, cls: "P" }
+        ],
+        conflicting: false
+      }
+    },
+    notes: "624 S Grand Ave. One Wilshire is one of the most significant interconnection points on the US west coast, and it is a MULTI-TENANT building rather than one operator's site — that distinction is the main thing to understand about this entry. CoreSite manages the Meet-Me-Room (240+ network providers by its own account), but DataBank and Multacom hold their own PeeringDB facility records at the same address, and DataBank's is named literally \"LAX1\". A directory lead that lists \"One Wilshire Data Center: LAX1\" with no operator is therefore most likely pointing at DataBank's suite rather than at this CoreSite record. Recorded under CoreSite as the building's operator; the ambiguity is flagged rather than resolved. The 30MW figure is CoreSite's own and describes the CoreSite footprint, not the whole building. An SCAQMD generator permit would give the first independent capacity proxy."
+  },
+  {
+    id: "centersquare-lax3",
+    provider: "Centersquare",
+    site: "LAX3",
+    city: "Irvine, CA",
+    country: "United States",
+    lat: 33.6846,
+    lon: -117.8265,
+    status: "Operational",
+    capacityMW: null,
+    lastUpdated: "2026-09-21",
+    sources: [
+      { label: "PeeringDB — Centersquare LAX3", url: "https://www.peeringdb.com/fac/2641", cls: "N" },
+      { label: "Data Center Dynamics — \"Brookfield combines Cyxtera and Evoque under new Centersquare brand\"", url: "https://www.datacenterdynamics.com/en/news/brookfield-combines-cyxtera-and-evoque-under-new-centersquare-brand/", cls: "T" }
+    ],
+    provenance: {
+      status: {
+        basis: "disclosed",
+        asOf: "2026-09-21",
+        evidence: [
+          { source: 0, cls: "N", note: "Live networks present on the PeeringDB facility record." },
+          { source: 1, cls: "T", note: "Establishes Centersquare as the operator: the 2024 Brookfield rebrand of the merged Cyxtera and Evoque estates, not a shell name." }
+        ],
+        conflicting: false
+      },
+      location: {
+        basis: "observed",
+        asOf: "2026-09-21",
+        evidence: [
+          { source: 0, cls: "N", note: "PeeringDB street address." }
+        ],
+        conflicting: false
+      }
+    },
+    notes: "17836 Gilette Ave, Irvine — Orange County, despite the LAX branding. Centersquare is the 2024 Brookfield rebrand of the merged Cyxtera/Evoque estate, so records for this building may exist under either prior name. Capacity is deliberately null: the MW figures circulating for the LAX sites are directory-grade only, and this project does not take a hard number from a directory. An SCAQMD generator permit or Centersquare's own spec sheet would be the first real figure. Note for anyone reconciling against third-party lists: the \"LAX\" prefix is branding, not geography — LAX3 and LAX5 are in Orange County, and at least one public directory mislabels both as Los Angeles County."
+  },
+  {
+    id: "centersquare-lax4",
+    provider: "Centersquare",
+    site: "LAX4",
+    city: "Hawthorne, CA",
+    country: "United States",
+    lat: 33.9192,
+    lon: -118.3517,
+    status: "Operational",
+    capacityMW: null,
+    lastUpdated: "2026-09-21",
+    sources: [
+      { label: "PeeringDB — Centersquare LAX4", url: "https://www.peeringdb.com/fac/6669", cls: "N" },
+      { label: "Data Center Dynamics — \"Brookfield combines Cyxtera and Evoque under new Centersquare brand\"", url: "https://www.datacenterdynamics.com/en/news/brookfield-combines-cyxtera-and-evoque-under-new-centersquare-brand/", cls: "T" }
+    ],
+    provenance: {
+      status: {
+        basis: "disclosed",
+        asOf: "2026-09-21",
+        evidence: [
+          { source: 0, cls: "N", note: "Live networks present on the PeeringDB facility record." },
+          { source: 1, cls: "T", note: "Establishes Centersquare as the operator: the 2024 Brookfield rebrand of the merged Cyxtera and Evoque estates, not a shell name." }
+        ],
+        conflicting: false
+      },
+      location: {
+        basis: "observed",
+        asOf: "2026-09-21",
+        evidence: [
+          { source: 0, cls: "N", note: "PeeringDB street address." }
+        ],
+        conflicting: false
+      }
+    },
+    notes: "2301 W 120th St, Hawthorne — Los Angeles County. Centersquare is the 2024 Brookfield rebrand of the merged Cyxtera/Evoque estate, so records for this building may exist under either prior name. Capacity is deliberately null: the MW figures circulating for the LAX sites are directory-grade only, and this project does not take a hard number from a directory. An SCAQMD generator permit or Centersquare's own spec sheet would be the first real figure. Note for anyone reconciling against third-party lists: the \"LAX\" prefix is branding, not geography — LAX3 and LAX5 are in Orange County, and at least one public directory mislabels both as Los Angeles County."
+  },
+  {
+    id: "centersquare-lax5",
+    provider: "Centersquare",
+    site: "LAX5",
+    city: "Irvine, CA",
+    country: "United States",
+    lat: 33.6889,
+    lon: -117.8312,
+    status: "Operational",
+    capacityMW: null,
+    lastUpdated: "2026-09-21",
+    sources: [
+      { label: "PeeringDB — Centersquare LAX5", url: "https://www.peeringdb.com/fac/6670", cls: "N" },
+      { label: "Data Center Dynamics — \"Brookfield combines Cyxtera and Evoque under new Centersquare brand\"", url: "https://www.datacenterdynamics.com/en/news/brookfield-combines-cyxtera-and-evoque-under-new-centersquare-brand/", cls: "T" }
+    ],
+    provenance: {
+      status: {
+        basis: "disclosed",
+        asOf: "2026-09-21",
+        evidence: [
+          { source: 0, cls: "N", note: "Live networks present on the PeeringDB facility record." },
+          { source: 1, cls: "T", note: "Establishes Centersquare as the operator: the 2024 Brookfield rebrand of the merged Cyxtera and Evoque estates, not a shell name." }
+        ],
+        conflicting: false
+      },
+      location: {
+        basis: "observed",
+        asOf: "2026-09-21",
+        evidence: [
+          { source: 0, cls: "N", note: "PeeringDB street address." }
+        ],
+        conflicting: false
+      }
+    },
+    notes: "2681 Kelvin Ave, Irvine — Orange County, despite the LAX branding. Centersquare is the 2024 Brookfield rebrand of the merged Cyxtera/Evoque estate, so records for this building may exist under either prior name. Capacity is deliberately null: the MW figures circulating for the LAX sites are directory-grade only, and this project does not take a hard number from a directory. An SCAQMD generator permit or Centersquare's own spec sheet would be the first real figure. Note for anyone reconciling against third-party lists: the \"LAX\" prefix is branding, not geography — LAX3 and LAX5 are in Orange County, and at least one public directory mislabels both as Los Angeles County."
+  },
+  {
+    id: "colocrossing-la01",
+    provider: "ColoCrossing",
+    site: "LA1",
+    city: "Los Angeles, CA",
+    country: "United States",
+    lat: 34.0466,
+    lon: -118.2559,
+    status: "Operational",
+    capacityMW: null,
+    lastUpdated: "2026-09-21",
+    sources: [
+      { label: "PeeringDB — ColoCrossing LA1, 530 W 6th St", url: "https://www.peeringdb.com/fac/6426", cls: "N" }
+    ],
+    provenance: {
+      status: {
+        basis: "disclosed",
+        asOf: "2026-09-21",
+        evidence: [
+          { source: 0, cls: "N", note: "Three networks present on the PeeringDB record. One class only, so this does not reach High however solid the record is." }
+        ],
+        conflicting: false
+      },
+      location: {
+        basis: "observed",
+        asOf: "2026-09-21",
+        evidence: [
+          { source: 0, cls: "N" }
+        ],
+        conflicting: false
+      }
+    },
+    notes: "530 W 6th St, Los Angeles. ColoCrossing is a real multi-market operator with seven PeeringDB facilities nationwide. Thin entry by design: PeeringDB is the only usable source found, no capacity figure exists anywhere credible, and searches returned only directory mirrors of the same PeeringDB record. Any second class — trade coverage, an SCAQMD permit, or the operator's own stated figure — would lift both fields."
+  },
+  {
+    id: "databank-sna1",
+    provider: "DataBank",
+    site: "SNA1 — Irvine",
+    city: "Irvine, CA",
+    country: "United States",
+    lat: 33.6795,
+    lon: -117.8514,
+    status: "Operational",
+    capacityMW: 2.64,
+    lastUpdated: "2026-09-21",
+    sources: [
+      { label: "PeeringDB — DataBank SNA1, 17222 Von Karman Ave", url: "https://www.peeringdb.com/fac/2980", cls: "N" },
+      { label: "DataBank — 17222 Von Karman Ave, Irvine", url: "https://www.databank.com/data-centers/irvine/17222-von-karman-avenue/", cls: "P" },
+      { label: "Data Center Dynamics — \"DataBank to expand SNA2 data center in Irvine, California\"", url: "https://www.datacenterdynamics.com/en/news/databank-to-expand-sna2-data-center-in-irvine-california/", cls: "T" }
+    ],
+    provenance: {
+      capacityMW: {
+        basis: "disclosed",
+        asOf: "2026-09-21",
+        evidence: [
+          { source: 1, cls: "P", note: "DataBank's own site states 2.64MW of critical IT power for this building (SNA1 2.64MW and SNA2 8MW, 'almost 11 megawatts' combined)." },
+          { source: 2, cls: "T" }
+        ],
+        conflicting: false
+      },
+      status: {
+        basis: "disclosed",
+        asOf: "2026-09-21",
+        evidence: [
+          { source: 0, cls: "N", note: "Live PeeringDB facility record under DataBank's name." },
+          { source: 1, cls: "P" }
+        ],
+        conflicting: false
+      },
+      location: {
+        basis: "observed",
+        asOf: "2026-09-21",
+        evidence: [
+          { source: 0, cls: "N", note: "PeeringDB street address, 17222 Von Karman Ave." },
+          { source: 1, cls: "P" }
+        ],
+        conflicting: false
+      }
+    },
+    notes: "17222 Von Karman Ave, Irvine. OPERATOR ATTRIBUTION MATTERS HERE: third-party lists still file this pair under \"Irvine Data Center\", which is legacy Latisys-era branding. The chain is Latisys, acquired by Zayo in 2015, whose zColo estate DataBank bought for about $1.4B in Dec 2020. DataBank is the current operator and PeeringDB reflects that. Capacity is DataBank's own published critical-IT figure and deliberately replaces the figures carried by unsourced directories, which put the pair at roughly 17MW combined against DataBank's own 'almost 11'. An SCAQMD generator permit at this address would give the first independent capacity proxy."
+  },
+  {
+    id: "databank-sna2",
+    provider: "DataBank",
+    site: "SNA2 — Irvine",
+    city: "Irvine, CA",
+    country: "United States",
+    lat: 33.6812,
+    lon: -117.8492,
+    status: "Operational",
+    capacityMW: 8,
+    lastUpdated: "2026-09-21",
+    sources: [
+      { label: "PeeringDB — DataBank SNA2, 17400 Von Karman Ave", url: "https://www.peeringdb.com/fac/10933", cls: "N" },
+      { label: "DataBank — 17400 Von Karman Ave, Irvine", url: "https://www.databank.com/data-centers/irvine/17400-von-karman-avenue/", cls: "P" },
+      { label: "Data Center Dynamics — \"DataBank to expand SNA2 data center in Irvine, California\"", url: "https://www.datacenterdynamics.com/en/news/databank-to-expand-sna2-data-center-in-irvine-california/", cls: "T" }
+    ],
+    provenance: {
+      capacityMW: {
+        basis: "disclosed",
+        asOf: "2026-09-21",
+        evidence: [
+          { source: 1, cls: "P", note: "DataBank's own site states 8MW of critical IT power for this building (SNA1 2.64MW and SNA2 8MW, 'almost 11 megawatts' combined)." },
+          { source: 2, cls: "T" }
+        ],
+        conflicting: false
+      },
+      status: {
+        basis: "disclosed",
+        asOf: "2026-09-21",
+        evidence: [
+          { source: 0, cls: "N", note: "Live PeeringDB facility record under DataBank's name." },
+          { source: 1, cls: "P" }
+        ],
+        conflicting: false
+      },
+      location: {
+        basis: "observed",
+        asOf: "2026-09-21",
+        evidence: [
+          { source: 0, cls: "N", note: "PeeringDB street address, 17400 Von Karman Ave." },
+          { source: 1, cls: "P" }
+        ],
+        conflicting: false
+      }
+    },
+    notes: "17400 Von Karman Ave, Irvine. OPERATOR ATTRIBUTION MATTERS HERE: third-party lists still file this pair under \"Irvine Data Center\", which is legacy Latisys-era branding. The chain is Latisys, acquired by Zayo in 2015, whose zColo estate DataBank bought for about $1.4B in Dec 2020. DataBank is the current operator and PeeringDB reflects that. Capacity is DataBank's own published critical-IT figure and deliberately replaces the figures carried by unsourced directories, which put the pair at roughly 17MW combined against DataBank's own 'almost 11'. An SCAQMD generator permit at this address would give the first independent capacity proxy."
+  },
+  {
+    id: "databank-san1",
+    provider: "DataBank",
+    site: "SAN1 — San Diego",
+    city: "San Diego, CA",
+    country: "United States",
+    lat: 32.9595,
+    lon: -117.0838,
+    status: "Operational",
+    capacityMW: null,
+    lastUpdated: "2026-09-21",
+    sources: [
+      { label: "PeeringDB — DataBank San Diego (SAN1), 12270 World Trade Dr", url: "https://www.peeringdb.com/fac/10910", cls: "N" }
+    ],
+    provenance: {
+      status: {
+        basis: "disclosed",
+        asOf: "2026-09-21",
+        evidence: [
+          { source: 0, cls: "N", note: "Live PeeringDB facility record. One class only." }
+        ],
+        conflicting: false
+      },
+      location: {
+        basis: "observed",
+        asOf: "2026-09-21",
+        evidence: [
+          { source: 0, cls: "N" }
+        ],
+        conflicting: false
+      }
+    },
+    notes: "12270 World Trade Dr, San Diego. Third-party lists carry this as \"San Diego World Trade Data Center\" with no operator — that name is just the street address, and the operator is unambiguously DataBank per its PeeringDB record. No capacity figure found from any usable class, so the field stays null."
+  },
+  {
+    id: "edgeconnex-sdg01",
+    provider: "EdgeConneX",
+    site: "SDG01 — San Diego",
+    city: "San Diego, CA",
+    country: "United States",
+    lat: 32.8261,
+    lon: -117.1544,
+    status: "Operational",
+    capacityMW: null,
+    lastUpdated: "2026-09-21",
+    sources: [
+      { label: "PeeringDB — EdgeConneX San Diego (EDCSDG01), 5761 Copley Dr", url: "https://www.peeringdb.com/fac/1928", cls: "N" }
+    ],
+    provenance: {
+      status: {
+        basis: "disclosed",
+        asOf: "2026-09-21",
+        evidence: [
+          { source: 0, cls: "N", note: "Eight networks present on the PeeringDB record. One class only." }
+        ],
+        conflicting: false
+      },
+      location: {
+        basis: "observed",
+        asOf: "2026-09-21",
+        evidence: [
+          { source: 0, cls: "N" }
+        ],
+        conflicting: false
+      }
+    },
+    notes: "5761 Copley Dr, San Diego. Same operator as the Cedar Creek TX campus CoreWeave leases from, which is the only place EdgeConneX otherwise appears in this atlas. No capacity figure from a usable class; EdgeConneX's own site lists the location and would be a second class if added, and an SCAQMD-equivalent San Diego APCD permit would be the first independent one."
+  },
+  {
+    id: "prime-vernon",
+    provider: "Prime Data Centers",
+    site: "Los Angeles (LAX01) — Vernon",
+    city: "Vernon, CA",
+    country: "United States",
+    lat: 34.0025,
+    lon: -118.2159,
+    status: "Operational",
+    capacityMW: 33,
+    lastUpdated: "2026-09-21",
+    sources: [
+      { label: "PR Newswire — \"Prime Data Centers announces the opening of its hyperscale data center in Vernon, California\"", url: "https://www.prnewswire.com/news-releases/prime-data-centers-announces-the-opening-of-its-hyperscale-data-center-in-vernon-california-302305195.html", cls: "P" },
+      { label: "Data Center Dynamics — \"Prime launches 33MW data center in Vernon, California\"", url: "https://www.datacenterdynamics.com/en/news/prime-launches-33mw-data-center-in-vernon-california/", cls: "T" }
+    ],
+    provenance: {
+      capacityMW: {
+        basis: "disclosed",
+        asOf: "2026-09-21",
+        evidence: [
+          { source: 0, cls: "P", note: "33MW IT capacity at full build-out, from Prime's own announcement." },
+          { source: 1, cls: "T" }
+        ],
+        conflicting: false
+      },
+      status: {
+        basis: "disclosed",
+        asOf: "2026-09-21",
+        evidence: [
+          { source: 0, cls: "P", note: "Opened November 2024, reported 100% pre-leased to two unnamed AI companies." },
+          { source: 1, cls: "T" }
+        ],
+        conflicting: false
+      },
+      location: {
+        basis: "disclosed",
+        asOf: "2026-09-21",
+        evidence: [
+          { source: 0, cls: "P", note: "4701 S Santa Fe Ave, Vernon. Coordinates are an approximation for that address, not a geocoded parcel." },
+          { source: 1, cls: "T" }
+        ],
+        conflicting: false
+      }
+    },
+    notes: "4701 S Santa Fe Ave, Vernon — 242,495 sq ft over three storeys, opened Nov 2024, reported fully pre-leased to two unnamed AI companies. Prime markets it as its Los Angeles facility (Vernon is about four miles from downtown), which is why third-party lists file it under Los Angeles County. NOT in PeeringDB, and that absence is informative rather than troubling: this is a single or dual-tenant wholesale shell, not carrier-neutral colocation, so it shows the same PeeringDB blind spot the CoreWeave and Nebius compute sites do. Prime's internal designation for the campus is LAX01-01, which means a separate small \"LAX01, 6MW, planned\" row in at least one public directory is very likely a stale construction-phase snapshot of this same site rather than a distinct facility — it is deliberately not tracked as one. A Vernon Public Utilities load record or an SCAQMD generator permit would give the first independent class."
+  },
+  {
+    id: "databank-vernon-lax2",
+    provider: "DataBank",
+    site: "LAX2 — Vernon (Goodman JV)",
+    city: "Vernon, CA",
+    country: "United States",
+    lat: 34.0033,
+    lon: -118.2032,
+    status: "Planned",
+    capacityMW: null,
+    lastUpdated: "2026-09-21",
+    sources: [
+      { label: "PR Newswire — \"DataBank and Goodman Group partner to open new landmark data center in Los Angeles\"", url: "https://www.prnewswire.com/news-releases/databank-and-goodman-group-partner-to-open-new-landmark-data-center-in-los-angeles-302735412.html", cls: "P" },
+      { label: "Data Center Dynamics — \"DataBank partners with Goodman for California data center\"", url: "https://www.datacenterdynamics.com/en/news/databank-partners-with-goodman-for-california-data-center/", cls: "T" },
+      { label: "California Energy Commission — Vernon Backup Generating Facility, docket 25-SPPE-01", url: "https://www.energy.ca.gov/powerplant/backup-generating-system/vernon-backup-generating-facility-vbgf", cls: "R" },
+      { label: "The Real Deal — \"Joint venture to launch data center south of Los Angeles\"", url: "https://therealdeal.com/la/2026/04/09/joint-venture-to-launch-data-center-south-of-los-angeles/", cls: "G" }
+    ],
+    provenance: {
+      capacityMW: {
+        basis: "disclosed",
+        asOf: "2026-09-21",
+        evidence: [
+          { source: 0, cls: "P", note: "DataBank and Goodman state 32MW total IT capacity for this building, 6MW at a Dec 2026 launch reaching 32MW by Sept 2027." },
+          { source: 2, cls: "R", note: "DIFFERENT SCOPE, not a confirmation: the CEC docket covers 40 diesel generators totalling 99MW of BACKUP generation across TWO buildings. Backup generation is not IT load and the building count does not match, so the two figures cannot be reconciled into one value." }
+        ],
+        conflicting: true
+      },
+      status: {
+        basis: "disclosed",
+        asOf: "2026-09-21",
+        evidence: [
+          { source: 2, cls: "R", note: "An active California Energy Commission Small Power Plant Exemption filing for a Goodman-developed backup generating facility on East Vernon Ave — a regulatory record of a project under review." },
+          { source: 0, cls: "P" },
+          { source: 1, cls: "T" }
+        ],
+        conflicting: false
+      },
+      location: {
+        basis: "estimated",
+        asOf: "2026-09-21",
+        evidence: [
+          { source: 0, cls: "P", note: "3094 E Vernon Ave per the JV announcement. The CEC docket names 3163 and 3049 E Vernon Ave — a block away — so the precise parcel is not settled." },
+          { source: 1, cls: "T" }
+        ],
+        conflicting: false
+      }
+    },
+    notes: "3094 E Vernon Ave. DataBank's second Southern California site, a JV with Goodman Group announced Apr 2026: 6MW at launch in Dec 2026, 32MW by Sept 2027. The interesting and unresolved part is a California Energy Commission Small Power Plant Exemption docket, 25-SPPE-01, for a \"Goodman Energy Park\" backup generating facility at 3163 and 3049 E Vernon Ave, filed by GIC Vernon LLC — 40 diesel generators, 38 at 3MW plus 2 at 1MW, 99MW total. Shared developer name, addresses a block apart, matching timing. It is very likely the same campus or an adjacent phase, but the addresses are not identical and no source ties GIC Vernon LLC to the DataBank/Goodman JV entity, so it is recorded as probably-related rather than asserted as the same project. A California Secretary of State entity lookup would settle it and is the best next step. Capacity is deliberately left null: 32MW disclosed IT capacity and 99MW of backup generation across two buildings are different measures at different scopes, and picking either would misrepresent it."
+  },
+  {
+    id: "digitalrealty-vernon",
+    provider: "Digital Realty",
+    site: "Vernon (4400 Pacific Blvd)",
+    city: "Vernon, CA",
+    country: "United States",
+    lat: 33.9986,
+    lon: -118.2118,
+    status: "Planned",
+    capacityMW: 32,
+    lastUpdated: "2026-09-21",
+    sources: [
+      { label: "Data Center Dynamics — \"Digital Realty buys land in Los Angeles for 32MW data center\"", url: "https://www.datacenterdynamics.com/en/news/digital-realty-buys-land-in-los-angeles-for-32mw-data-center/", cls: "T" },
+      { label: "The Real Deal — \"Digital Realty buys site for data center in LA suburb Vernon\"", url: "https://therealdeal.com/la/2025/11/07/digital-realty-buys-site-for-data-center-in-la-suburb-vernon/", cls: "G" }
+    ],
+    provenance: {
+      capacityMW: {
+        basis: "disclosed",
+        asOf: "2026-09-21",
+        evidence: [
+          { source: 0, cls: "T", note: "32MW planned IT capacity. This is a land purchase rather than a permitted build, so the figure is an intention, not a commitment." },
+          { source: 1, cls: "G" }
+        ],
+        conflicting: false
+      },
+      status: {
+        basis: "disclosed",
+        asOf: "2026-09-21",
+        evidence: [
+          { source: 0, cls: "T" },
+          { source: 1, cls: "G", note: "A 5.4-acre parcel bought for about $49M in Nov 2025. Land acquired, nothing permitted." }
+        ],
+        conflicting: false
+      },
+      location: {
+        basis: "estimated",
+        asOf: "2026-09-21",
+        evidence: [
+          { source: 0, cls: "T", note: "4400 Pacific Blvd, Vernon. Coordinates approximate the address rather than a geocoded parcel." },
+          { source: 1, cls: "G" }
+        ],
+        conflicting: false
+      }
+    },
+    notes: "4400 Pacific Blvd, Vernon — a 253,200 sq ft former 1925 industrial building on 5.4 acres, bought for about $49M in Nov 2025 and planned for 32MW. The third Vernon project in this atlas, alongside Prime's operating site and the DataBank/Goodman JV: a city of roughly 200 residents with its own municipal utility has become a genuine cluster, and Vernon Public Utilities publishes load and contract records, which is an unusually direct route to independent evidence for all three. Nothing independent backs this yet. The single cheapest thing to chase is an LA County Recorder deed for the $49M transaction, which is a public R-class record sitting unused; an SCAQMD or CEC filing will follow once construction starts."
+  },
+  {
+    id: "ivcm-imperialvalley",
+    provider: "Imperial Valley Computer Manufacturing",
+    site: "Imperial Valley AI Data Center",
+    city: "Imperial County, CA",
+    country: "United States",
+    lat: 32.8475,
+    lon: -115.5694,
+    status: "Planned",
+    capacityMW: 330,
+    lastUpdated: "2026-09-21",
+    sources: [
+      { label: "Imperial Valley Computer Manufacturing — infrastructure page", url: "https://www.imperialdatacenter.com/infrastructure", cls: "P" },
+      { label: "Imperial Valley Press — \"Developer defends proposed 330 MW Data Center\"", url: "https://www.ivpressonline.com/news/developer-defends-proposed-330-mw-data-center-calls-project-a-major-economic-boost/article_a3a889a0-526c-4d02-882b-6b91324eee20.html", cls: "G" },
+      { label: "inewsource — \"AI data center plan energizes opposition\"", url: "https://inewsource.org/2026/04/08/california-data-center-nimby-imperial-county/", cls: "G" }
+    ],
+    provenance: {
+      capacityMW: {
+        basis: "disclosed",
+        asOf: "2026-09-21",
+        evidence: [
+          { source: 0, cls: "P", note: "330MW of power-ready capacity, the developer's own figure. The press coverage repeats it rather than confirming it independently, so this is effectively a single-source number." }
+        ],
+        conflicting: false
+      },
+      status: {
+        basis: "disclosed",
+        asOf: "2026-09-21",
+        evidence: [
+          { source: 1, cls: "G", note: "Local reporting of public meetings and the developer's defence of the project — independent legwork, not a press-release rewrite." },
+          { source: 2, cls: "G", note: "Reporting on organised local opposition, again with independent detail." },
+          { source: 0, cls: "P" }
+        ],
+        conflicting: false
+      },
+      location: {
+        basis: "estimated",
+        asOf: "2026-09-21",
+        evidence: [
+          { source: 1, cls: "G", note: "Aten and Clark Roads, Imperial County. Coordinates are a county-level approximation, not a parcel." }
+        ],
+        conflicting: false
+      }
+    },
+    notes: "Proposed at Aten and Clark Roads, Imperial County. The developer's own site claims 330MW of power-ready capacity, a 16-acre on-site substation with four connections to Imperial Irrigation District's 230kV S-Line and 92kV R-Line, 220 Tesla Megapacks at 862MWh, and 132 Caterpillar G3520 generators. All of that is the developer's word; capacity is written because the field was empty and nothing contradicts it, not because it is corroborated. TREAT THE ANCHOR-TENANT CLAIM AS UNVERIFIED: local reporting names Google, but sourced to the developer rather than to Google, and no Google-side confirmation was found — it is recorded here as a lead and deliberately not written anywhere as fact. Searched without result: the Imperial Irrigation District interconnection queue (the queue exists but no project-level entry was retrieved by name), EDGAR, and EPA ECHO for Imperial County. On ECHO specifically, note that a statewide California sweep under NAICS 518210 returned exactly one facility in the entire state, which is under-coverage rather than an accurate picture — California delegates air permitting to local districts, so Imperial County APCD is the channel that matters here, and an IID queue entry or an APCD permit for those generators is what would make this real."
   }
 ];

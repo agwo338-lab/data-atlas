@@ -217,5 +217,71 @@ var PROVIDERS = [
         lastUpdated: "2026-08-23"
       }
     ]
+  },
+  {
+    name: "DataBank",
+    domain: "databank.com",
+    color: "#E0608A",
+    summary: "A US colocation and interconnection operator, and the largest single " +
+      "presence in this atlas's Southern California coverage with four sites. Its " +
+      "footprint here came largely by acquisition — it bought Zayo's zColo estate " +
+      "for about $1.4B in 2020, which is why some of its buildings still appear in " +
+      "third-party directories under older brands."
+  },
+  {
+    name: "CoreSite",
+    domain: "coresite.com",
+    color: "#A97BFF",
+    summary: "A colocation operator whose significance is interconnection rather " +
+      "than scale: it manages the Meet-Me-Room at One Wilshire in Los Angeles, one " +
+      "of the most important network exchange points on the US west coast."
+  },
+  {
+    name: "Digital Realty",
+    domain: "digitalrealty.com",
+    color: "#6247AA",
+    summary: "One of the largest data center REITs in the world. Only its Vernon, " +
+      "California project is tracked here — this atlas does not attempt its full " +
+      "global footprint, on the same scoping grounds that exclude AWS's."
+  },
+  {
+    name: "Centersquare",
+    color: "#D4A72C",
+    summary: "The 2024 Brookfield rebrand of the merged Cyxtera and Evoque " +
+      "colocation estates. Records for its buildings often still sit under one of " +
+      "those prior names, which is worth knowing before concluding a site is " +
+      "unsourced."
+  },
+  {
+    name: "EdgeConneX",
+    domain: "edgeconnex.com",
+    color: "#C2703D",
+    summary: "A global data center developer and operator. Appears in this atlas " +
+      "twice over: as the landlord of the Cedar Creek, Texas campus CoreWeave " +
+      "leases, and in its own right in San Diego."
+  },
+  {
+    name: "ColoCrossing",
+    color: "#8E9BD6",
+    summary: "A US multi-market colocation provider. Tracked here on a single " +
+      "PeeringDB facility record — a deliberately thin entry, kept because the " +
+      "record is real and independent, not because much is known about the site."
+  },
+  {
+    name: "Prime Data Centers",
+    domain: "primedatacenters.com",
+    color: "#8FBF3F",
+    summary: "A wholesale data center developer. Its Vernon, California building " +
+      "is a single or dual-tenant shell rather than carrier-neutral colocation, " +
+      "which is why it has no PeeringDB presence despite being fully leased."
+  },
+  {
+    name: "Imperial Valley Computer Manufacturing",
+    domain: "imperialdatacenter.com",
+    color: "#A8577E",
+    summary: "The developer behind a proposed 330MW campus in Imperial County, " +
+      "California. Everything disclosed about the project so far is the " +
+      "developer's own word, including a reported anchor tenant that has never " +
+      "been confirmed by the named company."
   }
 ];
