@@ -293,9 +293,20 @@
   .back-link:hover{ color:var(--color-text); }
   .op-head{ padding:14px 20px 0; display:flex; flex-direction:column; gap:10px; }
   .op-ident{ display:flex; align-items:center; gap:12px; }
-  .op-logo{ width:40px; height:40px; border-radius:10px; background:#ffffff; box-shadow:inset 0 0 0 1px var(--color-divider-strong); display:flex; align-items:center; justify-content:center; flex:none; overflow:hidden; }
-  .op-logo img{ width:26px; height:26px; display:block; }
-  .op-logo.fallback{ background:var(--color-surface-3); color:var(--color-text); font-weight:600; font-size:15px; }
+  /* Favicons arrive in two shapes: full-bleed brand tiles carrying their own
+     background (AWS navy, Nebius lime, OpenAI white) and bare transparent
+     glyphs (CoreWeave). Insetting a small image on white suited the second
+     and wrecked the first — a square colour block floating in a rounded white
+     box, with AWS's wordmark shrunk past legibility. So the artwork fills the
+     tile and the tile's radius clips it; the white underneath is now only a
+     backstop for the transparent ones. */
+  .op-logo{ position:relative; width:40px; height:40px; border-radius:10px; background:#ffffff; flex:none; overflow:hidden; }
+  .op-logo img{ position:relative; z-index:1; width:100%; height:100%; object-fit:cover; display:block; background:#ffffff; }
+  /* Hairline drawn over the artwork, so a full-bleed favicon still reads as a
+     rounded tile rather than a square with its corners sliced off. */
+  .op-logo::after{ content:""; position:absolute; inset:0; z-index:2; border-radius:inherit; box-shadow:inset 0 0 0 1px var(--color-divider-strong); pointer-events:none; }
+  /* Sits under the image; revealed when the favicon fails to load. */
+  .op-logo-letter{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:var(--color-surface-3); color:var(--color-text); font-weight:600; font-size:15px; }
   .op-ident h1{ font-size:22px; line-height:1.1; }
   .op-meta{ display:inline-flex; align-items:center; gap:6px; font-size:11.5px; color:var(--color-neutral-500); }
   .op-meta .dot{ width:8px; height:8px; border-radius:50%; }
@@ -1347,9 +1358,16 @@
   // an entry with neither gets a lettered tile.
   function providerLogoHtml(p){
     var entry = providerLookup[p] || {};
-    if (entry.logo) return '<span class="op-logo"><img src="' + esc(entry.logo) + '" alt="" width="26" height="26"></span>';
-    if (entry.domain) return '<span class="op-logo"><img src="https://www.google.com/s2/favicons?domain=' + encodeURIComponent(entry.domain) + '&amp;sz=64" alt="" width="26" height="26"></span>';
-    return '<span class="op-logo fallback" aria-hidden="true">' + esc(p.charAt(0)) + '</span>';
+    // The lettered tile is always rendered underneath, so a favicon that
+    // 404s or is blocked degrades to it rather than to a broken-image glyph.
+    var letter = '<span class="op-logo-letter">' + esc(p.charAt(0)) + '</span>';
+    // sz=128 for a 40px tile: the artwork now fills the box, so 64 was soft
+    // on a HiDPI screen.
+    var src = entry.logo ? esc(entry.logo)
+      : entry.domain ? 'https://www.google.com/s2/favicons?domain=' + encodeURIComponent(entry.domain) + '&amp;sz=128'
+      : null;
+    if (!src) return '<span class="op-logo" aria-hidden="true">' + letter + '</span>';
+    return '<span class="op-logo" aria-hidden="true">' + letter + '<img src="' + src + '" alt="" loading="lazy"></span>';
   }
 
   function renderProviderView(p){
@@ -1441,6 +1459,11 @@
       '</div>';
 
     wireSiteRows(el);
+    // Drop a favicon that failed to load, uncovering the lettered tile.
+    el.querySelectorAll(".op-logo img").forEach(function(img){
+      img.addEventListener("error", function(){ img.remove(); });
+      if (img.complete && img.naturalWidth === 0) img.remove();
+    });
     document.getElementById("opBack").addEventListener("click", function(){ closeProviderPanel(); });
     document.getElementById("opFit").addEventListener("click", function(){ fitSites(sitesOf); });
   }
