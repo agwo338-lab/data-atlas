@@ -175,12 +175,69 @@ the most valuable line in your report: "an ERCOT queue entry or a TCEQ air
 permit for this parcel would make this High." The channel catalog in
 `data/sources.js` lists where to look, per jurisdiction.
 
-## Reach for a regulatory or observational source first
+## Step one: find out what the operator itself claims
 
-You have three tools that query public records directly, with no model in
-the loop. **Try these before web search, not after.** A number that comes
-back from one of them cannot be fabricated, because no model produced it —
-which is exactly the failure mode `openrouter_ask` has already shown.
+**Before any record hunt, spend two minutes establishing what number the
+operator publishes.** Its own site, its spec sheets, its facility pages,
+its investor material. This is the cheapest step available and it comes
+first.
+
+That will read oddly, because P is a weak class and this project exists
+largely to stop treating it as strong. So be clear about what this step is
+and is not. **Collecting a claim first is not crediting it first.** The
+scoring engine decides what P is worth — one class, Low, no matter how
+many of the operator's own pages repeat it — and nothing about looking
+early changes that. What looking early changes is that you now know what
+you are trying to corroborate.
+
+Four things become possible only once you have the operator's number, and
+all four are impossible without it:
+
+- **The headline question needs it.** This atlas asks whether a figure
+  traces back to anyone other than the company announcing it. You cannot
+  ask that question about a claim you have not collected.
+- **You cannot recognise noise without it.** Directory listings for the
+  Centersquare LA sites carried 7.2, 12, 15, 20 and 28MW. Those were only
+  identifiable as junk once the operator's own figures were in hand to
+  compare against — without them, they look like several sources agreeing.
+- **`disclosed` versus `derived` depends on it.** If the operator states
+  a figure, a matching permit corroborates a disclosed number. If it
+  states nothing, the same permit yields a derived one. Same record,
+  different basis, and you cannot tell which without checking first.
+- **A gap between claim and record is itself a finding** — often the most
+  interesting one available. You can only see the gap if you have both
+  sides.
+
+**Collect every figure the operator publishes, not the first MW you see.**
+Operators routinely disclose several different quantities that are not the
+same fact restated. Centersquare publishes utility power, UPS capacity and
+generator capacity per site, and they differ by an order of magnitude:
+LAX4 is 25.9MW of utility feed, 2.7MW of UPS, 4MW of generator. Grabbing
+whichever appeared first would have overstated that site by nearly ten
+times. Report all of them and say which one you propose for `capacityMW`
+and why — the caller may reasonably choose differently, and cannot if you
+only pass along one.
+
+**The one real risk, named so you can avoid it: anchoring.** Having the
+operator's number in your head makes it tempting to accept a record that
+roughly agrees and to squint at one that does not. Guard against it by
+reading the record on its own terms first and comparing afterwards, and by
+reporting what the record actually says even when it embarrasses the
+claim. If a permit implies a figure well away from the operator's, that is
+a finding, not an error to reconcile.
+
+This step is done when you can state what the operator claims, or state
+that it publishes nothing — which is itself worth reporting.
+
+## Then go straight to a regulatory or observational source
+
+Now that you know what is being claimed, go and test it. You have three
+tools that query public records directly, with no model in the loop.
+**Use these before web search, not after** — and before any further
+reading of the operator's own material, which you are now done with. A
+number that comes back from one of them cannot be fabricated, because no
+model produced it — which is exactly the failure mode `openrouter_ask`
+has already shown.
 
 - **`edgar_search`** — full text of SEC filings. Search the site name, the
   town, or the operator. If the operator or its landlord is US-listed, a
@@ -257,6 +314,10 @@ Report back per site, not as free-flowing prose:
   <site name / id>
   Verdict: confirmed / changed / could not verify / conflicting sources
   Field(s) checked: ...
+  Operator claims: every figure the operator itself publishes, or "nothing
+    published" — see "Step one". Always present, even when a record
+    supersedes it, because the caller cannot judge disclosed-vs-derived or
+    spot a claim/record gap without it.
   Findings: ...
   Confidence: High / Medium / Low / Unverifiable — per FIELD, not per site
   Classes: which source classes back each field (e.g. capacity R+T, status T only)

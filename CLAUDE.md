@@ -171,6 +171,34 @@ for anything flagged that way before relying on a number. When adding a new
 operator or site, follow the sourcing standard already documented at the
 top of that file rather than re-deriving one.
 
+**Vetting order: collect the operator's own claim first, then go test it**
+(set Sep 2026, after a run that got this backwards). The first step in
+vetting any figure is two minutes establishing what the operator itself
+publishes — its site, spec sheets, investor material. Only then go to the
+records. This reads oddly against everything else here, so the distinction
+that makes it correct: **collecting a claim first is not crediting it
+first.** `data/sources.js` decides what P is worth, and it is one class
+and Low however early it was read.
+
+What the order buys is that four things are impossible without the
+operator's number in hand. The atlas's headline question — does this trace
+back to anyone but the company announcing it — cannot be asked about a
+claim never collected. Directory noise is unrecognisable as noise:
+Centersquare's LA sites had 7.2, 12, 15, 20 and 28MW in circulation, which
+look like agreement until the operator's real figures are there to compare.
+`disclosed` versus `derived` depends on it, since the same permit yields
+one or the other depending on whether the operator stated anything. And a
+gap between claim and record is often the most interesting finding
+available, visible only with both sides.
+
+Two riders. **Collect every figure the operator publishes, not the first
+MW.** Operators disclose different quantities that are not one fact
+restated — Centersquare gives utility power, UPS capacity and generator
+capacity, and for LAX4 those are 25.9, 2.7 and 4MW, so grabbing the first
+would overstate the site nearly tenfold. And **anchoring is the real risk**:
+read each record on its own terms before comparing it to the claim, and
+report what it says even when that embarrasses the claim.
+
 A `research-agent` subagent (`.claude/agents/research-agent.md`) handles
 research on request — vetting a new candidate, re-checking one entry or
 provider, or auditing the whole dataset — against a rigorous sourcing
